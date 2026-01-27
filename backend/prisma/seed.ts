@@ -791,6 +791,29 @@ async function main() {
 
   console.log('✅ Subscription created for client (Iron Fitness)');
 
+  // Suscripción a Power Gym (gym3)
+  const endDatePower = new Date();
+  endDatePower.setDate(endDatePower.getDate() + 18);
+  
+  await prisma.subscription.upsert({
+    where: { userId_gymId: { userId: client.id, gymId: gym3.id } },
+    update: {},
+    create: {
+      userId: client.id,
+      gymId: gym3.id,
+      planId: 'power-full',
+      status: 'ACTIVE',
+      type: 'MONTHLY',
+      startDate: new Date(),
+      endDate: endDatePower,
+      autoRenew: true,
+      mpSubscriptionId: 'mp_sub_demo_006',
+      mpPayerId: 'mp_payer_demo_001',
+    },
+  });
+
+  console.log('✅ Subscription created for client (Power Gym)');
+
   const endDate3 = new Date();
   endDate3.setDate(endDate3.getDate() + 15);
   
@@ -908,48 +931,56 @@ async function main() {
 
   console.log('✅ Branches created:', branches.length);
 
-  // Create benefits (beneficios exclusivos)
-  const benefits = [
-    {
-      name: 'Golden',
-      description: 'Descuento en suplementos deportivos',
-      discount: '25% OFF',
-      imageUrl: null,
-      websiteUrl: 'https://golden.com.ar',
-    },
-    {
-      name: 'Farmalife',
-      description: 'Descuento en vitaminas y suplementos',
-      discount: '25% OFF',
-      imageUrl: null,
-      websiteUrl: 'https://farmalife.com.ar',
-    },
-    {
-      name: 'SportClub',
-      description: 'Descuento en indumentaria deportiva',
-      discount: '20% OFF',
-      imageUrl: null,
-      websiteUrl: 'https://sportclub.com.ar',
-    },
-    {
-      name: 'NutriCenter',
-      description: 'Descuento en planes nutricionales',
-      discount: '15% OFF',
-      imageUrl: null,
-      websiteUrl: 'https://nutricenter.com.ar',
-    },
+  // Limpiar beneficios duplicados antes de crear nuevos
+  await prisma.benefit.deleteMany({});
+  console.log('🗑️  Benefits cleared');
+
+  // Create benefits for GoFit (gym principal)
+  const gofitBenefits = [
+    { name: 'Golden', description: 'Descuento en suplementos deportivos', discount: '25% OFF', websiteUrl: 'https://golden.com.ar' },
+    { name: 'Farmalife', description: 'Descuento en vitaminas y suplementos', discount: '25% OFF', websiteUrl: 'https://farmalife.com.ar' },
+    { name: 'SportClub', description: 'Descuento en indumentaria deportiva', discount: '20% OFF', websiteUrl: 'https://sportclub.com.ar' },
+    { name: 'NutriCenter', description: 'Descuento en planes nutricionales', discount: '15% OFF', websiteUrl: 'https://nutricenter.com.ar' },
   ];
 
-  for (const benefit of benefits) {
-    await prisma.benefit.create({
-      data: {
-        ...benefit,
-        gymId: gym.id,
-      },
-    });
+  for (const benefit of gofitBenefits) {
+    await prisma.benefit.create({ data: { ...benefit, gymId: gym.id } });
   }
+  console.log('✅ GoFit benefits created:', gofitBenefits.length);
 
-  console.log('✅ Benefits created:', benefits.length);
+  // Create benefits for Iron Fitness (gym2)
+  const ironBenefits = [
+    { name: 'ProteinShop', description: 'Proteínas y suplementos premium', discount: '30% OFF', websiteUrl: 'https://proteinshop.com.ar' },
+    { name: 'FitWear', description: 'Ropa deportiva de alta gama', discount: '20% OFF', websiteUrl: 'https://fitwear.com.ar' },
+  ];
+
+  for (const benefit of ironBenefits) {
+    await prisma.benefit.create({ data: { ...benefit, gymId: gym2.id } });
+  }
+  console.log('✅ Iron Fitness benefits created:', ironBenefits.length);
+
+  // Create benefits for Power Gym (gym3)
+  const powerBenefits = [
+    { name: 'MuscleFood', description: 'Comidas preparadas para deportistas', discount: '15% OFF', websiteUrl: 'https://musclefood.com.ar' },
+    { name: 'GymGear', description: 'Equipamiento y accesorios de gym', discount: '25% OFF', websiteUrl: 'https://gymgear.com.ar' },
+    { name: 'RecoverySpa', description: 'Masajes deportivos y recuperación', discount: '20% OFF', websiteUrl: 'https://recoveryspa.com.ar' },
+  ];
+
+  for (const benefit of powerBenefits) {
+    await prisma.benefit.create({ data: { ...benefit, gymId: gym3.id } });
+  }
+  console.log('✅ Power Gym benefits created:', powerBenefits.length);
+
+  // Create benefits for Flex Fitness (gym4)
+  const flexBenefits = [
+    { name: 'YogaMat Pro', description: 'Mats y accesorios de yoga premium', discount: '30% OFF', websiteUrl: 'https://yogamatpro.com.ar' },
+    { name: 'Wellness Center', description: 'Tratamientos de bienestar', discount: '15% OFF', websiteUrl: 'https://wellnesscenter.com.ar' },
+  ];
+
+  for (const benefit of flexBenefits) {
+    await prisma.benefit.create({ data: { ...benefit, gymId: gym4.id } });
+  }
+  console.log('✅ Flex Fitness benefits created:', flexBenefits.length);
 
   // Create expense categories
   const categories = ['Alquiler', 'Servicios', 'Equipamiento', 'Sueldos', 'Marketing', 'Otros'];
