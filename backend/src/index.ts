@@ -11,6 +11,7 @@ import clientRoutes from './routes/client';
 import uploadRoutes from './routes/upload';
 import notificationsRoutes from './routes/notifications';
 import cronRoutes from './routes/cron';
+import { startSubscriptionCron } from './cron/subscriptionCron';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -62,6 +63,9 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 const port = typeof PORT === 'string' ? parseInt(PORT, 10) : PORT;
 app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 GoFit API running on http://0.0.0.0:${port}`);
+  
+  // Iniciar cron jobs
+  startSubscriptionCron();
 });
 
 // Graceful shutdown
