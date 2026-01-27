@@ -53,8 +53,9 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 100px;
   cursor: pointer;
   transition: all 0.2s;
@@ -63,11 +64,12 @@
 }
 
 .gymTab:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .gymTabActive {
-  background: linear-gradient(135deg, rgba(188, 255, 49, 0.15) 0%, rgba(188, 255, 49, 0.05) 100%);
+  background: rgba(255, 255, 255, 0.2);
   border-color: var(--accent-lime);
 }
 
@@ -117,8 +119,8 @@
   border-radius: 16px;
   overflow: hidden;
   margin-bottom: 1.25rem;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .map {
@@ -167,8 +169,8 @@
 
 .branchCount {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.15);
   padding: 0.25rem 0.6rem;
   border-radius: 100px;
 }
@@ -230,17 +232,22 @@
   padding: 1rem;
   cursor: pointer;
   transition: all 0.2s;
-  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
   position: relative;
 }
 
 .branchCard:hover {
-  border-color: rgba(188, 255, 49, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .branchCard.selected {
-  background: rgba(188, 255, 49, 0.05);
+  background: rgba(255, 255, 255, 0.15);
   border-color: var(--accent-lime);
+  box-shadow: 0 0 0 1px rgba(188, 255, 49, 0.3);
 }
 
 .branchHeader {
