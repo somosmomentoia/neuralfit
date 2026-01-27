@@ -11,6 +11,8 @@ export default function LandingPage() {
   const [activeScreen, setActiveScreen] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [heroBgLoaded, setHeroBgLoaded] = useState(false);
+  const [strengthBgLoaded, setStrengthBgLoaded] = useState(false);
 
   const minSwipeDistance = 50;
 
@@ -56,6 +58,16 @@ export default function LandingPage() {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const heroImg = new window.Image();
+    heroImg.src = '/fotos para landing/pexels-franklin-santillan-a-551795305-20901480.jpg';
+    heroImg.onload = () => setHeroBgLoaded(true);
+
+    const strengthImg = new window.Image();
+    strengthImg.src = '/fotos para landing/pexels-franklin-santillan-a-551795305-20901483.jpg';
+    strengthImg.onload = () => setStrengthBgLoaded(true);
   }, []);
 
   const features = [
@@ -134,6 +146,7 @@ export default function LandingPage() {
 
       {/* ==================== HERO SECTION ==================== */}
       <section className={styles.hero}>
+        <div className={`${styles.heroBgFull} ${heroBgLoaded ? styles.loaded : ''}`} />
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
           <p className={styles.heroTagline}>TU GIMNASIO EN TU BOLSILLO</p>
@@ -440,6 +453,7 @@ export default function LandingPage() {
 
       {/* ==================== STRENGTH BANNER ==================== */}
       <section className={styles.strengthBanner}>
+        <div className={`${styles.strengthBgFull} ${strengthBgLoaded ? styles.loaded : ''}`} />
         <div className={styles.strengthOverlay} />
         <div className={styles.strengthContent}>
           <h2 className={styles.strengthTitle}>ENTRENÁ</h2>

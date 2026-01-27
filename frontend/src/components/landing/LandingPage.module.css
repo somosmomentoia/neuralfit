@@ -216,7 +216,21 @@
   position: relative;
   padding: 6rem 1.5rem 3rem;
   background: 
+    url('/fotos para landing/pexels-franklin-santillan-a-551795305-20901480-blur.jpg') center/cover no-repeat;
+}
+
+.heroBgFull {
+  position: absolute;
+  inset: 0;
+  background: 
     url('/fotos para landing/pexels-franklin-santillan-a-551795305-20901480.jpg') center/cover no-repeat;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  z-index: 0;
+}
+
+.heroBgFull.loaded {
+  opacity: 1;
 }
 
 .heroOverlay {
@@ -228,11 +242,12 @@
     rgba(0,0,0,0.6) 50%,
     var(--bg-dark) 100%
   );
+  z-index: 1;
 }
 
 .heroContent {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .heroTagline {
@@ -979,7 +994,21 @@
   align-items: center;
   justify-content: center;
   background: 
+    url('/fotos para landing/pexels-franklin-santillan-a-551795305-20901483-blur.jpg') center/cover no-repeat;
+}
+
+.strengthBgFull {
+  position: absolute;
+  inset: 0;
+  background: 
     url('/fotos para landing/pexels-franklin-santillan-a-551795305-20901483.jpg') center/cover no-repeat;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  z-index: 0;
+}
+
+.strengthBgFull.loaded {
+  opacity: 1;
 }
 
 .strengthOverlay {
