@@ -1,0 +1,934 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+  padding-bottom: 120px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--color-text-1);
+}
+
+/* ==================== TABS - ESTILO PILLS ==================== */
+.tabs {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.tab {
+  padding: var(--spacing-2) var(--spacing-4);
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.tab:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.tab:focus {
+  outline: none;
+}
+
+.tabActive {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #000;
+}
+
+.tabActive:hover {
+  background: var(--color-primary);
+}
+
+/* ==================== SUBSCRIPTIONS LIST ==================== */
+.subscriptionsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+/* ==================== SUBSCRIPTION CARD - GLASS STYLE ==================== */
+.subscriptionCard {
+  position: relative;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.12) 0%, 
+    rgba(255, 255, 255, 0.06) 30%,
+    rgba(255, 255, 255, 0.08) 60%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: var(--spacing-5);
+  cursor: pointer;
+  transition: transform 0.15s ease-out;
+  overflow: hidden;
+}
+
+.subscriptionCard:active {
+  transform: scale(0.98);
+}
+
+/* Borde sutil blanco - igual que gym cards */
+.subscriptionCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+  transition: border-color 0.2s ease;
+}
+
+.subscriptionCard:hover::before,
+.subscriptionCard.expanded::before {
+  border-color: rgba(188, 255, 49, 0.3);
+}
+
+.subHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.subGymIcon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(188, 255, 49, 0.15) 0%, rgba(188, 255, 49, 0.05) 100%);
+  border: 1px solid rgba(188, 255, 49, 0.3);
+  border-radius: 14px;
+  color: var(--color-primary);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.subGymIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.subGymIcon span {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.subInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.subGymName {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.subPlanName {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.subStatus {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statusActive {
+  background: rgba(188, 255, 49, 0.2);
+  color: var(--color-primary);
+}
+
+.statusPending {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+}
+
+.statusExpired {
+  background: rgba(255, 82, 82, 0.2);
+  color: #ff5252;
+}
+
+.statusInactive {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.grantedBadge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(96, 165, 250, 0.2);
+  color: #60a5fa;
+}
+
+.subDetails {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-4);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.subDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.subLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.subValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.grantedInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  border-radius: 12px;
+  margin-top: var(--spacing-4);
+  font-size: 13px;
+  color: #60a5fa;
+}
+
+.grantedInfo svg {
+  flex-shrink: 0;
+}
+
+.subExpandBtn {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, margin-top 0.3s ease-out;
+  margin-top: 0;
+}
+
+.subExpandBtn.visible {
+  max-height: 60px;
+  margin-top: var(--spacing-4);
+}
+
+.viewDetailBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  padding: 14px;
+  background: var(--color-primary);
+  border-radius: 50px;
+  color: #000;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+
+.viewDetailBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(188, 255, 49, 0.3);
+}
+
+/* ==================== EMPTY STATE ==================== */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-8) var(--spacing-4);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.08) 0%, 
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  border-radius: 20px;
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  text-align: center;
+}
+
+.emptyIcon {
+  color: rgba(255, 255, 255, 0.25);
+  margin-bottom: var(--spacing-4);
+}
+
+.emptyText {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.emptySubtext {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 var(--spacing-5) 0;
+}
+
+.exploreBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 32px;
+  background: var(--color-primary);
+  color: #000;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 50px;
+  transition: all 0.2s ease;
+}
+
+.exploreBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(188, 255, 49, 0.3);
+}
+
+/* ==================== GYMS LIST ==================== */
+.gymsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+/* ==================== GYM CARD - GLASS STYLE ==================== */
+.gymCard {
+  position: relative;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.10) 0%, 
+    rgba(255, 255, 255, 0.05) 30%,
+    rgba(255, 255, 255, 0.07) 60%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: var(--spacing-5);
+  cursor: pointer;
+  transition: transform 0.15s ease-out;
+  overflow: hidden;
+}
+
+.gymCard:active {
+  transform: scale(0.98);
+}
+
+/* Borde sutil blanco */
+.gymCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+  transition: border-color 0.2s ease;
+}
+
+.gymCard:hover::before,
+.gymCard.gymExpanded::before {
+  border-color: rgba(188, 255, 49, 0.3);
+}
+
+.subscribedGym::before {
+  border-color: rgba(188, 255, 49, 0.4);
+}
+
+.gymHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.gymLogo {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  color: var(--color-primary);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.gymLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gymLogo span {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.gymInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gymName {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.gymFromPrice {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-primary);
+}
+
+.subscribedBadge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(188, 255, 49, 0.2);
+  color: var(--color-primary);
+}
+
+.gymDetails {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-4);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gymDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gymLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gymValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Contenido expandible */
+.gymExpandContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-out, margin-top 0.3s ease-out;
+  margin-top: 0;
+}
+
+.gymExpandContent.visible {
+  max-height: 800px;
+  margin-top: var(--spacing-4);
+}
+
+.gymDescription {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 var(--spacing-4) 0;
+  line-height: 1.6;
+}
+
+.currentPlanInfo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-3);
+  background: rgba(188, 255, 49, 0.08);
+  border: 1px solid rgba(188, 255, 49, 0.2);
+  border-radius: 12px;
+  padding: var(--spacing-3) var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+
+.currentPlanLabel {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.currentPlanName {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.currentPlanExpiry {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-left: auto;
+}
+
+/* ==================== PLANS SECTION ==================== */
+.gymPlans {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 16px;
+  padding: var(--spacing-4);
+}
+
+.plansTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+.planOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-4);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  margin-bottom: var(--spacing-3);
+  transition: all 0.2s ease;
+}
+
+.planOption:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.planOption:last-child {
+  margin-bottom: 0;
+}
+
+.planOption.currentPlan {
+  background: rgba(188, 255, 49, 0.08);
+  border-color: rgba(188, 255, 49, 0.3);
+}
+
+.planInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.planName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.currentTag {
+  display: inline-block;
+  background: var(--color-primary);
+  color: #000;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+}
+
+.planDuration {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.planPriceAction {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.planPrice {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.subscribeBtn {
+  padding: 10px 20px;
+  background: var(--color-primary);
+  color: #000;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+}
+
+.subscribeBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(188, 255, 49, 0.3);
+}
+
+.subscribeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ==================== ERROR TOAST ==================== */
+.errorToast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(239, 68, 68, 0.95);
+  color: white;
+  padding: var(--spacing-3) var(--spacing-5);
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 1000;
+  animation: slideUp 0.3s ease-out;
+  box-shadow: 0 8px 32px rgba(239, 68, 68, 0.3);
+}
+
+.errorToast button {
+  background: transparent;
+  color: white;
+  font-size: 18px;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.errorToast button:hover {
+  opacity: 1;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ==================== PAYMENT MODAL ==================== */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--spacing-4);
+}
+
+.modal {
+  position: relative;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.12) 0%, 
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Borde discontinuo verde para modal */
+.modal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  padding: 1.5px;
+  background: linear-gradient(135deg, 
+    var(--color-primary) 0%, 
+    transparent 30%,
+    transparent 45%,
+    var(--color-primary) 55%,
+    transparent 70%,
+    var(--color-primary) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modalTitle {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.modalClose {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.modalClose:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.modalBody {
+  padding: var(--spacing-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+}
+
+.paymentSummary {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 16px;
+  padding: var(--spacing-5);
+}
+
+.summaryGym {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summaryGymLogo {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(188, 255, 49, 0.2) 0%, rgba(188, 255, 49, 0.1) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summaryGymLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.summaryGymLogo span {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.summaryGymInfo h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 4px 0;
+}
+
+.summaryGymInfo span {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.summaryDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.summaryTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-4);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summaryTotal span:first-child {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.totalPrice {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.paymentMethod {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.mpBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background: rgba(0, 158, 227, 0.1);
+  border: 1px solid rgba(0, 158, 227, 0.3);
+  border-radius: 14px;
+  color: #00b1ea;
+  font-weight: 600;
+}
+
+.mpNote {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.modalActions {
+  display: flex;
+  gap: var(--spacing-3);
+  padding: var(--spacing-5);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cancelBtn {
+  flex: 1;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.payBtn {
+  flex: 2;
+  padding: 14px;
+  background: linear-gradient(135deg, #009ee3 0%, #00b1ea 100%);
+  border: none;
+  border-radius: 50px;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.payBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 158, 227, 0.4);
+}
+
+.payBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 480px) {
+  .subDetails,
+  .gymDetails {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .planOption {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+  }
+  
+  .planPriceAction {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

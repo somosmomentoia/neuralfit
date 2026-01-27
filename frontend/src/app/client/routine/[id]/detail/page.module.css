@@ -1,0 +1,426 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  color: var(--color-text-1);
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+  transition: color var(--transition-fast);
+}
+
+.backBtn:hover {
+  color: var(--color-text-0);
+}
+
+.empty {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--color-text-1);
+}
+
+/* Header */
+.header {
+  padding: var(--spacing-4);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.badges {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+}
+
+.badge {
+  padding: var(--spacing-1) var(--spacing-3);
+  background: rgba(188, 255, 49, 0.1);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+}
+
+.badgeOwn {
+  padding: 0.35rem 0.75rem;
+  background: rgba(188, 255, 49, 0.15);
+  border: 1px solid rgba(188, 255, 49, 0.25);
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: auto;
+}
+
+.badgeAssigned {
+  padding: 0.35rem 0.75rem;
+  background: rgba(54, 98, 228, 0.15);
+  border: 1px solid rgba(54, 98, 228, 0.25);
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: var(--font-weight-bold);
+  color: #3662E4;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: auto;
+}
+
+/* Creator Info Section */
+.creatorInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  margin: var(--spacing-3) 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+}
+
+.creatorIcon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(188, 255, 49, 0.12);
+  border-radius: var(--radius-lg);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.creatorIconAssigned {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(54, 98, 228, 0.12);
+  border-radius: var(--radius-lg);
+  color: #3662E4;
+  flex-shrink: 0;
+}
+
+.creatorText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.creatorLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
+}
+
+.creatorSub {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-2);
+}
+
+/* Días asignados */
+.assignedDays {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  margin: var(--spacing-2) 0;
+  background: rgba(54, 98, 228, 0.05);
+  border: 1px solid rgba(54, 98, 228, 0.15);
+  border-radius: var(--radius-lg);
+}
+
+.assignedDaysLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dayPills {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.dayPill {
+  padding: 0.35rem 0.6rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-2);
+  transition: all var(--transition-fast);
+}
+
+.dayPillActive {
+  background: rgba(54, 98, 228, 0.18);
+  border-color: rgba(54, 98, 228, 0.4);
+  color: #3662E4;
+  font-weight: var(--font-weight-semibold);
+}
+
+.editDaysBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: var(--spacing-3);
+  padding: 0.5rem 0.75rem;
+  background: rgba(188, 255, 49, 0.1);
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  transition: background var(--transition-fast);
+}
+
+.editDaysBtn:hover {
+  background: rgba(188, 255, 49, 0.2);
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-0);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.objective {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+  margin: 0 0 var(--spacing-3) 0;
+}
+
+.meta {
+  display: flex;
+  gap: var(--spacing-3);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-1);
+}
+
+/* Muscle Groups */
+.muscleGroups {
+  padding: var(--spacing-4);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-1);
+  margin: 0 0 var(--spacing-3) 0;
+}
+
+.muscleList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+.muscleTag {
+  padding: var(--spacing-1) var(--spacing-3);
+  background: var(--color-bg-2);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-0);
+}
+
+/* Exercises List */
+.exercisesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.exerciseCard {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition-fast);
+  position: relative;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.exerciseCard::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: calc(var(--radius-lg) + 2px);
+  padding: 2px;
+  background: linear-gradient(45deg, #bcff31 0%, transparent 50%, #bcff31 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  pointer-events: none;
+}
+
+.exerciseCard.expanded::before {
+  opacity: 1;
+}
+
+.exerciseHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  cursor: pointer;
+}
+
+.exerciseNumber {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: var(--color-bg-0);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.exerciseInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.exerciseName {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-0);
+  margin: 0 0 var(--spacing-1) 0;
+}
+
+.exerciseMeta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+  margin: 0;
+}
+
+.expandIcon {
+  color: var(--color-text-1);
+  flex-shrink: 0;
+}
+
+/* Exercise Details */
+.exerciseDetails {
+  padding: 0 var(--spacing-4) var(--spacing-4) var(--spacing-4);
+  border-top: 1px solid var(--glass-border);
+  margin-top: -1px;
+  padding-top: var(--spacing-4);
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-2) 0;
+}
+
+.detailLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+}
+
+.detailValue {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-0);
+}
+
+.difficultyDots {
+  display: flex;
+  gap: 4px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-bg-2);
+}
+
+.dot.filled {
+  background: var(--color-primary);
+}
+
+.detailBlock {
+  padding: var(--spacing-3) 0;
+  border-top: 1px solid var(--glass-border);
+}
+
+.detailBlock p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-0);
+  margin: var(--spacing-2) 0 0 0;
+  line-height: 1.5;
+}
+
+.videoBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-3);
+  padding: var(--spacing-2) var(--spacing-4);
+  border: 2px solid transparent;
+  background: 
+    linear-gradient(transparent, transparent),
+    linear-gradient(45deg, #bcff31 0%, transparent 50%, #bcff31 100%);
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-fast);
+}
+
+.videoBtn:hover {
+  background: rgba(188, 255, 49, 0.1);
+}
+
+/* Description Section */
+.descriptionSection {
+  padding: var(--spacing-4);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.descriptionSection p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-0);
+  margin: 0;
+  line-height: 1.6;
+}

@@ -1,0 +1,891 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+  padding-bottom: calc(var(--spacing-8) + 80px);
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: var(--spacing-4);
+  color: var(--color-text-1);
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--glass-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--color-text-1);
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+}
+
+.menuBtn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--color-text-1);
+  cursor: pointer;
+}
+
+.headerTitle {
+  flex: 1;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-0);
+  margin: 0;
+  text-align: center;
+}
+
+.notificationBtn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-full);
+  color: var(--color-bg-0);
+  cursor: pointer;
+}
+
+/* Period Filter */
+.periodFilterContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.periodPills {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.periodPill {
+  padding: var(--spacing-2) var(--spacing-4);
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  outline: none;
+}
+
+.periodPill:hover {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.periodPill:focus {
+  outline: none;
+}
+
+.periodPill:active {
+  transform: scale(0.96);
+}
+
+.periodPillActive {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #000;
+}
+
+.periodPillActive:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.periodPillActive:active {
+  transform: scale(0.96);
+}
+
+.periodPillActive svg {
+  stroke: #000;
+}
+
+/* Month Picker Container */
+.monthPickerContainer {
+  background: linear-gradient(145deg, rgba(40, 45, 43, 0.98) 0%, rgba(30, 35, 33, 0.99) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Year Selector */
+.yearSelector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.yearArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-radius: 6px;
+  color: var(--color-text-1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.yearArrow:hover:not(:disabled) {
+  background: rgba(188, 255, 49, 0.15);
+  color: var(--color-primary);
+}
+
+.yearArrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.yearLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-0);
+  min-width: 50px;
+  text-align: center;
+}
+
+/* Month Picker */
+.monthPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.monthPickerItem {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.monthPickerItem:hover:not(:disabled) {
+  background: rgba(188, 255, 49, 0.1);
+  color: #fff;
+}
+
+.monthPickerItemActive {
+  background: rgba(188, 255, 49, 0.2);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.monthPickerItemDisabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Stats Row */
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-3);
+}
+
+/* Flip Card */
+.flipCard {
+  perspective: 1000px;
+  cursor: pointer;
+  height: 160px;
+}
+
+.flipCardInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.flipCard.flipped .flipCardInner {
+  transform: rotateY(180deg);
+}
+
+.flipCardFront,
+.flipCardBack {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.flipCardBack {
+  transform: rotateY(180deg);
+  gap: 8px;
+}
+
+.flipHint {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  transition: color 0.2s ease;
+}
+
+.flipCard:hover .flipHint {
+  color: var(--color-primary);
+}
+
+/* Back Card Styles */
+.backHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.backTitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.backList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 100px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(188, 255, 49, 0.3) transparent;
+}
+
+.backList::-webkit-scrollbar {
+  width: 4px;
+}
+
+.backList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.backList::-webkit-scrollbar-thumb {
+  background: rgba(188, 255, 49, 0.3);
+  border-radius: 4px;
+}
+
+.backList::-webkit-scrollbar-thumb:hover {
+  background: rgba(188, 255, 49, 0.5);
+}
+
+.backListItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.backListName {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+}
+
+.backListValue {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.backEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Heatmap */
+.heatmapWrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.25s ease;
+}
+
+.heatmapWrapper.expanded {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.heatmapInner {
+  overflow: hidden;
+}
+
+.heatmapContent {
+  padding: 0 14px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 12px;
+}
+
+.heatmapLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.heatmapGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-start;
+}
+
+.heatmapDay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 28px;
+}
+
+.heatmapDot {
+  width: 20px;
+  height: 20px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  box-shadow: 0 0 8px rgba(188, 255, 49, 0.3);
+}
+
+.heatmapDotFree {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+}
+
+.heatmapDayLabel {
+  font-size: 8px;
+  color: var(--color-text-2);
+}
+
+.heatmapEmpty {
+  font-size: 11px;
+  color: var(--color-text-2);
+  text-align: center;
+  padding: 10px 0;
+}
+
+.statCard {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.statIconSvg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.statTitle {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.2;
+}
+
+.statValueRow {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.statValue {
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
+.statValueSub {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.statUnit {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 0;
+}
+
+.statGrowth {
+  margin-top: 10px;
+}
+
+.growthPositive {
+  display: inline-block;
+  padding: 4px 14px;
+  background: rgba(188, 255, 49, 0.15);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.growthNegative {
+  display: inline-block;
+  padding: 4px 14px;
+  background: rgba(239, 68, 68, 0.15);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ef4444;
+}
+
+/* Section Title */
+.sectionTitle {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text-0);
+  margin: 0 0 var(--spacing-3) 0;
+}
+
+/* Weekly Section */
+.weeklySection {
+  display: flex;
+  flex-direction: column;
+}
+
+.weeklyCard {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.weeklyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-1);
+}
+
+.weeklyLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-0);
+}
+
+.sessionsIconSvg {
+  color: var(--color-primary);
+}
+
+.weeklyTotal {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-1);
+}
+
+.totalNumber {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.totalLabel {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.weeklySubtext {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-2);
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+/* Weekly Chart */
+.weeklyChart {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 100px;
+  gap: var(--spacing-2);
+}
+
+.chartColumn {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
+  height: 100%;
+  cursor: pointer;
+}
+
+.chartBarContainer {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.chartBarWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 32px;
+  min-height: 6px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.chartBar {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  transition: box-shadow 0.2s ease;
+}
+
+.chartBarActive {
+  background: linear-gradient(180deg, var(--color-primary) 0%, rgba(140, 200, 40, 0.85) 100%);
+  box-shadow: 0 0 12px rgba(188, 255, 49, 0.25);
+}
+
+.chartBarSelected {
+  box-shadow: 0 0 20px rgba(188, 255, 49, 0.5);
+}
+
+.chartColumnSelected .chartLabel {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.chartLabel {
+  font-size: 10px;
+  color: var(--color-text-2);
+  transition: all 0.2s ease;
+}
+
+.chartLabelSelected {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Mini tooltip sobre la barra */
+.miniTooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 7px;
+  background: rgba(12, 14, 12, 0.97);
+  border: 1px solid rgba(188, 255, 49, 0.5);
+  border-radius: 5px;
+  white-space: nowrap;
+  animation: miniTooltipIn 0.15s ease-out forwards;
+  z-index: 10;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.miniTooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: rgba(188, 255, 49, 0.5);
+}
+
+@keyframes miniTooltipIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.miniTooltipValue {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-0);
+}
+
+.miniTooltipValue small {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--color-text-2);
+  margin-left: 1px;
+}
+
+.miniTooltipDivider {
+  font-size: 8px;
+  color: var(--color-text-3);
+}
+
+/* Summary Card - Collapsible */
+.summaryCard {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: border-color 0.3s ease;
+}
+
+.summaryCardExpanded {
+  border-color: rgba(188, 255, 49, 0.3);
+}
+
+.summaryCardHeader {
+  padding: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.summaryCardHeader:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.summaryHeaderTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-1);
+}
+
+.summaryHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summaryExpandIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-2);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.summaryExpandIcon.rotated {
+  transform: rotate(180deg);
+}
+
+.summaryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-1);
+}
+
+.summaryLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-2);
+}
+
+.summaryBadge {
+  padding: 4px 10px;
+  background: rgba(188, 255, 49, 0.15);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.summaryBadgeNegative {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.summaryValue {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text-0);
+  margin-bottom: 4px;
+}
+
+.summarySubtext {
+  font-size: 12px;
+  color: var(--color-text-2);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Total Section */
+.totalSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.totalGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-3);
+}
+
+.totalCard {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.totalIcon {
+  color: var(--color-primary);
+  margin-bottom: 4px;
+}
+
+.totalValueRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.totalValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.totalLabelBottom {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: left;
+}
+
+/* Averages Section */
+.averagesSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.averagesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-3);
+}
+
+.averageCard {
+  background: linear-gradient(145deg, rgba(25, 30, 28, 0.95) 0%, rgba(18, 22, 20, 0.98) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.averageValue {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.averageUnit {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-primary);
+  vertical-align: super;
+}
+
+.averageLabel {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+}

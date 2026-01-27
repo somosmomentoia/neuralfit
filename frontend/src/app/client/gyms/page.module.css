@@ -1,0 +1,241 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+  margin: 0;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--color-text-1);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-8);
+  color: var(--color-text-2);
+  text-align: center;
+}
+
+.gymsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.gymCard {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.gymCard:hover {
+  border-color: rgba(188, 255, 49, 0.3);
+}
+
+.gymCardExpanded {
+  border-color: var(--color-primary);
+}
+
+.gymHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+}
+
+.gymLogo {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  background: rgba(188, 255, 49, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.gymLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gymInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.gymName {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
+  margin: 0 0 4px 0;
+}
+
+.gymMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+}
+
+.gymBranches,
+.gymMembers {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-2);
+}
+
+.gymArrow {
+  color: var(--color-text-2);
+  transition: transform 0.2s ease;
+}
+
+.gymArrow svg {
+  transition: transform 0.2s ease;
+}
+
+.gymDetails {
+  padding: 0 var(--spacing-4) var(--spacing-4);
+  border-top: 1px solid var(--glass-border);
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.gymDescription {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+  margin: var(--spacing-3) 0;
+  line-height: 1.5;
+}
+
+.section {
+  margin-top: var(--spacing-4);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.branchesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.branchItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-2);
+}
+
+.branchItem svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.branchItem div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.branchName {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-0);
+}
+
+.branchAddress {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-2);
+}
+
+.plansList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.planItem {
+  padding: var(--spacing-3);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+}
+
+.planInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.planName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-0);
+}
+
+.planPrice {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.planDescription {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-2);
+  margin: var(--spacing-1) 0 0 0;
+}
+
+.subscribeBtn {
+  width: 100%;
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-3);
+  background: var(--color-primary);
+  color: var(--color-bg-0);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-md);
+  transition: all 0.2s;
+}
+
+.subscribeBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(188, 255, 49, 0.3);
+}

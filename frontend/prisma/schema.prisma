@@ -1,0 +1,400 @@
+// GoFit - Schema Multi-tenant
+// Todas las entidades principales cuelgan de gym_id
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== ENUMS ====================
+
+enum Role {
+  ADMIN
+  PROFESSIONAL
+  CLIENT
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  VISITED
+  CONVERTED
+  LOST
+}
+
+enum RoutineCategory {
+  MUSCULACION
+  AEROBICA
+  DEPORTISTA
+}
+
+enum ExerciseStatus {
+  PENDING
+  APPROVED
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+}
+
+// ==================== CORE ENTITIES ====================
+
+model Gym {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logo      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users         User[]
+  leads         Lead[]
+  exercises     Exercise[]
+  routines      Routine[]
+  sports        Sport[]
+  plans         Plan[]
+  expenses      Expense[]
+  expenseCategories ExpenseCategory[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  phone        String?
+  avatar       String?
+  role         Role
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  // Relaciones según rol
+  clientProfile       ClientProfile?
+  professionalProfile ProfessionalProfile?
+
+  // Profesional: ejercicios y rutinas creadas
+  createdExercises Exercise[] @relation("CreatedBy")
+  createdRoutines  Routine[]  @relation("CreatedBy")
+
+  @@index([gymId])
+  @@index([email])
+}
+
+model ClientProfile {
+  id                String             @id @default(cuid())
+  userId            String             @unique
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  assignedProfessionalId String?
+  assignedProfessional   ProfessionalProfile? @relation(fields: [assignedProfessionalId], references: [id])
+  
+  subscriptionStatus SubscriptionStatus @default(INACTIVE)
+  notes              String?
+  
+  planId String?
+  plan   Plan?   @relation(fields: [planId], references: [id])
+
+  assignedRoutines ClientRoutine[]
+  invoices         Invoice[]
+  payments         Payment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([assignedProfessionalId])
+}
+
+model ProfessionalProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialty String?
+  bio       String?
+  
+  assignedClients ClientProfile[]
+  clientNotes     ClientNote[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ClientNote {
+  id        String   @id @default(cuid())
+  content   String
+  
+  professionalId String
+  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id])
+  
+  clientProfileId String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([professionalId])
+  @@index([clientProfileId])
+}
+
+// ==================== LEADS (CRM) ====================
+
+model Lead {
+  id        String     @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String
+  phone     String?
+  status    LeadStatus @default(NEW)
+  source    String?
+  notes     String?
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  history LeadHistory[]
+  
+  convertedUserId String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+  @@index([status])
+}
+
+model LeadHistory {
+  id        String   @id @default(cuid())
+  action    String
+  notes     String?
+  
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+
+  @@index([leadId])
+}
+
+// ==================== EJERCICIOS Y RUTINAS ====================
+
+model Sport {
+  id   String @id @default(cuid())
+  name String
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  exercises Exercise[]
+  routines  Routine[]
+
+  @@unique([gymId, name])
+}
+
+model Exercise {
+  id          String         @id @default(cuid())
+  name        String
+  muscleGroup String?
+  category    RoutineCategory
+  difficulty  Int            @default(1) // 1-5
+  description String?
+  videoUrl    String?
+  status      ExerciseStatus @default(PENDING)
+  
+  sportId String?
+  sport   Sport?  @relation(fields: [sportId], references: [id])
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+  
+  createdById String
+  createdBy   User   @relation("CreatedBy", fields: [createdById], references: [id])
+
+  routineExercises RoutineExercise[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+  @@index([category])
+  @@index([status])
+}
+
+model Routine {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  coverImage  String?
+  category    RoutineCategory
+  level       Int             @default(1) // 1-5
+  objective   String?
+  intensity   Int             @default(1) // 1-5
+  isTemplate  Boolean         @default(false)
+  
+  sportId String?
+  sport   Sport?  @relation(fields: [sportId], references: [id])
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+  
+  createdById String
+  createdBy   User   @relation("CreatedBy", fields: [createdById], references: [id])
+
+  exercises       RoutineExercise[]
+  clientRoutines  ClientRoutine[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+  @@index([category])
+  @@index([isTemplate])
+}
+
+model RoutineExercise {
+  id         String @id @default(cuid())
+  order      Int
+  sets       Int?
+  reps       String? // "12" o "8-12"
+  restSeconds Int?
+  notes      String?
+  
+  routineId String
+  routine   Routine @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@index([routineId])
+}
+
+model ClientRoutine {
+  id        String   @id @default(cuid())
+  startDate DateTime
+  endDate   DateTime?
+  isActive  Boolean  @default(true)
+  
+  // Snapshot de la rutina al momento de asignar
+  snapshotData Json
+  
+  clientProfileId String
+  clientProfile   ClientProfile @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
+  
+  routineId String
+  routine   Routine @relation(fields: [routineId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientProfileId])
+  @@index([isActive])
+}
+
+// ==================== PAGOS Y SUSCRIPCIONES ====================
+
+model Plan {
+  id          String @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  durationDays Int   // 30, 90, 365
+  isActive    Boolean @default(true)
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  clients  ClientProfile[]
+  invoices Invoice[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+}
+
+model Invoice {
+  id        String        @id @default(cuid())
+  amount    Float
+  status    InvoiceStatus @default(PENDING)
+  dueDate   DateTime
+  paidAt    DateTime?
+  
+  clientProfileId String
+  clientProfile   ClientProfile @relation(fields: [clientProfileId], references: [id])
+  
+  planId String
+  plan   Plan   @relation(fields: [planId], references: [id])
+
+  payments Payment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientProfileId])
+  @@index([status])
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  amount        Float
+  method        String   // "manual", "mercadopago"
+  reference     String?
+  notes         String?
+  
+  clientProfileId String
+  clientProfile   ClientProfile @relation(fields: [clientProfileId], references: [id])
+  
+  invoiceId String?
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+  
+  createdAt DateTime @default(now())
+
+  @@index([clientProfileId])
+}
+
+// ==================== CONTABILIDAD ====================
+
+model ExpenseCategory {
+  id   String @id @default(cuid())
+  name String
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  expenses Expense[]
+
+  @@unique([gymId, name])
+}
+
+model Expense {
+  id     String   @id @default(cuid())
+  amount Float
+  date   DateTime
+  notes  String?
+  
+  categoryId String
+  category   ExpenseCategory @relation(fields: [categoryId], references: [id])
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+  @@index([date])
+}

@@ -1,0 +1,104 @@
+/* GlassCard - Premium Dark Theme v4.0 */
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  transition: 
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.card:hover {
+  background: var(--card-bg-hover);
+  border-color: var(--card-border-hover);
+}
+
+.card:active {
+  transform: scale(0.99);
+}
+
+/* Padding variants */
+.sm {
+  padding: var(--spacing-4);
+}
+
+.md {
+  padding: var(--spacing-5);
+}
+
+.lg {
+  padding: var(--spacing-8);
+}
+
+/* Style variants */
+.default {
+  background: var(--card-bg);
+}
+
+.highlight {
+  background: var(--card-bg-elevated);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.highlight:hover {
+  border-color: var(--color-primary);
+  box-shadow: 
+    var(--card-shadow-hover),
+    0 0 20px var(--color-primary-glow);
+}
+
+/* Elevated variant - for nested cards */
+.elevated {
+  background: var(--card-bg-elevated);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Subtle variant - minimal style */
+.subtle {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.subtle:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--card-border);
+}
+
+/* Interactive variant - for clickable cards */
+.interactive {
+  cursor: pointer;
+}
+
+.interactive:hover {
+  border-color: var(--color-primary);
+}
+
+/* Selected state */
+.selected {
+  border-color: var(--color-secondary) !important;
+  box-shadow: 
+    var(--card-shadow),
+    0 0 0 1px var(--color-secondary),
+    0 0 20px var(--color-secondary-glow);
+}
+
+/* Primary accent */
+.accent {
+  border-left: 3px solid var(--color-primary);
+}
+
+/* No hover effect */
+.static {
+  pointer-events: none;
+}
+
+.static:hover {
+  transform: none;
+  background: var(--card-bg);
+  border-color: var(--card-border);
+  box-shadow: var(--card-shadow);
+}

@@ -1,0 +1,232 @@
+.sidebar {
+  position: fixed;
+  top: var(--spacing-4);
+  left: var(--spacing-4);
+  bottom: var(--spacing-4);
+  width: var(--sidebar-width);
+  z-index: var(--z-fixed);
+  transition: width 300ms ease;
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed-width);
+}
+
+.sidebarInner {
+  height: 100%;
+  background: var(--color-bg-1);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-4);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.logoSection {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  min-width: 0;
+}
+
+.logoIcon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  border-radius: var(--radius-md);
+  color: var(--color-bg-0);
+  flex-shrink: 0;
+}
+
+.gymName {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-0);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.toggleBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-2);
+  border-radius: var(--radius-md);
+  color: var(--color-text-1);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.toggleBtn:hover {
+  background: var(--color-bg-3);
+  color: var(--color-text-0);
+}
+
+/* User Info */
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  color: var(--color-bg-0);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.userName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userRole {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-1);
+}
+
+/* Navigation */
+.nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  padding: var(--spacing-3);
+  overflow-y: auto;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-1);
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.navItem:hover {
+  background: var(--color-bg-2);
+  color: var(--color-text-0);
+}
+
+.navItem.active {
+  background: rgba(188, 255, 49, 0.1);
+  color: var(--color-text-0);
+  border: 1px solid rgba(188, 255, 49, 0.2);
+}
+
+.navItem.active .navIcon {
+  color: var(--color-primary);
+}
+
+.navIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.navLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* Footer */
+.footer {
+  padding: var(--spacing-3);
+  border-top: 1px solid var(--glass-border);
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  width: 100%;
+  padding: var(--spacing-3);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-fast);
+}
+
+.logoutBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
+/* Collapsed state adjustments */
+.sidebar.collapsed .header {
+  padding: var(--spacing-3);
+  justify-content: center;
+}
+
+.sidebar.collapsed .logoSection {
+  justify-content: center;
+}
+
+.sidebar.collapsed .toggleBtn {
+  display: none;
+}
+
+.sidebar.collapsed .userInfo {
+  justify-content: center;
+  padding: var(--spacing-3);
+}
+
+.sidebar.collapsed .navItem {
+  justify-content: center;
+  padding: var(--spacing-3);
+}
+
+.sidebar.collapsed .footer {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-3);
+}
+
+.sidebar.collapsed .logoutBtn {
+  width: auto;
+  justify-content: center;
+  padding: var(--spacing-3);
+}

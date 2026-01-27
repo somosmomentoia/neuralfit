@@ -1,0 +1,1862 @@
+/* ==================== VARIABLES ==================== */
+:root {
+  --training-green: #BCFF31;
+  --training-green-dark: #9ed629;
+  --training-bg: #0d1210;
+}
+
+/* ==================== CONTAINER ==================== */
+.container {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--training-bg);
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ==================== HEADER ==================== */
+/* Header oculto - solo mantiene el espaciado para no chocar con el header del layout */
+.header {
+  display: none;
+}
+
+.headerSpacer {
+  height: 60px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.menuBtn,
+.notificationBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.menuBtn:active,
+.notificationBtn:active {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.headerTitle {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+.notificationBtn {
+  position: relative;
+}
+
+.notificationBadge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: #ff3b30;
+  border-radius: 50%;
+}
+
+/* ==================== LOADING ==================== */
+.loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--training-green);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==================== PHASE: EXERCISE START ==================== */
+.exerciseStartPhase {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--spacing-4);
+  padding-top: var(--spacing-4);
+  padding-bottom: 60px;
+  position: relative;
+}
+
+/* Main exercise card - estructura según mockup */
+.exerciseCard {
+  display: flex;
+  flex-direction: column;
+  background: var(--training-green);
+  border-radius: 24px 24px 0 0;
+  position: relative;
+  overflow: visible;
+  min-height: 420px;
+}
+
+/* Forma curva cóncava en la parte inferior - llega hasta los bordes */
+.exerciseCard::after {
+  content: '';
+  position: absolute;
+  bottom: -45px;
+  left: 0;
+  right: 0;
+  height: 90px;
+  background: var(--training-green);
+  border-radius: 0 0 100% 100% / 0 0 100% 100%;
+  z-index: 1;
+}
+
+/* Imagen de fondo del ejercicio - ocupa la parte superior */
+.exerciseImageContainer {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  overflow: hidden;
+  border-radius: 24px 24px 0 0;
+}
+
+.exerciseImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.exerciseImagePlaceholder {
+  width: 100%;
+  height: 100%;
+  background: url('/fondo-ejercicios.jpeg') center / cover no-repeat;
+}
+
+/* Gradiente que funde la imagen con el verde */
+.exerciseImageContainer::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(to bottom, transparent 0%, var(--training-green) 100%);
+  pointer-events: none;
+}
+
+/* Exercise info - contenido sobre el verde */
+.exerciseInfo {
+  position: relative;
+  z-index: 3;
+  padding: 0 var(--spacing-5);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  margin-top: -40px;
+}
+
+.exerciseName {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: #000;
+  margin: 0 0 var(--spacing-2) 0;
+  line-height: 1.1;
+}
+
+.exerciseMusclePill {
+  display: inline-block;
+  padding: 8px 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 auto var(--spacing-5);
+}
+
+/* Series selector */
+.seriesSelector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 16px;
+  padding: 8px 16px;
+  width: fit-content;
+  margin: 0 auto var(--spacing-2);
+}
+
+.seriesBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.15);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.seriesBtn:active {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.seriesValue {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #000;
+  min-width: 40px;
+  text-align: center;
+}
+
+.seriesLabel {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.5);
+  text-align: center;
+  margin-bottom: var(--spacing-2);
+}
+
+/* Start exercise text */
+.startExerciseText {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  font-style: italic;
+  color: #000;
+  text-align: center;
+  margin-bottom: var(--spacing-2);
+}
+
+/* Play button - centrado sobre la línea de la curva */
+.playBtnContainer {
+  position: absolute;
+  bottom: -81px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.playBtn {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s;
+}
+
+.playBtn:active {
+  transform: scale(0.94);
+}
+
+.playBtn svg {
+  color: #000;
+  margin-left: 4px;
+}
+
+/* ==================== PHASE: ACTIVE WORKOUT ==================== */
+.activePhase {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+  min-height: 0;
+}
+
+/* Scrollable header - scrolls with content */
+.scrollableHeader {
+  flex-shrink: 0;
+  padding-top: var(--spacing-4);
+}
+
+/* Progress header */
+.progressHeader {
+  padding: 0 var(--spacing-4) var(--spacing-4);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.closeBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+}
+
+.progressInfo {
+  flex: 1;
+}
+
+.progressText {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 6px;
+}
+
+.progressBar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--training-green);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Exercise pills */
+.exercisePills {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: 0 var(--spacing-4);
+  margin-bottom: var(--spacing-3);
+  flex-wrap: wrap;
+}
+
+.exercisePill {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.exercisePillCompleted {
+  background: var(--training-green);
+  color: #000;
+}
+
+.exercisePillActive {
+  background: var(--training-green);
+  color: #000;
+  transform: scale(1.1);
+  position: relative;
+}
+
+/* Animated orbit ring around active pill */
+.exercisePillActive::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--training-green);
+  animation: orbitSpin 1s linear infinite;
+}
+
+@keyframes orbitSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.exercisePillLocked {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.exercisePillInProgress {
+  background: rgba(188, 255, 49, 0.3);
+  border: 2px solid var(--training-green);
+  color: var(--training-green);
+}
+
+/* Carousel container */
+.carouselContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Carousel track - holds all cards in a row */
+.carouselTrack {
+  display: flex;
+  flex: 1;
+  will-change: transform;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Individual carousel card */
+.carouselCard {
+  flex: 0 0 100%;
+  min-width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--spacing-4);
+  padding-bottom: 100px;
+  box-sizing: border-box;
+  will-change: transform, opacity;
+}
+
+.carouselCardActive {
+  z-index: 2;
+}
+
+/* Wrapper para card verde + sección video - legacy support */
+.activeCardWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 0 var(--spacing-4);
+  position: relative;
+}
+
+/* Active exercise card - con forma curva suave */
+.activeExerciseCard {
+  display: flex;
+  flex-direction: column;
+  background: var(--training-green);
+  border-radius: 24px 24px 0 0;
+  position: relative;
+  overflow: visible;
+  padding-bottom: 40px;
+  z-index: 2;
+}
+
+/* Forma curva que llega hasta los bordes de la card */
+.activeExerciseCard::after {
+  content: '';
+  position: absolute;
+  bottom: -45px;
+  left: 0;
+  right: 0;
+  height: 90px;
+  background: var(--training-green);
+  border-radius: 0 0 100% 100% / 0 0 100% 100%;
+  z-index: 1;
+}
+
+/* Patrón de puntos */
+.activeExerciseCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.05) 3px, transparent 3px);
+  background-size: 18px 18px;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 24px 24px 0 0;
+}
+
+/* Timers section */
+.timersSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-4) var(--spacing-4) 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* Timer total pequeño arriba */
+.totalTime {
+  font-family: var(--font-archivo-narrow), 'Archivo Narrow', 'SF Pro Display', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.7);
+  margin-bottom: var(--spacing-1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.totalTimeValue {
+  font-family: var(--font-archivo-narrow), 'Archivo Narrow', 'SF Pro Display', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  font-style: italic;
+  color: #000;
+}
+
+.totalTimeLabel {
+  font-size: 11px;
+  font-weight: 400;
+  font-style: normal;
+  color: rgba(0, 0, 0, 0.5);
+  text-transform: capitalize;
+}
+
+/* Timer de ejercicio grande */
+.exerciseTimer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+}
+
+/* Icono del reloj - gira cuando está activo */
+.exerciseTimer svg {
+  color: #000;
+  width: 28px;
+  height: 28px;
+  transition: transform 0.3s ease;
+}
+
+/* Clase para animar el reloj cuando está corriendo */
+.clockAnimating svg {
+  animation: clockSpin 2s linear infinite;
+}
+
+@keyframes clockSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Timer de ejercicio - fuente Archivo Narrow Bold Italic */
+.exerciseTimerValue {
+  font-family: var(--font-archivo-narrow), 'Archivo Narrow', 'SF Pro Display', sans-serif;
+  font-size: 42px;
+  font-weight: 700;
+  font-style: italic;
+  color: #000;
+  letter-spacing: -1px;
+  transition: transform 0.2s ease;
+}
+
+/* Bounce animation cuando se hace play/pause */
+.timerBounce .exerciseTimerValue {
+  animation: timerBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes timerBounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.exerciseTimerSeconds {
+  font-family: var(--font-archivo-narrow), 'Archivo Narrow', 'SF Pro Display', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.6);
+  margin-left: 2px;
+}
+
+/* Current series pill - con animación bounce */
+.currentSeriesPill {
+  display: inline-block;
+  padding: 10px 28px;
+  background: #000;
+  border-radius: 50px;
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: var(--spacing-2);
+  transition: all 0.3s ease;
+}
+
+/* Animación bounce con gradiente al cambiar de serie */
+.currentSeriesPill.seriesChange {
+  animation: seriesBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: linear-gradient(135deg, var(--training-green) 0%, #8BC34A 50%, var(--training-green) 100%);
+  color: #000;
+}
+
+@keyframes seriesBounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.2); }
+  50% { transform: scale(0.95); }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Active exercise name */
+.activeExerciseName {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #000;
+  text-align: center;
+  margin-bottom: var(--spacing-2);
+  padding: 0 var(--spacing-4);
+}
+
+/* Exercise start content */
+.exerciseStartContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-3) var(--spacing-4);
+  text-align: center;
+  margin-top: -20px;
+}
+
+.exerciseStartName {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: var(--spacing-1);
+}
+
+/* Descripción en sección gris */
+.exerciseDescriptionBox {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-text-1);
+  line-height: 1.5;
+  padding: 0;
+}
+
+/* ==================== EXERCISE COMPLETED PHASE ==================== */
+.exerciseCompletedContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-6) var(--spacing-4);
+  text-align: center;
+}
+
+.completedCheckmark {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-4);
+  animation: checkmarkPop 0.5s ease-out;
+}
+
+.completedCheckmark svg {
+  color: #000;
+}
+
+@keyframes checkmarkPop {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.completedExerciseTitle {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: var(--spacing-1);
+}
+
+.completedExerciseName {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  color: #3a3a3a !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-4);
+}
+
+.completedStats {
+  display: flex;
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-4);
+}
+
+.completedStatItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.completedStatValue {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #000;
+}
+
+.completedStatLabel {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.completedSeriesList {
+  width: 100%;
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.completedSeriesItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-2) var(--spacing-3);
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+}
+
+.completedSeriesNumber {
+  font-size: 13px;
+  font-weight: 600;
+  color: #000;
+}
+
+.completedSeriesData {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+/* Next exercise countdown island */
+.nextExerciseIsland {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 20px;
+  animation: islandPulse 1s ease-in-out infinite;
+}
+
+@keyframes islandPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.nextExerciseText {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.nextExerciseCountdown {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #000;
+}
+
+/* Grid grip decorativo */
+.gridGrip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  justify-items: center;
+  padding: var(--spacing-4) var(--spacing-6);
+  margin-top: var(--spacing-4);
+}
+
+.gridDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* Mensaje motivacional - misma fuente y tamaño que el timer */
+.motivationalMessage {
+  font-family: var(--font-archivo-narrow), 'Archivo Narrow', 'SF Pro Display', sans-serif;
+  font-size: 42px;
+  font-weight: 700;
+  font-style: italic;
+  color: #000;
+  text-align: center;
+  margin-bottom: var(--spacing-3);
+  animation: motivationalSlide 2.5s ease-in-out forwards;
+}
+
+@keyframes motivationalSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  75% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}
+
+/* Reps and weight inputs - más compactos */
+.inputsRow {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-4);
+  padding: 0 var(--spacing-4);
+  position: relative;
+  z-index: 2;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.inputControls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+.inputBtn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.15);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.inputBtn:active {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.inputValue {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  min-width: 40px;
+  text-align: center;
+}
+
+.inputLabel {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Action buttons - centrados sobre la línea curva */
+.actionButtons {
+  position: absolute;
+  bottom: -77px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-4);
+  z-index: 10;
+}
+
+.actionBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #000;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.actionBtn:active {
+  transform: scale(0.94);
+}
+
+/* Botón central Play/Pause - exactamente sobre la curva con sombra difusa */
+.actionBtnMain {
+  width: 64px;
+  height: 64px;
+  background: #fff;
+  color: #000;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+}
+
+.actionBtnMain:active {
+  transform: scale(0.94);
+}
+
+.actionBtnCheck {
+  background: #000;
+}
+
+.actionBtnDisabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Mensaje para iniciar serie */
+.startSeriesHint {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.6);
+  text-align: center;
+  white-space: nowrap;
+  z-index: 5;
+}
+
+/* Rest timer overlay - cubre toda la pantalla */
+.restTimerOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  background: rgba(15, 18, 16, 0.85);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.restTimerContent {
+  text-align: center;
+}
+
+.restTimerTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: var(--spacing-3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.restTimerValue {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 72px;
+  font-weight: 700;
+  color: var(--training-green);
+  margin-bottom: var(--spacing-4);
+}
+
+.restTimerNext {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: var(--spacing-5);
+}
+
+.skipRestBtn {
+  padding: 14px 32px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.skipRestBtn:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Video section - solapada debajo de la card verde con más gap */
+.videoSection {
+  background: rgba(30, 35, 32, 0.95);
+  border-radius: 0 0 24px 24px;
+  padding: 80px var(--spacing-4) var(--spacing-4);
+  margin-top: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.videoTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: var(--spacing-3);
+  text-align: left;
+}
+
+.videoContainer {
+  aspect-ratio: 16/9;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.videoIframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Placeholder cuando no hay video */
+.videoPlaceholder {
+  aspect-ratio: 16/9;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* ==================== PHASE: COMPLETED ==================== */
+/* Usa las mismas clases que activePhase: activeCardWrapper, activeExerciseCard, videoSection */
+.completedPhase {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-top: var(--spacing-4);
+}
+
+.completedContent {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding-top: var(--spacing-4);
+}
+
+/* Título ENTRENAMIENTO COMPLETADO - más grande, menos kerning */
+.completedTitle {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: #000;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+  margin: var(--spacing-4) 0 var(--spacing-5) 0;
+  line-height: 1.1;
+}
+
+/* Stats row - centradas, más grandes y más abajo */
+.statsRow {
+  display: flex;
+  position: relative;
+  justify-content: center;
+  align-items: flex-start;
+  gap: var(--spacing-8);
+  padding: var(--spacing-4) 0;
+  margin-top: var(--spacing-4);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* El stat del medio baja un poco cuando hay 3 */
+.statItem:nth-child(2) {
+  transform: translateY(8px);
+}
+
+/* Icono circular con borde - aún más grande */
+.statIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid #000;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  margin-bottom: 8px;
+}
+
+.statIcon svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Valor grande debajo del icono - aún más grande */
+.statValue {
+  font-family: var(--font-archivo-narrow), 'Archivo Narrow', 'SF Pro Display', sans-serif;
+  font-size: 38px;
+  font-weight: 700;
+  font-style: italic;
+  color: #000;
+  line-height: 1;
+}
+
+.statValueSmall {
+  font-size: 14px;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.statLabel {
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.5);
+  text-transform: capitalize;
+  letter-spacing: 0;
+}
+
+/* Completed exercises list header con paginación */
+.completedListHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2);
+}
+
+.completedListTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.paginationBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.paginationBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.paginationBtn:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.paginationText {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  min-width: 30px;
+  text-align: center;
+}
+
+/* Completed exercises list */
+.completedExercisesList {
+  margin-top: var(--spacing-2);
+  padding: 0;
+}
+
+.completedExerciseItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) 0;
+}
+
+/* Check icon verde con borde */
+.completedExerciseCheck {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--training-green);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--training-green);
+}
+
+.completedExerciseCheck svg {
+  width: 14px;
+  height: 14px;
+}
+
+.completedExerciseInfo {
+  flex: 1;
+}
+
+.completedListExerciseName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.completedExerciseSeries {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+}
+
+/* Back button - estilo del mockup */
+.backToHomeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-4);
+  padding: 16px 24px;
+  background: var(--training-green);
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.backToHomeBtn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+/* ==================== CANCEL MODAL ==================== */
+.cancelModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-4);
+  z-index: 100;
+}
+
+.cancelModalContent {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: var(--spacing-6);
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+}
+
+.cancelModalTitle {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 var(--spacing-3) 0;
+}
+
+.cancelModalText {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 var(--spacing-5) 0;
+  line-height: 1.5;
+}
+
+.cancelModalButtons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.cancelModalKeep {
+  padding: 16px;
+  background: var(--training-green);
+  border: none;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000;
+  cursor: pointer;
+}
+
+.cancelModalExit {
+  padding: 16px;
+  background: #EF4444;
+  border: none;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+  cursor: pointer;
+}
+
+/* ==================== VISTA DE HISTORIAL ==================== */
+.historyHeader {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.historyTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-0);
+  margin: 0;
+}
+
+.historyDate {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+  text-transform: capitalize;
+}
+
+.historySummary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
+}
+
+.summaryCard {
+  background: linear-gradient(145deg, rgba(40, 45, 42, 0.9) 0%, rgba(28, 32, 30, 0.95) 100%);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);
+}
+
+.summaryValue {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.summaryLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-1);
+  text-transform: uppercase;
+}
+
+.historyExercises {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.historyExerciseItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  background: linear-gradient(145deg, rgba(40, 45, 42, 0.9) 0%, rgba(28, 32, 30, 0.95) 100%);
+  border-radius: var(--radius-lg);
+}
+
+.historyExerciseCheck {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(34, 197, 94, 0.2);
+  border-radius: var(--radius-full);
+  color: #22C55E;
+  flex-shrink: 0;
+}
+
+.historyExerciseInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.historyExerciseName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-0);
+}
+
+.historyExerciseMeta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-1);
+}
+
+.historyExerciseWrapper {
+  margin-bottom: 8px;
+}
+
+.historyExerciseItem.expandable {
+  cursor: pointer;
+}
+
+.historyExerciseItem.expandable:active {
+  transform: scale(0.98);
+}
+
+.expandIcon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-1);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.expandIcon.expanded {
+  transform: rotate(180deg);
+}
+
+/* Series Detail (expandible) */
+.seriesDetail {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 0 0 12px 12px;
+  margin-top: -8px;
+  padding: 16px 12px 12px 12px;
+  animation: slideDown 0.2s ease;
+}
+
+.seriesDetailHeader {
+  display: grid;
+  grid-template-columns: 50px 1fr 60px;
+  gap: 8px;
+  padding: 4px 8px;
+  font-size: 10px;
+  color: var(--color-text-1);
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.seriesDetailRow {
+  display: grid;
+  grid-template-columns: 50px 1fr 60px;
+  gap: 8px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  margin-bottom: 4px;
+  align-items: center;
+  text-align: center;
+}
+
+.seriesDetailNumber {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: var(--color-bg-0);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+.seriesDetailWeight {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.seriesDetailReps {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-0);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== SERIES TRACKER ==================== */
+.seriesTracker {
+  width: 100%;
+  max-width: 100%;
+  margin: var(--spacing-3) 0;
+}
+
+.seriesHeader {
+  display: grid;
+  grid-template-columns: 40px 1fr 70px;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 10px;
+  color: var(--color-text-1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.seriesRow {
+  display: grid;
+  grid-template-columns: 40px 1fr 70px;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  align-items: center;
+}
+
+.seriesNumber {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: var(--color-bg-0);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+.weightInput,
+.repsInput {
+  width: 100%;
+  height: 40px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.weightInput:focus,
+.repsInput:focus {
+  outline: none;
+  border: 2px solid transparent;
+  background: 
+    linear-gradient(rgba(188, 255, 49, 0.1), rgba(188, 255, 49, 0.1)),
+    linear-gradient(45deg, #bcff31 0%, transparent 50%, #bcff31 100%);
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+}
+
+.weightInput::placeholder {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Chrome, Safari, Edge, Opera - hide arrows */
+.weightInput::-webkit-outer-spin-button,
+.weightInput::-webkit-inner-spin-button,
+.repsInput::-webkit-outer-spin-button,
+.repsInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox - hide arrows */
+.weightInput[type=number],
+.repsInput[type=number] {
+  -moz-appearance: textfield;
+}
+
+.restInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-md);
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-3);
+}
+
+.restInfo svg {
+  color: var(--color-primary);
+}
+
+/* ==================== ANIMACIONES DE ÉXITO ==================== */
+.successOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.successContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-4);
+  animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.successIcon {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-primary) 0%, #8BC34A 100%);
+  border-radius: var(--radius-full);
+  animation: pulse 0.6s ease-in-out infinite alternate, glow 1s ease-in-out infinite;
+}
+
+.successIcon svg {
+  width: 50px;
+  height: 50px;
+  stroke: var(--color-bg-0);
+  animation: bolt 0.5s ease-out;
+}
+
+.successTitle {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  margin: 0;
+  text-shadow: 0 0 20px rgba(188, 255, 49, 0.5);
+}
+
+.successText {
+  font-size: var(--font-size-base);
+  color: var(--color-text-1);
+  margin: 0;
+}
+
+/* ==================== ANIMACIÓN DE TROFEO ==================== */
+.trophyOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.trophyContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-4);
+  animation: trophyEntry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.trophyIcon {
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.trophyIcon::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle, rgba(188, 255, 49, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: trophyGlow 1.5s ease-in-out infinite;
+}
+
+.trophyIcon svg {
+  width: 100px;
+  height: 100px;
+  stroke: var(--color-primary);
+  filter: drop-shadow(0 0 20px rgba(188, 255, 49, 0.8));
+  animation: trophyBounce 0.6s ease-out;
+}
+
+.trophyTitle {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  margin: 0;
+  text-align: center;
+  text-shadow: 0 0 30px rgba(188, 255, 49, 0.6);
+  animation: textGlow 1s ease-in-out infinite alternate;
+}
+
+.trophyText {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-0);
+  margin: 0;
+}
+
+/* ==================== KEYFRAMES ==================== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(188, 255, 49, 0.4); }
+  50% { box-shadow: 0 0 40px rgba(188, 255, 49, 0.8); }
+}
+
+@keyframes bolt {
+  0% { 
+    opacity: 0;
+    transform: translateY(-20px) scale(0.5);
+  }
+  50% { 
+    opacity: 1;
+    transform: translateY(5px) scale(1.1);
+  }
+  100% { 
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes trophyEntry {
+  0% { 
+    opacity: 0;
+    transform: scale(0.3) translateY(50px);
+  }
+  60% { 
+    transform: scale(1.1) translateY(-10px);
+  }
+  100% { 
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes trophyGlow {
+  0%, 100% { 
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes trophyBounce {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+@keyframes textGlow {
+  from { text-shadow: 0 0 20px rgba(188, 255, 49, 0.4); }
+  to { text-shadow: 0 0 40px rgba(188, 255, 49, 0.8); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}

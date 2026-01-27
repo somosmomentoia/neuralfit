@@ -1,0 +1,49 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-3) var(--spacing-4);
+  background: transparent;
+  z-index: var(--z-fixed);
+}
+
+.menuButton {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-1);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-0);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-md);
+}
+
+.menuButton:hover {
+  background: var(--color-bg-2);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.menuButton:active {
+  transform: scale(0.95);
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-0);
+  margin: 0;
+}
+
+.spacer {
+  width: 48px;
+}

@@ -1,0 +1,40 @@
+.fab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: var(--color-bg-0);
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 20px rgba(188, 255, 49, 0.3);
+  transition: all var(--transition-normal);
+}
+
+.fab:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 30px rgba(188, 255, 49, 0.4);
+}
+
+.fab:active {
+  transform: scale(0.98);
+}
+
+/* Size variants */
+.default {
+  width: 56px;
+  height: 56px;
+}
+
+.large {
+  width: 72px;
+  height: 72px;
+}
+
+.fab svg {
+  width: 24px;
+  height: 24px;
+}
+
+.large svg {
+  width: 32px;
+  height: 32px;
+}

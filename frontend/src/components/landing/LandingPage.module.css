@@ -1,0 +1,1593 @@
+/* ==================== VARIABLES ==================== */
+:root {
+  --primary: #BCFF31;
+  --primary-dark: #9FE000;
+  --bg-dark: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-card: #1a1a1a;
+  --text-white: #ffffff;
+  --text-gray: rgba(255, 255, 255, 0.7);
+  --text-muted: rgba(255, 255, 255, 0.5);
+  --border: rgba(255, 255, 255, 0.1);
+  --font-display: var(--font-archivo-narrow), 'Archivo Narrow', 'Impact', sans-serif;
+  --font-body: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ==================== BASE - MOBILE FIRST ==================== */
+.landing {
+  min-height: 100vh;
+  background: var(--bg-dark);
+  color: var(--text-white);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ==================== NAVIGATION ==================== */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.navScrolled {
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.navContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.logoIcon {
+  width: 28px;
+  height: 28px;
+}
+
+.logoText {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+}
+
+.logoNeural {
+  color: #ffffff;
+}
+
+.logoFit {
+  color: var(--primary);
+}
+
+.navLinks {
+  display: none;
+}
+
+.navActions {
+  display: none;
+}
+
+.loginBtn,
+.ctaBtn {
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.loginBtn {
+  color: var(--text-gray);
+  padding: 0.5rem 1rem;
+}
+
+.ctaBtn {
+  background: var(--primary);
+  color: #000;
+  padding: 0.6rem 1.25rem;
+  border-radius: 4px;
+}
+
+/* Mobile Menu Toggle */
+.menuToggle {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 1002;
+  position: relative;
+}
+
+.menuBar {
+  width: 24px;
+  height: 2px;
+  background: var(--text-white);
+  transition: all 0.3s;
+}
+
+.menuBarOpen:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.menuBarOpen:nth-child(2) {
+  opacity: 0;
+}
+
+.menuBarOpen:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* Mobile Menu */
+.mobileMenu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 10, 10, 0.99);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  z-index: 1001;
+  padding-top: 80px;
+}
+
+.mobileMenuOpen {
+  display: flex;
+}
+
+.mobileMenuClose {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  color: var(--text-white);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+}
+
+.mobileMenuClose:hover {
+  color: var(--primary);
+}
+
+.mobileLink {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-white);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.mobileCtas {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+  width: 80%;
+  max-width: 300px;
+}
+
+.mobileLoginBtn,
+.mobileCtaBtn {
+  text-align: center;
+  padding: 1rem;
+  border-radius: 4px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.mobileLoginBtn {
+  border: 1px solid var(--border);
+  color: var(--text-white);
+}
+
+.mobileCtaBtn {
+  background: var(--primary);
+  color: #000;
+}
+
+/* ==================== HERO SECTION ==================== */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  padding: 6rem 1.5rem 3rem;
+  background: 
+    url('/fotos para landing/pexels-franklin-santillan-a-551795305-20901480.jpg') center/cover no-repeat;
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.3) 0%,
+    rgba(0,0,0,0.6) 50%,
+    var(--bg-dark) 100%
+  );
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+}
+
+.heroTagline {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: 3px;
+  margin-bottom: 1.5rem;
+}
+
+.heroTitle {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 700;
+  font-style: italic;
+  line-height: 0.95;
+  margin: 0 0 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: -2px;
+}
+
+.heroTitleOutline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--text-white);
+  text-stroke: 1.5px var(--text-white);
+}
+
+.heroTitleHighlight {
+  color: var(--primary);
+}
+
+.heroSubtitle {
+  font-size: 1rem;
+  color: var(--text-gray);
+  line-height: 1.7;
+  margin: 0 0 2rem;
+  max-width: 500px;
+}
+
+.heroCtas {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.heroCtaPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: #000;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 1rem 1.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+
+.heroCtaPrimary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.heroCtaSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: var(--text-white);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 1rem;
+}
+
+.playIcon {
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+.heroStats {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.heroStat {
+  display: flex;
+  flex-direction: column;
+}
+
+.heroStatValue {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.heroStatLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.heroStatDivider {
+  width: 1px;
+  background: var(--border);
+}
+
+.heroScrollIndicator {
+  position: absolute;
+  bottom: 2rem;
+  right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  writing-mode: vertical-rl;
+}
+
+.scrollLine {
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(to bottom, var(--primary), transparent);
+}
+
+/* ==================== SECTIONS COMMON ==================== */
+.sectionContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.sectionTag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: 3px;
+  margin-bottom: 0.75rem;
+}
+
+.sectionTitle {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+}
+
+/* ==================== EXPERIENCE SECTION ==================== */
+.experience {
+  padding: 5rem 0;
+  background: var(--bg-dark);
+}
+
+.experienceGrid {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 1rem;
+  margin: 0 -1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.experienceGrid::-webkit-scrollbar {
+  height: 4px;
+}
+
+.experienceGrid::-webkit-scrollbar-track {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.experienceGrid::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+.experienceCard {
+  flex: 0 0 280px;
+  min-width: 280px;
+  scroll-snap-align: start;
+  background: linear-gradient(145deg, var(--bg-card) 0%, #0d0d0d 100%);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.75rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.experienceCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), transparent);
+}
+
+.experienceCard:hover {
+  border-color: rgba(188, 255, 49, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.experienceIcon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1.25rem;
+  background: rgba(188, 255, 49, 0.1);
+  border: 1px solid rgba(188, 255, 49, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.experienceIcon svg {
+  width: 24px;
+  height: 24px;
+  color: var(--primary);
+}
+
+.experienceCard h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.experienceCard p {
+  font-size: 0.85rem;
+  color: var(--text-gray);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ==================== APP SHOWCASE SECTION ==================== */
+.appShowcase {
+  padding: 5rem 0;
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+
+.showcaseGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  align-items: center;
+}
+
+.phoneMockup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 280px;
+}
+
+.phoneFrame {
+  position: relative;
+  width: 260px;
+  height: 520px;
+  background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+  border-radius: 40px;
+  padding: 10px;
+  box-shadow: 
+    0 50px 100px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.phoneFrameSecondary {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-30%) rotate(-8deg);
+  width: 240px;
+  height: 480px;
+  background: linear-gradient(145deg, #222, #111);
+  border-radius: 36px;
+  padding: 10px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+  z-index: 1;
+  opacity: 0.7;
+}
+
+.phoneNotch {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 26px;
+  background: #000;
+  border-radius: 20px;
+  z-index: 10;
+}
+
+.phoneScreen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-dark);
+  border-radius: 32px;
+  overflow: hidden;
+}
+
+.screenSlider {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.4s ease-out;
+}
+
+.screenSlide {
+  position: relative;
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+}
+
+.screenDots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 1.5rem;
+}
+
+.screenDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  border: none;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.screenDot:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.screenDotActive {
+  width: 24px;
+  background: var(--primary);
+}
+
+.screenLabel {
+  text-align: center;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.showcaseContent {
+  text-align: center;
+  max-width: 500px;
+}
+
+.showcaseTitle {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1;
+  margin: 0.75rem 0 1.25rem;
+  text-transform: uppercase;
+}
+
+.showcaseHighlight {
+  color: var(--primary);
+}
+
+.showcaseDesc {
+  font-size: 1rem;
+  color: var(--text-gray);
+  line-height: 1.7;
+  margin: 0 0 2rem;
+}
+
+.showcaseFeatures {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.showcaseFeatures li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: var(--text-gray);
+}
+
+.featureIcon {
+  font-size: 1.25rem;
+}
+
+.showcaseCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--primary);
+  color: #000;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 1rem 2rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+
+.showcaseCta:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+/* ==================== PROGRAMS SECTION ==================== */
+.programs {
+  padding: 5rem 0;
+  background: var(--bg-dark);
+}
+
+.programsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.programCard {
+  position: relative;
+  background: var(--bg-card);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s;
+  aspect-ratio: 4/3;
+}
+
+.programCard:hover {
+  transform: translateY(-4px);
+}
+
+.programCard:hover .programOverlay {
+  background: linear-gradient(
+    135deg,
+    rgba(188, 255, 49, 0.2) 0%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+}
+
+.programImage {
+  position: absolute;
+  inset: 0;
+}
+
+.programOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.3) 50%,
+    transparent 100%
+  );
+}
+
+.programContent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+}
+
+.programName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+}
+
+.programDesc {
+  font-size: 0.9rem;
+  color: var(--text-gray);
+  line-height: 1.6;
+  margin: 0 0 1rem;
+}
+
+.programMeta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.programDuration {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.programLevel {
+  font-size: 0.75rem;
+  color: var(--primary);
+  background: rgba(188, 255, 49, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 100px;
+}
+
+.programCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: gap 0.2s;
+}
+
+.programCta:hover {
+  gap: 0.75rem;
+}
+
+/* ==================== WORKOUT ENGINE SECTION ==================== */
+.workoutEngine {
+  padding: 5rem 0;
+  background: var(--bg-dark);
+}
+
+.workoutGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  align-items: center;
+}
+
+.workoutContent {
+  text-align: center;
+}
+
+.workoutTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0.75rem 0 1rem;
+}
+
+.workoutHighlight {
+  color: var(--primary);
+}
+
+.workoutDesc {
+  font-size: 1rem;
+  color: var(--text-gray);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.workoutFeatures {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: left;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.workoutFeatures li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: var(--text-white);
+}
+
+.featureCheck {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.workoutMockups {
+  position: relative;
+  width: 260px;
+  height: 520px;
+}
+
+.workoutPhone {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.workoutPhoneFrame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+  border-radius: 40px;
+  padding: 10px;
+  overflow: hidden;
+  box-shadow: 
+    0 50px 100px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.workoutPhoneFrame::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 24px;
+  background: #000;
+  border-radius: 12px;
+  z-index: 10;
+}
+
+/* ==================== HOW IT WORKS SECTION ==================== */
+.howItWorks {
+  padding: 5rem 0;
+  background: var(--bg-secondary);
+}
+
+.stepsTimeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  max-width: 500px;
+  margin: 0 auto;
+  padding-left: 3rem;
+}
+
+.timelineLine {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  bottom: 20px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--primary), var(--primary) 50%, rgba(188, 255, 49, 0.3));
+}
+
+.stepItem {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.stepDot {
+  position: absolute;
+  left: -3rem;
+  width: 40px;
+  height: 40px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #000;
+  box-shadow: 0 0 0 4px var(--bg-secondary), 0 0 20px rgba(188, 255, 49, 0.4);
+  z-index: 1;
+}
+
+.stepContent {
+  flex: 1;
+  padding-top: 0.25rem;
+}
+
+.stepContent h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: var(--text-white);
+}
+
+.stepContent p {
+  font-size: 0.9rem;
+  color: var(--text-gray);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ==================== STRENGTH BANNER ==================== */
+.strengthBanner {
+  position: relative;
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: 
+    url('/fotos para landing/pexels-franklin-santillan-a-551795305-20901483.jpg') center/cover no-repeat;
+}
+
+.strengthOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0,0,0,0.8) 0%,
+    rgba(0,0,0,0.4) 100%
+  );
+}
+
+.strengthContent {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 3rem 1.5rem;
+}
+
+.strengthTitle {
+  font-family: var(--font-display);
+  font-size: 4rem;
+  font-weight: 700;
+  font-style: italic;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  color: var(--text-white);
+}
+
+.strengthSubtitle {
+  font-size: 1rem;
+  color: var(--primary);
+  margin: 1rem 0 2rem;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+}
+
+.strengthCta {
+  display: inline-block;
+  background: var(--primary);
+  color: #000;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 1rem 2rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ==================== SPONSORS ==================== */
+.sponsors {
+  padding: 3rem 0;
+  background: var(--bg-dark);
+  overflow: hidden;
+}
+
+.sponsorsTrack {
+  display: flex;
+  gap: 3rem;
+  animation: scroll 20s linear infinite;
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.sponsorLogo {
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.sponsorLogo:hover {
+  opacity: 1;
+}
+
+/* ==================== CONTACT SECTION ==================== */
+.contact {
+  padding: 5rem 0;
+  background: var(--bg-secondary);
+}
+
+.contactGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.contactItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.contactIcon {
+  width: 48px;
+  height: 48px;
+  background: rgba(188, 255, 49, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.contactItem h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+
+.contactItem p {
+  font-size: 0.9rem;
+  color: var(--text-gray);
+  margin: 0;
+}
+
+.contactSocial {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.socialBtn {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-gray);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.socialBtn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.contactForm form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formInput,
+.formTextarea {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1rem;
+  font-size: 0.95rem;
+  color: var(--text-white);
+  transition: border-color 0.2s;
+}
+
+.formInput::placeholder,
+.formTextarea::placeholder {
+  color: var(--text-muted);
+}
+
+.formInput:focus,
+.formTextarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.formTextarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.formSubmit {
+  background: var(--primary);
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  padding: 1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.formSubmit:hover {
+  background: var(--primary-dark);
+}
+
+/* ==================== FOOTER ==================== */
+.footer {
+  background: var(--bg-dark);
+  border-top: 1px solid var(--border);
+  padding: 3rem 0 1.5rem;
+}
+
+.footerContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.footerMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.footerBrand {
+  text-align: center;
+}
+
+.footerLogoWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.footerLogo {
+  display: flex;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.footerBrand p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0;
+}
+
+.footerLinks {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.footerColumn h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 1rem;
+}
+
+.footerColumn a,
+.footerColumn p {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-bottom: 0.5rem;
+}
+
+.footerColumn a:hover {
+  color: var(--primary);
+}
+
+.newsletterForm {
+  display: flex;
+  margin-top: 0.75rem;
+}
+
+.newsletterForm input {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-right: none;
+  border-radius: 4px 0 0 4px;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-white);
+}
+
+.newsletterForm input::placeholder {
+  color: var(--text-muted);
+}
+
+.newsletterForm input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.newsletterForm button {
+  background: var(--primary);
+  color: #000;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.footerBottom {
+  padding-top: 1.5rem;
+  text-align: center;
+}
+
+.footerBottom p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ==================== DESKTOP STYLES ==================== */
+@media (min-width: 768px) {
+  .nav {
+    padding: 1.25rem 2rem;
+  }
+
+  .menuToggle {
+    display: none;
+  }
+
+  .navLinks {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .navLink {
+    color: var(--text-gray);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+  }
+
+  .navLink:hover {
+    color: var(--text-white);
+  }
+
+  .navActions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .hero {
+    padding: 8rem 2rem 4rem;
+  }
+
+  .heroTitle {
+    font-size: 4rem;
+  }
+
+  .heroCtas {
+    flex-direction: row;
+  }
+
+  .heroStats {
+    gap: 2.5rem;
+  }
+
+  .heroStatValue {
+    font-size: 2rem;
+  }
+
+  .sectionContainer {
+    padding: 0 2rem;
+  }
+
+  .sectionTitle {
+    font-size: 2.5rem;
+  }
+
+  .experienceGrid {
+    overflow-x: visible;
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: center;
+  }
+
+  .experienceCard {
+    flex: 0 0 320px;
+    min-width: 320px;
+  }
+
+  .showcaseGrid {
+    flex-direction: row;
+    gap: 4rem;
+  }
+
+  .phoneMockup {
+    width: 340px;
+    height: 680px;
+  }
+
+  .phoneFrame {
+    width: 300px;
+    height: 600px;
+  }
+
+  .phoneFrameSecondary {
+    width: 280px;
+    height: 560px;
+  }
+
+  .showcaseContent {
+    text-align: left;
+    flex: 1;
+  }
+
+  .showcaseTitle {
+    font-size: 3rem;
+  }
+
+  .workoutGrid {
+    flex-direction: row;
+    gap: 4rem;
+  }
+
+  .workoutContent {
+    text-align: left;
+    flex: 1;
+  }
+
+  .workoutFeatures {
+    margin: 0;
+  }
+
+  .workoutTitle {
+    font-size: 2.5rem;
+  }
+
+  .workoutMockups {
+    width: 300px;
+    height: 600px;
+  }
+
+  .programsGrid {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .programCard {
+    flex: 1;
+    min-width: 280px;
+  }
+
+  .stepsTimeline {
+    flex-direction: row;
+    max-width: 900px;
+    padding-left: 0;
+    padding-top: 3rem;
+    justify-content: space-between;
+  }
+
+  .timelineLine {
+    left: 60px;
+    right: 60px;
+    top: 20px;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+    background: linear-gradient(to right, var(--primary), var(--primary));
+  }
+
+  .stepItem {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+  }
+
+  .stepDot {
+    position: absolute;
+    left: 50%;
+    top: -3rem;
+    transform: translateX(-50%);
+  }
+
+  .stepContent {
+    padding-top: 0;
+  }
+
+  .strengthTitle {
+    font-size: 6rem;
+  }
+
+  .contactGrid {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .contactInfo {
+    flex: 1;
+  }
+
+  .contactForm {
+    flex: 1;
+  }
+
+  .formRow {
+    flex-direction: row;
+  }
+
+  .footerMain {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .footerBrand {
+    text-align: left;
+    max-width: 250px;
+  }
+
+  .footerLinks {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero {
+    align-items: center;
+    text-align: center;
+  }
+
+  .heroContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .heroTitle {
+    font-size: 6rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1.25rem;
+    text-align: center;
+  }
+
+  .heroCtas {
+    justify-content: center;
+  }
+
+  .heroStats {
+    justify-content: center;
+  }
+
+  .sectionTitle {
+    font-size: 3rem;
+  }
+
+  .experienceCard {
+    padding: 2.5rem;
+  }
+
+  .programCard {
+    min-width: 320px;
+  }
+
+  .strengthTitle {
+    font-size: 8rem;
+    letter-spacing: 12px;
+  }
+
+  .strengthSubtitle {
+    font-size: 1.25rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .heroTitle {
+    font-size: 7rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1.35rem;
+  }
+
+  .heroContent {
+    max-width: 900px;
+  }
+
+  .strengthTitle {
+    font-size: 10rem;
+  }
+}

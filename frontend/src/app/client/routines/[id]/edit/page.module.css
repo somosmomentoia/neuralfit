@@ -1,0 +1,264 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 200px);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: #888;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid #222;
+  border-top-color: #bcff31;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error {
+  text-align: center;
+  padding: 48px 24px;
+  color: #888;
+}
+
+.error p {
+  margin-bottom: 16px;
+}
+
+.error button {
+  padding: 12px 24px;
+  background: #bcff31;
+  border: none;
+  border-radius: 12px;
+  color: #0a0a0a;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.backBtn:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+/* Routine Info Card */
+.routineInfo {
+  padding: 20px;
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+
+.routineName {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px 0;
+}
+
+.routineDesc {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.exerciseCount {
+  display: inline-block;
+  padding: 6px 12px;
+  background: rgba(188, 255, 49, 0.1);
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #bcff31;
+}
+
+/* Days Section */
+.daysSection {
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 4px 0;
+}
+
+.sectionHint {
+  font-size: 13px;
+  color: #555;
+  margin: 0 0 20px 0;
+}
+
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.dayBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dayBtn:active {
+  transform: scale(0.95);
+}
+
+.dayBtnActive {
+  background: rgba(188, 255, 49, 0.15);
+  border-color: rgba(188, 255, 49, 0.5);
+}
+
+.dayShort {
+  font-size: 13px;
+  font-weight: 700;
+  color: #666;
+}
+
+.dayBtnActive .dayShort {
+  color: #bcff31;
+}
+
+.dayFull {
+  display: none;
+}
+
+@media (min-width: 480px) {
+  .dayBtn {
+    padding: 16px 8px;
+  }
+  
+  .dayShort {
+    display: none;
+  }
+  
+  .dayFull {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #555;
+  }
+  
+  .dayBtnActive .dayFull {
+    color: #bcff31;
+  }
+}
+
+/* Error Message */
+.errorMessage {
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  color: #ef4444;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 12px;
+  padding-bottom: 100px;
+}
+
+.cancelBtn {
+  flex: 1;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cancelBtn:active {
+  transform: scale(0.98);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.cancelBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.saveBtn {
+  flex: 1;
+  padding: 16px;
+  background: #bcff31;
+  border: none;
+  border-radius: 14px;
+  color: #0a0a0a;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.saveBtn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.saveBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

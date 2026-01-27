@@ -1,0 +1,621 @@
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding-bottom: var(--spacing-10);
+}
+
+.loading {
+  text-align: center;
+  padding: var(--spacing-10);
+  color: var(--color-text-1);
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-4);
+  transition: color var(--transition-fast);
+}
+
+.backBtn:hover {
+  color: var(--color-text-0);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-10) !important;
+  color: var(--color-text-1);
+}
+
+.empty svg {
+  margin-bottom: var(--spacing-4);
+  opacity: 0.5;
+}
+
+.empty h2 {
+  font-size: var(--font-size-xl);
+  color: var(--color-text-0);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.empty p {
+  margin: 0;
+}
+
+.hero {
+  position: relative;
+  min-height: 200px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  margin-bottom: var(--spacing-6);
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+}
+
+.heroContent {
+  position: relative;
+  padding: var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 200px;
+  z-index: 1;
+}
+
+.badges {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+}
+
+.badge {
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-0);
+}
+
+.badge.musculacion {
+  background: rgba(188, 255, 49, 0.2);
+  color: var(--color-primary);
+}
+
+.badge.aerobica {
+  background: rgba(37, 99, 235, 0.2);
+  color: var(--color-secondary);
+}
+
+.badge.deportista {
+  background: rgba(245, 158, 11, 0.2);
+  color: #F59E0B;
+}
+
+.routineName {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-0);
+  margin: 0;
+}
+
+.objective {
+  font-size: var(--font-size-base);
+  color: var(--color-text-1);
+  margin: var(--spacing-2) 0 0 0;
+}
+
+.meta {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+.exercisesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.exerciseCard {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.exerciseCard::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: calc(var(--radius-lg) + 2px);
+  padding: 2px;
+  background: linear-gradient(45deg, #bcff31 0%, transparent 50%, #bcff31 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  pointer-events: none;
+}
+
+.exerciseCard.expanded::before {
+  opacity: 1;
+}
+
+.exerciseHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  cursor: pointer;
+}
+
+.exerciseNumber {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  border-radius: var(--radius-md);
+  color: var(--color-bg-0);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+.exerciseInfo {
+  flex: 1;
+}
+
+.exerciseName {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
+  margin: 0;
+}
+
+.exerciseMeta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+  margin: var(--spacing-1) 0 0 0;
+}
+
+.expandIcon {
+  color: var(--color-text-1);
+  transition: transform var(--transition-fast);
+}
+
+.exerciseDetails {
+  padding: 0 var(--spacing-4) var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  border-top: 1px solid var(--glass-border);
+  padding-top: var(--spacing-4);
+  margin-top: 0;
+}
+
+.detailItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detailLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+}
+
+.detailValue {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-0);
+}
+
+.difficultyDots {
+  display: flex;
+  gap: 4px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-bg-2);
+}
+
+.dot.filled {
+  background: var(--color-primary);
+}
+
+.description,
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.description p,
+.notes p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-0);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.notes {
+  padding: var(--spacing-3);
+  background: rgba(37, 99, 235, 0.1);
+  border-radius: var(--radius-md);
+}
+
+.notes .detailLabel {
+  color: var(--color-secondary);
+}
+
+.videoBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: var(--radius-md);
+  color: #EF4444;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: background var(--transition-fast);
+}
+
+.videoBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.startBtn {
+  position: fixed;
+  bottom: var(--spacing-6);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - var(--spacing-8));
+  max-width: 560px;
+  padding: var(--spacing-5);
+  background: var(--color-primary);
+  color: var(--color-bg-0);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-normal);
+  box-shadow: 0 8px 30px rgba(188, 255, 49, 0.3);
+}
+
+.startBtn:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 12px 40px rgba(188, 255, 49, 0.4);
+}
+
+/* Workout Mode Styles */
+.workoutContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-4);
+  padding-bottom: var(--spacing-10);
+}
+
+.workoutHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+}
+
+.exitBtn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-1);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.exitBtn:hover {
+  border: 2px solid transparent;
+  background: 
+    linear-gradient(rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.15)),
+    linear-gradient(45deg, #EF4444 0%, transparent 50%, #EF4444 100%);
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  color: #EF4444;
+}
+
+.workoutProgress {
+  flex: 1;
+}
+
+.progressText {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+  margin-bottom: var(--spacing-2);
+  display: block;
+}
+
+.progressBar {
+  height: 6px;
+  background: var(--color-bg-2);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  transition: width var(--transition-normal);
+}
+
+.currentExercise {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-6) var(--spacing-4);
+}
+
+.exerciseNumberLarge {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  color: var(--color-bg-0);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-4);
+}
+
+.currentExerciseName {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-0);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.muscleGroup {
+  font-size: var(--font-size-sm);
+  color: var(--color-secondary);
+  margin-bottom: var(--spacing-6);
+}
+
+.exerciseStats {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-6);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-4) var(--spacing-6);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+}
+
+.statValue {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.statLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.exerciseDescription {
+  max-width: 500px;
+  margin-bottom: var(--spacing-4);
+}
+
+.exerciseDescription p {
+  font-size: var(--font-size-base);
+  color: var(--color-text-1);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.trainerNotes {
+  max-width: 500px;
+  padding: var(--spacing-4);
+  background: rgba(54, 98, 228, 0.1);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-4);
+}
+
+.notesLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: #3662e4;
+  display: block;
+  margin-bottom: var(--spacing-2);
+}
+
+.trainerNotes p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-0);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.videoBtnLarge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-5);
+  background: rgba(239, 68, 68, 0.15);
+  border-radius: var(--radius-lg);
+  color: #EF4444;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
+}
+
+.videoBtnLarge:hover {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+.workoutActions {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: center;
+  padding: var(--spacing-4);
+}
+
+.prevBtn,
+.nextBtn,
+.finishBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-4) var(--spacing-6);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.prevBtn {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--color-text-0);
+}
+
+.prevBtn:hover {
+  border: 2px solid transparent;
+  background: 
+    linear-gradient(var(--glass-bg), var(--glass-bg)),
+    linear-gradient(45deg, #bcff31 0%, transparent 50%, #bcff31 100%);
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+}
+
+.nextBtn {
+  background: var(--color-primary);
+  border: none;
+  color: var(--color-bg-0);
+  flex: 1;
+  max-width: 300px;
+  justify-content: center;
+}
+
+.nextBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(188, 255, 49, 0.3);
+}
+
+.finishBtn {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #22C55E 100%);
+  border: none;
+  color: var(--color-bg-0);
+  flex: 1;
+  max-width: 300px;
+  justify-content: center;
+}
+
+.finishBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+}
+
+.exerciseIndicators {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-4);
+  flex-wrap: wrap;
+}
+
+.indicator {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.indicator:hover {
+  border: 2px solid transparent;
+  background: 
+    linear-gradient(var(--glass-bg), var(--glass-bg)),
+    linear-gradient(45deg, #bcff31 0%, transparent 50%, #bcff31 100%);
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  color: var(--color-text-0);
+}
+
+.indicator.current {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-bg-0);
+  transform: scale(1.1);
+}
+
+.indicator.done {
+  border: 2px solid transparent;
+  background: 
+    linear-gradient(rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.2)),
+    linear-gradient(45deg, #22C55E 0%, transparent 50%, #22C55E 100%);
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  color: #22C55E;
+}

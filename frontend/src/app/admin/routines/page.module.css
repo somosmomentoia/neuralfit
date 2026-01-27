@@ -1,0 +1,441 @@
+/* Routines Page - Premium Dark Theme v4.0 */
+
+.container {
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-4);
+  padding-bottom: var(--spacing-10);
+  overflow-x: hidden;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-6);
+  gap: var(--spacing-4);
+}
+
+.headerInfo {
+  flex: 1;
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-0);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+  margin: var(--spacing-1) 0 0 0;
+}
+
+/* Primary Action Button */
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-5);
+  background: var(--color-primary);
+  color: #000;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  border-radius: 12px;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.addButton:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+.addButton:active {
+  transform: scale(0.98);
+}
+
+/* Stats Card */
+.statsCard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-5);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.statItem {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.statIcon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+
+.statItem.templates .statIcon {
+  color: var(--color-secondary);
+}
+
+.statItem.musculacion .statIcon {
+  color: var(--color-success);
+}
+
+.statContent {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+}
+
+.statValue {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.statItem.templates .statValue {
+  color: var(--color-secondary);
+}
+
+.statItem.musculacion .statValue {
+  color: var(--color-success);
+}
+
+.statLabel {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Legacy - oculto */
+.statsGrid {
+  display: none;
+}
+
+.statCard {
+  display: none;
+}
+
+/* Category cards - grid 2x2 como en la referencia */
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+}
+
+.categoryCard {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--spacing-4) !important;
+  cursor: pointer;
+  min-height: 120px;
+}
+
+.categoryCard.selected {
+  border-color: #3B82F6 !important;
+  box-shadow: 0 0 0 1px #3B82F6;
+}
+
+.categoryNumber {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-0);
+  line-height: 1;
+}
+
+.categoryLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+}
+
+/* Section title */
+.sectionTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-5);
+  padding: var(--spacing-1);
+  background: var(--color-bg-1);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+}
+
+.filterBtn {
+  padding: var(--spacing-2) var(--spacing-4);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.filterBtn:hover {
+  color: var(--color-text-0);
+  background: var(--color-bg-2);
+}
+
+.filterBtn.active {
+  background: var(--color-primary);
+  color: var(--color-bg-0);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* States */
+.loading {
+  text-align: center;
+  padding: var(--spacing-12);
+  color: var(--color-text-2);
+  font-size: var(--font-size-sm);
+}
+
+.empty {
+  text-align: center;
+  padding: var(--spacing-10) !important;
+  background: var(--card-bg) !important;
+  border: 1px dashed var(--card-border) !important;
+}
+
+.empty p {
+  margin: 0 0 var(--spacing-4) 0;
+  color: var(--color-text-1);
+}
+
+/* Routines Grid */
+.routinesGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+/* Routine Card - Collapsible */
+.routineCard {
+  padding: 0 !important;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+.routineCard:hover {
+  transform: none;
+  border-color: var(--card-border-hover) !important;
+  box-shadow: var(--card-shadow-hover) !important;
+}
+
+.routineHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+}
+
+.routineInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.routineHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex-shrink: 0;
+}
+
+.chevron {
+  color: var(--color-text-1);
+  transition: transform var(--transition-fast);
+}
+
+.chevron.rotated {
+  transform: rotate(180deg);
+}
+
+/* Contenido expandido */
+.routineDetails {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.2s ease, padding 0.3s ease;
+  padding: 0 var(--spacing-4);
+}
+
+.routineDetails.show {
+  max-height: 300px;
+  opacity: 1;
+  padding: 0 var(--spacing-5) var(--spacing-5) var(--spacing-5);
+  border-top: 1px solid var(--color-bg-2);
+}
+
+.routineBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+}
+
+/* Category Badges */
+.badge {
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge.musculacion {
+  background: var(--color-primary-glow);
+  color: var(--color-primary);
+}
+
+.badge.aerobica {
+  background: var(--color-secondary-glow);
+  color: var(--color-secondary);
+}
+
+.badge.deportista {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.templateBadge {
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  background: var(--color-bg-2);
+  color: var(--color-text-0);
+}
+
+.sportBadge {
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  background: var(--color-secondary);
+  color: var(--color-text-0);
+}
+
+.routineName {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.routineObjective {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+  margin: var(--spacing-1) 0 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.routineMeta {
+  display: flex;
+  gap: var(--spacing-5);
+  margin-bottom: var(--spacing-4);
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.metaLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-2);
+}
+
+.metaValue {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-0);
+}
+
+.levelDots {
+  display: flex;
+  gap: 3px;
+}
+
+.levelDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.levelDot.filled {
+  background: var(--color-primary);
+}
+
+/* Action Buttons */
+.routineActions {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.actionBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  background: var(--color-bg-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
+}
+
+.actionBtn:hover {
+  background: var(--color-bg-3);
+  color: var(--color-text-0);
+}

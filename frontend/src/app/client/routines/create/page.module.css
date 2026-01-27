@@ -1,0 +1,836 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 200px);
+  overflow-x: hidden;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--color-text-1);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+}
+
+.backBtn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-1);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--color-text-0);
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-0);
+  margin: 0;
+}
+
+.error {
+  padding: var(--spacing-3);
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  color: #EF4444;
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-4);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  flex: 1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-1);
+}
+
+.input,
+.textarea {
+  padding: var(--spacing-3) var(--spacing-4);
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-0);
+  font-size: var(--font-size-base);
+  transition: all 0.2s ease;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: rgba(188, 255, 49, 0.5);
+  background: linear-gradient(145deg, rgba(15, 18, 16, 0.45) 0%, rgba(8, 10, 9, 0.55) 100%);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* Field Row */
+.fieldRow {
+  display: flex;
+  gap: 1rem;
+}
+
+.fieldRow .field {
+  flex: 1;
+}
+
+/* Slider Container - Diseño moderno */
+.sliderContainer {
+  width: 100%;
+  padding: 12px 0;
+  position: relative;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  touch-action: none;
+}
+
+.sliderTrack {
+  position: absolute;
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.sliderFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--color-primary, #bcff31);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 32px;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 2;
+  touch-action: none;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 6px;
+  background: transparent;
+  border-radius: 3px;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-primary, #bcff31);
+  cursor: pointer;
+  border: 3px solid var(--color-bg-1, #1a1a1a);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  margin-top: -11px;
+}
+
+.slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-primary, #bcff31);
+  cursor: pointer;
+  border: 3px solid var(--color-bg-1, #1a1a1a);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.slider::-moz-range-track {
+  height: 6px;
+  background: transparent;
+  border-radius: 3px;
+}
+
+/* Days Grid */
+.daysGrid {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.dayBtn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dayBtn:hover {
+  border-color: rgba(188, 255, 49, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dayActive {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-bg-0);
+  box-shadow: 0 4px 15px rgba(188, 255, 49, 0.3);
+}
+
+/* Exercises Section */
+.exercisesSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.exercisesHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.addExerciseBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: linear-gradient(135deg, rgba(188, 255, 49, 0.15) 0%, rgba(188, 255, 49, 0.05) 100%);
+  border: 1px solid rgba(188, 255, 49, 0.3);
+  border-radius: var(--radius-full);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.addExerciseBtn:hover {
+  background: rgba(188, 255, 49, 0.2);
+  border-color: rgba(188, 255, 49, 0.5);
+}
+
+.emptyExercises {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-8);
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-xl);
+  text-align: center;
+}
+
+.emptyExercises p {
+  color: var(--color-text-2);
+  margin: 0;
+  font-size: var(--font-size-base);
+}
+
+.addFirstBtn {
+  padding: var(--spacing-3) var(--spacing-5);
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-lg);
+  color: var(--color-bg-0);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(188, 255, 49, 0.25);
+}
+
+.addFirstBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(188, 255, 49, 0.35);
+}
+
+.exercisesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.exerciseItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.exercisesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: pan-y;
+}
+
+.exercisesList.touchDragging {
+  touch-action: none;
+}
+
+/* Cards no arrastradas durante drag - efecto burbuja fluido */
+.exercisesList.touchDragging .exerciseItem {
+  transition: transform 0.25s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.2s ease;
+  opacity: 0.75;
+  will-change: transform;
+}
+
+/* Card siendo arrastrada */
+.exerciseItem.dragging {
+  opacity: 1 !important;
+  background: linear-gradient(135deg, rgba(188, 255, 49, 0.35) 0%, rgba(188, 255, 49, 0.15) 100%);
+  border-color: var(--color-primary);
+  box-shadow: 
+    0 0 0 2px var(--color-primary),
+    0 8px 20px rgba(0, 0, 0, 0.35),
+    0 16px 40px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  position: relative;
+  will-change: transform;
+}
+
+.exerciseOrder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 44px;
+  padding: 8px 4px;
+  margin: -8px 0 -8px -8px;
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.dragHandle {
+  cursor: grab;
+  color: var(--color-text-2);
+  padding: 8px;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  touch-action: none;
+}
+
+.dragHandle:hover {
+  color: var(--color-primary);
+  background: rgba(188, 255, 49, 0.1);
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+  color: var(--color-primary);
+}
+
+.exerciseOrder > span {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.exerciseInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.exerciseName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
+}
+
+.exerciseInputs {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.inputGroup label {
+  font-size: 10px;
+  color: var(--color-text-2);
+}
+
+.inputGroup input {
+  width: 54px;
+  padding: var(--spacing-2);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  color: var(--color-text-0);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.inputGroup input:focus {
+  outline: none;
+  border-color: rgba(188, 255, 49, 0.5);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.removeBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-md);
+  color: #EF4444;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.removeBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: var(--spacing-3);
+  padding-top: var(--spacing-5);
+  margin-top: var(--spacing-5);
+}
+
+.cancelBtn {
+  flex: 1;
+  padding: var(--spacing-4);
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-1);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn:hover {
+  background: linear-gradient(145deg, rgba(15, 18, 16, 0.45) 0%, rgba(8, 10, 9, 0.55) 100%);
+}
+
+.saveBtn {
+  flex: 2;
+  padding: var(--spacing-4);
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-lg);
+  color: var(--color-bg-0);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(188, 255, 49, 0.25);
+}
+
+.saveBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 25px rgba(188, 255, 49, 0.35);
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ==================== EXERCISE PICKER MODAL ==================== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg-0);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Modal Header */
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  padding-top: calc(var(--spacing-4) + env(safe-area-inset-top, 0px));
+  flex-shrink: 0;
+}
+
+.closeBtn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-1);
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--color-text-0);
+}
+
+.modalHeader h2 {
+  flex: 1;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-0);
+  margin: 0;
+}
+
+/* Search Bar */
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin: 0 var(--spacing-4) var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  flex-shrink: 0;
+}
+
+.searchBar svg {
+  color: var(--color-text-2);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--color-text-0);
+  font-size: var(--font-size-base);
+  outline: none;
+  min-width: 0;
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-2);
+}
+
+.clearSearch {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  color: var(--color-text-1);
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.clearSearch:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Muscle Filters */
+.muscleFilters {
+  display: flex;
+  gap: var(--spacing-2);
+  padding: 0 var(--spacing-4) var(--spacing-3);
+  overflow-x: auto;
+  flex-shrink: 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.muscleFilters::-webkit-scrollbar {
+  display: none;
+}
+
+.muscleBtn {
+  padding: var(--spacing-2) var(--spacing-4);
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.muscleBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.muscleActive {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-bg-0);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Selected Count */
+.selectedCount {
+  margin: 0 var(--spacing-4) var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: linear-gradient(135deg, rgba(188, 255, 49, 0.15) 0%, rgba(188, 255, 49, 0.05) 100%);
+  border: 1px solid rgba(188, 255, 49, 0.25);
+  border-radius: var(--radius-lg);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* Exercise List */
+.exercisePickerList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--spacing-4) var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+/* Exercise Item */
+.exercisePickerItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  width: 100%;
+  padding: var(--spacing-4);
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.exercisePickerItem:hover {
+  background: linear-gradient(145deg, rgba(15, 18, 16, 0.45) 0%, rgba(8, 10, 9, 0.55) 100%);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.exercisePickerSelected {
+  background: linear-gradient(135deg, rgba(188, 255, 49, 0.12) 0%, rgba(188, 255, 49, 0.04) 100%);
+  border-color: rgba(188, 255, 49, 0.3);
+}
+
+.exercisePickerSelected:hover {
+  background: linear-gradient(135deg, rgba(188, 255, 49, 0.15) 0%, rgba(188, 255, 49, 0.06) 100%);
+}
+
+.exercisePickerDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.exercisePickerDisabled:hover {
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Checkbox */
+.exercisePickerCheck {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.exercisePickerSelected .exercisePickerCheck {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #000;
+}
+
+/* Exercise Info */
+.exercisePickerInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.exercisePickerName {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exercisePickerMuscle {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-2);
+}
+
+.alreadyAddedBadge {
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-2);
+  flex-shrink: 0;
+}
+
+/* No Results */
+.noResults {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-10);
+  text-align: center;
+  color: var(--color-text-2);
+}
+
+/* Modal Actions */
+.modalActions {
+  display: flex;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  padding-bottom: calc(var(--spacing-4) + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, transparent 0%, var(--color-bg-0) 20%);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.cancelModalBtn {
+  flex: 1;
+  padding: var(--spacing-4);
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-1);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelModalBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.addSelectedBtn {
+  flex: 1.5;
+  padding: var(--spacing-4);
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-lg);
+  color: var(--color-bg-0);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(188, 255, 49, 0.25);
+}
+
+.addSelectedBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 25px rgba(188, 255, 49, 0.35);
+}
+
+.addSelectedBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}

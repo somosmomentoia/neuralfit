@@ -1,0 +1,35 @@
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(188, 255, 49, 0.15), transparent),
+    var(--color-bg-0);
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-5);
+  background: rgba(23, 23, 23, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.main {
+  flex: 1;
+  padding: var(--spacing-5);
+  overflow-y: auto;
+}
+
+@media (min-width: 768px) {
+  .main {
+    padding: var(--spacing-8);
+  }
+}

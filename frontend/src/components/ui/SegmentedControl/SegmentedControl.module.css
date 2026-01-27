@@ -1,0 +1,28 @@
+.container {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-bg-2);
+  border-radius: var(--radius-full);
+  padding: var(--spacing-1);
+  gap: var(--spacing-1);
+}
+
+.option {
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-1);
+  background: transparent;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.option:hover:not(.active) {
+  color: var(--color-text-0);
+}
+
+.option.active {
+  background: var(--color-bg-1);
+  color: var(--color-text-0);
+}

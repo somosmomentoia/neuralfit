@@ -1,0 +1,47 @@
+.layout {
+  min-height: 100vh;
+  background-color: #000;
+  background-image: url('/Recurso 2 (1).svg');
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: 100% auto;
+}
+
+.loadingScreen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-0);
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-bg-2);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.main {
+  padding-top: var(--header-height);
+  padding-bottom: calc(var(--bottom-nav-height) + var(--bottom-nav-margin) * 2);
+  transition: transform 300ms ease-out;
+}
+
+.main.shifted {
+  transform: translateX(40px);
+}
+
+.content {
+  padding: var(--spacing-4);
+  max-width: 480px;
+  margin: 0 auto;
+}

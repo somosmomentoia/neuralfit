@@ -1,0 +1,226 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-6);
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+  transition: color var(--transition-fast);
+}
+
+.backBtn:hover {
+  color: var(--color-text-0);
+}
+
+.loading {
+  text-align: center;
+  padding: var(--spacing-10);
+  color: var(--color-text-1);
+}
+
+.notFound {
+  text-align: center;
+  padding: var(--spacing-10);
+}
+
+.notFound h2 {
+  color: var(--color-text-0);
+  margin-bottom: var(--spacing-4);
+}
+
+.backLink {
+  color: var(--color-primary);
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-5);
+  margin-bottom: var(--spacing-6);
+  flex-wrap: wrap;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-secondary);
+  border-radius: var(--radius-full);
+  color: var(--color-bg-0);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-2xl);
+}
+
+.profileInfo {
+  flex: 1;
+}
+
+.name {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-0);
+  margin: 0;
+}
+
+.email {
+  color: var(--color-text-1);
+  margin: var(--spacing-1) 0 0 0;
+}
+
+.phone {
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+.specialty {
+  color: var(--color-secondary);
+  font-weight: var(--font-weight-medium);
+  margin: var(--spacing-2) 0 0 0;
+}
+
+.statusBadge {
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.card {
+  height: fit-content;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.cardTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+.infoList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.infoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.infoLabel {
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+}
+
+.infoValue {
+  color: var(--color-text-0);
+  font-weight: var(--font-weight-medium);
+}
+
+.bio {
+  color: var(--color-text-1);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.noClients {
+  color: var(--color-text-1);
+  text-align: center;
+  padding: var(--spacing-6);
+}
+
+.clientsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.clientItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-3);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.clientItem:hover {
+  background: var(--color-bg-2);
+  border-color: var(--color-primary);
+}
+
+.clientAvatar {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  color: var(--color-bg-0);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+}
+
+.clientInfo {
+  flex: 1;
+}
+
+.clientName {
+  display: block;
+  color: var(--color-text-0);
+  font-weight: var(--font-weight-medium);
+}
+
+.clientEmail {
+  display: block;
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+}
+
+.clientMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-1);
+}
+
+.clientPlan {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-1);
+  background: var(--color-bg-2);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-sm);
+}
+
+.clientStatus {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}

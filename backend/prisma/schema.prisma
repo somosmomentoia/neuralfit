@@ -1,0 +1,664 @@
+// GoFit - Schema Multi-tenant
+// Todas las entidades principales cuelgan de gym_id
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== ENUMS ====================
+
+enum Role {
+  ADMIN
+  PROFESSIONAL
+  CLIENT
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  VISITED
+  CONVERTED
+  LOST
+}
+
+enum RoutineCategory {
+  MUSCULACION
+  AEROBICA
+  DEPORTISTA
+}
+
+enum ExerciseStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+enum SubscriptionStatus {
+  PENDING      // Esperando pago
+  ACTIVE       // Activa
+  EXPIRED      // Vencida
+  CANCELLED    // Cancelada
+  SUSPENDED    // Suspendida por falta de pago
+}
+
+enum SubscriptionType {
+  DAY_PASS     // Pase por día
+  WEEKLY       // Semanal
+  MONTHLY      // Mensual
+  QUARTERLY    // Trimestral
+  ANNUAL       // Anual
+}
+
+enum SubscriptionSource {
+  ADMIN_GRANTED      // Otorgada por admin del gym
+  PLATFORM_PURCHASE  // Comprada por el usuario en la plataforma
+  LEAD_CONVERSION    // Conversión de lead
+}
+
+// ==================== CORE ENTITIES ====================
+
+model Gym {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logo      String?
+  description String?
+  isPublic  Boolean  @default(true)  // Si aparece en la lista pública de gyms
+  
+  // Configuración MercadoPago
+  mpAccessToken     String?  // Access token de MP del gym
+  mpPublicKey       String?  // Public key de MP para el frontend
+  mpUserId          String?  // ID de usuario de MP
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users         User[]
+  leads         Lead[]
+  exercises     Exercise[]
+  routines      Routine[]
+  sports        Sport[]
+  plans         Plan[]
+  expenses      Expense[]
+  expenseCategories ExpenseCategory[]
+  branches      Branch[]
+  planFeatures  PlanFeature[]
+  benefits      Benefit[]
+  subscriptions Subscription[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  phone        String?
+  avatar       String?
+  role         Role
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Gym es opcional para clientes (pueden existir sin gym)
+  // Obligatorio para ADMIN y PROFESSIONAL
+  gymId String?
+  gym   Gym?    @relation(fields: [gymId], references: [id])
+
+  // Relaciones según rol
+  clientProfile       ClientProfile?
+  professionalProfile ProfessionalProfile?
+
+  // Profesional: ejercicios y rutinas creadas
+  createdExercises Exercise[] @relation("CreatedBy")
+  createdRoutines  Routine[]  @relation("CreatedBy")
+  
+  // Suscripciones del usuario (para clientes)
+  subscriptions    Subscription[]
+  
+  // Entrenamientos libres (sin suscripción)
+  freeWorkoutSessions WorkoutSession[] @relation("FreeWorkouts")
+
+  @@index([gymId])
+  @@index([email])
+}
+
+
+model ClientProfile {
+  id                String             @id @default(cuid())
+  userId            String             @unique
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  assignedProfessionalId String?
+  assignedProfessional   ProfessionalProfile? @relation(fields: [assignedProfessionalId], references: [id])
+  
+  subscriptionStatus SubscriptionStatus @default(PENDING)
+  startDate          DateTime           @default(now())
+  lastPlanChangeAt   DateTime?          // Fecha del último cambio de plan (restricción 15 días)
+  specialConsiderations String?
+  notes              String?
+  medicalClearanceUrl String?           // URL de la imagen del apto médico
+  weight             Float?             // Peso en kg
+  height             Float?             // Altura en cm
+  
+  planId String?
+  plan   Plan?   @relation(fields: [planId], references: [id])
+
+  assignedRoutines   ClientRoutine[]
+  dayAssignments     DayRoutineAssignment[]
+  workoutSessions    WorkoutSession[]
+  invoices           Invoice[]
+  payments           Payment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([assignedProfessionalId])
+}
+
+// ==================== SUSCRIPCIONES MÚLTIPLES ====================
+
+model Subscription {
+  id                    String   @id @default(cuid())
+  
+  // Usuario que tiene la suscripción
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Gimnasio al que está suscrito
+  gymId                 String
+  gym                   Gym      @relation(fields: [gymId], references: [id])
+  
+  // Plan contratado
+  planId                String?
+  plan                  Plan?    @relation(fields: [planId], references: [id])
+  
+  // Estado, tipo y origen de suscripción
+  status                SubscriptionStatus @default(PENDING)
+  type                  SubscriptionType   @default(MONTHLY)
+  source                SubscriptionSource @default(ADMIN_GRANTED)
+  
+  // Fechas
+  startDate             DateTime?
+  endDate               DateTime?
+  
+  // MercadoPago - datos de la suscripción
+  mpSubscriptionId      String?  // ID de suscripción en MP
+  mpPayerId             String?  // ID del pagador en MP
+  mpPreapprovalId       String?  // ID de preapproval para suscripciones recurrentes
+  autoRenew             Boolean   @default(true)
+  cancelledAt           DateTime? // Fecha en que se solicitó cancelación (sigue activa hasta endDate)
+  
+  // Profesional asignado (opcional)
+  assignedProfessionalId String?
+  assignedProfessional   ProfessionalProfile? @relation(fields: [assignedProfessionalId], references: [id])
+  
+  // Datos específicos del cliente en este gym
+  specialConsiderations String?  // Consideraciones especiales (lesiones, objetivos, etc.)
+  notes                 String?  // Notas del admin/profesional
+  medicalClearanceUrl   String?  // URL del apto médico (subido por el cliente)
+  
+  // Rutinas asignadas a esta suscripción
+  dayRoutineAssignments  DayRoutineAssignment[] @relation("SubscriptionDayAssignments")
+  workoutSessions        WorkoutSession[] @relation("SubscriptionWorkouts")
+  
+  // Timestamps
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@unique([userId, gymId])
+  @@index([userId])
+  @@index([gymId])
+  @@index([status])
+}
+
+model ProfessionalProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialty String?
+  bio       String?
+  
+  assignedClients ClientProfile[]
+  assignedSubscriptions Subscription[]
+  clientNotes     ClientNote[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ClientNote {
+  id        String   @id @default(cuid())
+  content   String
+  
+  professionalId String
+  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id])
+  
+  clientProfileId String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([professionalId])
+  @@index([clientProfileId])
+}
+
+// ==================== LEADS (CRM) ====================
+
+model Lead {
+  id        String     @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String
+  phone     String?
+  status    LeadStatus @default(NEW)
+  source    String?
+  notes     String?
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  history LeadHistory[]
+  
+  convertedUserId String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+  @@index([status])
+}
+
+model LeadHistory {
+  id        String   @id @default(cuid())
+  action    String
+  notes     String?
+  
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+
+  @@index([leadId])
+}
+
+// ==================== EJERCICIOS Y RUTINAS ====================
+
+model Sport {
+  id   String @id @default(cuid())
+  name String
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  exercises Exercise[]
+  routines  Routine[]
+
+  @@unique([gymId, name])
+}
+
+model Exercise {
+  id          String         @id @default(cuid())
+  name        String
+  muscleGroup String?
+  category    RoutineCategory
+  difficulty  Int            @default(1) // 1-5
+  description String?
+  videoUrl    String?
+  status      ExerciseStatus @default(PENDING)
+  isGlobal    Boolean        @default(false) // Ejercicio global disponible para todos
+  caloriesPerRep Float       @default(0.5) // Calorías quemadas por repetición
+  
+  sportId String?
+  sport   Sport?  @relation(fields: [sportId], references: [id])
+  
+  // gymId es opcional - NULL significa ejercicio global
+  gymId String?
+  gym   Gym?    @relation(fields: [gymId], references: [id])
+  
+  // createdById es opcional para ejercicios globales del sistema
+  createdById String?
+  createdBy   User?   @relation("CreatedBy", fields: [createdById], references: [id])
+
+  routineExercises RoutineExercise[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+  @@index([category])
+  @@index([status])
+}
+
+model Routine {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  coverImage  String?
+  category    RoutineCategory
+  level       Int             @default(1) // 1-5
+  objective   String?
+  intensity   Int             @default(1) // 1-5
+  isTemplate  Boolean         @default(false)
+  estimatedMinutes Int?       // Duración estimada en minutos (opcional)
+  
+  sportId String?
+  sport   Sport?  @relation(fields: [sportId], references: [id])
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+  
+  createdById String
+  createdBy   User   @relation("CreatedBy", fields: [createdById], references: [id])
+
+  exercises          RoutineExercise[]
+  clientRoutines     ClientRoutine[]
+  dayAssignments     DayRoutineAssignment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+  @@index([category])
+  @@index([isTemplate])
+}
+
+model RoutineExercise {
+  id         String @id @default(cuid())
+  order      Int
+  sets       Int?
+  reps       String? // "12" o "8-12"
+  restSeconds Int?
+  notes      String?
+  
+  routineId String
+  routine   Routine @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@index([routineId])
+}
+
+model ClientRoutine {
+  id        String   @id @default(cuid())
+  startDate DateTime
+  endDate   DateTime?
+  isActive  Boolean  @default(true)
+  
+  // Snapshot de la rutina al momento de asignar
+  snapshotData Json
+  
+  clientProfileId String
+  clientProfile   ClientProfile @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
+  
+  routineId String
+  routine   Routine @relation(fields: [routineId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientProfileId])
+  @@index([isActive])
+}
+
+// Asignación de rutinas por día de la semana a un cliente
+model DayRoutineAssignment {
+  id        String @id @default(cuid())
+  dayOfWeek Int    // 0=Domingo, 1=Lunes, 2=Martes, 3=Miércoles, 4=Jueves, 5=Viernes, 6=Sábado
+  order     Int    @default(0) // Orden si hay múltiples rutinas el mismo día
+  
+  // Puede estar asociado a ClientProfile (legacy) o a Subscription (nuevo)
+  clientProfileId String?
+  clientProfile   ClientProfile? @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
+  
+  subscriptionId String?
+  subscription   Subscription? @relation("SubscriptionDayAssignments", fields: [subscriptionId], references: [id], onDelete: Cascade)
+  
+  routineId String
+  routine   Routine @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([clientProfileId, routineId, dayOfWeek])
+  @@unique([subscriptionId, routineId, dayOfWeek])
+  @@index([clientProfileId])
+  @@index([subscriptionId])
+  @@index([dayOfWeek])
+}
+
+// Registro de sesiones de entrenamiento completadas
+model WorkoutSession {
+  id            String   @id @default(cuid())
+  date          DateTime @default(now())
+  dayOfWeek     Int      // Día de la semana cuando se realizó
+  durationMinutes Int?   // Duración real en minutos
+  completed     Boolean  @default(false)
+  isFreeWorkout Boolean  @default(false) // Entrenamiento libre sin suscripción
+  caloriesBurned Float?  // Calorías quemadas durante la sesión
+  sessionName   String?  // Nombre personalizado de la sesión
+  
+  // Puede estar asociado a ClientProfile (legacy) o a Subscription (nuevo) o a User (libre)
+  clientProfileId String?
+  clientProfile   ClientProfile? @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
+  
+  subscriptionId String?
+  subscription   Subscription? @relation("SubscriptionWorkouts", fields: [subscriptionId], references: [id], onDelete: Cascade)
+  
+  // Usuario para entrenamientos libres (sin suscripción)
+  userId String?
+  user   User?   @relation("FreeWorkouts", fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Ejercicios completados en esta sesión (JSON con detalles)
+  exercisesCompleted Json // [{exerciseId, sets, reps, weight, completedAt}]
+  
+  // Rutinas que se completaron en esta sesión
+  routineIds Json // Array de IDs de rutinas completadas
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientProfileId])
+  @@index([subscriptionId])
+  @@index([userId])
+  @@index([date])
+}
+
+// ==================== PAGOS Y SUSCRIPCIONES ====================
+
+model Plan {
+  id          String @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  durationDays Int   // 30, 90, 365
+  isActive    Boolean @default(true)
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  clients  ClientProfile[]
+  subscriptions Subscription[]
+  invoices Invoice[]
+  features PlanFeatureAssignment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+}
+
+// Features/beneficios disponibles para planes (configurables por gym)
+model PlanFeature {
+  id          String @id @default(cuid())
+  name        String
+  description String?
+  icon        String? // Nombre del icono (ej: "dumbbell", "pool", "spa")
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+  
+  assignments PlanFeatureAssignment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([gymId, name])
+  @@index([gymId])
+}
+
+// Relación muchos a muchos entre Plan y PlanFeature
+model PlanFeatureAssignment {
+  id        String @id @default(cuid())
+  
+  planId String
+  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  
+  featureId String
+  feature   PlanFeature @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+
+  @@unique([planId, featureId])
+  @@index([planId])
+  @@index([featureId])
+}
+
+// Sucursales del gimnasio
+model Branch {
+  id              String @id @default(cuid())
+  name            String
+  address         String
+  phone           String?
+  googleMapsUrl   String?  // Link para abrir en Google Maps
+  googleMapsEmbed String?  // URL del iframe embed de Google Maps
+  
+  // Horarios
+  openTime        String?  // Ej: "06:00"
+  closeTime       String?  // Ej: "23:00"
+  scheduleNotes   String?  // Notas adicionales de horario
+  
+  // Amenities
+  hasParking      Boolean @default(false)
+  is24Hours       Boolean @default(false)
+  hasContinuousSchedule Boolean @default(false)  // Horario corrido
+  hasAirConditioning Boolean @default(false)
+  hasShowers      Boolean @default(false)
+  hasLockers      Boolean @default(false)
+  hasWifi         Boolean @default(false)
+  
+  isActive        Boolean @default(true)
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+}
+
+// Beneficios exclusivos con marcas/empresas
+model Benefit {
+  id          String  @id @default(cuid())
+  name        String  // Nombre de la marca/empresa
+  description String? // Descripción del beneficio
+  discount    String  // Ej: "25% OFF", "2x1", etc.
+  imageUrl    String? // Logo o imagen de la marca
+  websiteUrl  String? // Link al sitio web
+  validUntil  DateTime? // Fecha de vencimiento del beneficio
+  isActive    Boolean @default(true)
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+}
+
+model Invoice {
+  id        String        @id @default(cuid())
+  amount    Float
+  status    InvoiceStatus @default(PENDING)
+  dueDate   DateTime
+  paidAt    DateTime?
+  
+  clientProfileId String
+  clientProfile   ClientProfile @relation(fields: [clientProfileId], references: [id])
+  
+  planId String
+  plan   Plan   @relation(fields: [planId], references: [id])
+
+  payments Payment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientProfileId])
+  @@index([status])
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  amount        Float
+  method        String   // "manual", "mercadopago"
+  reference     String?
+  notes         String?
+  
+  clientProfileId String
+  clientProfile   ClientProfile @relation(fields: [clientProfileId], references: [id])
+  
+  invoiceId String?
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+  
+  createdAt DateTime @default(now())
+
+  @@index([clientProfileId])
+}
+
+// ==================== CONTABILIDAD ====================
+
+model ExpenseCategory {
+  id   String @id @default(cuid())
+  name String
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  expenses Expense[]
+
+  @@unique([gymId, name])
+}
+
+model Expense {
+  id     String   @id @default(cuid())
+  amount Float
+  date   DateTime
+  notes  String?
+  
+  categoryId String
+  category   ExpenseCategory @relation(fields: [categoryId], references: [id])
+  
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+  @@index([date])
+}

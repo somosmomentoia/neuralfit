@@ -1,0 +1,1726 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  padding-bottom: var(--spacing-8);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  color: var(--color-text-1);
+}
+
+/* ==================== TABS PILLS ==================== */
+.tabsPills {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.tabPill {
+  padding: var(--spacing-2) var(--spacing-4);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tabPill:hover:not(.tabPillActive) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.tabPill:active {
+  transform: scale(0.97);
+}
+
+.tabPillActive {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #000;
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ==================== MAIN CARD - RUTINA DE HOY ==================== */
+.mainSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.todayCarousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  gap: var(--spacing-4);
+  padding: var(--spacing-1);
+  margin: 0 calc(var(--spacing-1) * -1);
+}
+
+.todayCarousel::-webkit-scrollbar {
+  display: none;
+}
+
+.todayCarousel .mainCard {
+  flex: 0 0 100%;
+  max-width: 100%;
+  scroll-snap-align: start;
+}
+
+/* Dots indicadores */
+.carouselDots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.carouselDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.carouselDotActive {
+  background: var(--color-primary);
+  transform: scale(1.2);
+}
+
+.sectionLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+  margin: 0;
+}
+
+.mainCard {
+  position: relative;
+  border-radius: 24px;
+  padding: 24px;
+  overflow: hidden;
+  height: 220px;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.12) 0%, 
+    rgba(255, 255, 255, 0.06) 30%,
+    rgba(255, 255, 255, 0.08) 60%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.15s ease-out;
+  cursor: pointer;
+}
+
+.mainCard:active {
+  transform: scale(1.02);
+}
+
+/* Borde discontinuo verde */
+.mainCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  padding: 1.5px;
+  background: linear-gradient(135deg, 
+    var(--color-primary) 0%, 
+    transparent 25%,
+    transparent 40%,
+    var(--color-primary) 50%,
+    transparent 65%,
+    transparent 80%,
+    var(--color-primary) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.mainCardImage {
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 55%;
+  max-width: 200px;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mainCardContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  max-width: 55%;
+  flex: 1;
+}
+
+.mainCardTop {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-1);
+}
+
+.mainCardMeta {
+  margin-top: auto;
+  padding-bottom: 0;
+}
+
+.mainCardTitle {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-text-0);
+  margin: 0;
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+}
+
+.mainCardMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  width: 100%;
+  margin-top: var(--spacing-3);
+}
+
+.startButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: 14px 28px;
+  background: var(--color-primary);
+  color: var(--color-bg-0);
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.startButton:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 16px rgba(188, 255, 49, 0.3);
+}
+
+/* Estado completado de la card */
+.mainCard.completed {
+  border: 2px solid transparent;
+  background: 
+    linear-gradient(145deg, rgba(34, 80, 50, 0.95) 0%, rgba(20, 45, 30, 0.98) 100%),
+    linear-gradient(45deg, #22C55E 0%, transparent 50%, #22C55E 100%);
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+}
+
+.completedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: #22C55E;
+  color: var(--color-bg-0);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: var(--radius-md);
+}
+
+.mainCardInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+}
+
+.mainCardGroups {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.mainCardTime {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ==================== TU SEMANA - SCROLL PICKER (Crown Swap) ==================== */
+.weekSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  position: relative;
+  margin-left: calc(-1 * var(--spacing-4));
+  margin-right: calc(-1 * var(--spacing-4));
+}
+
+.dayPicker {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 8px 0;
+  padding-left: calc(50% - 70px);
+  padding-right: calc(50% - 70px);
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+}
+
+.dayPicker::-webkit-scrollbar {
+  display: none;
+}
+
+.dayCard {
+  flex-shrink: 0;
+  width: 140px;
+  min-height: 80px;
+  background: rgba(35, 40, 38, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.15s ease-out, opacity 0.15s ease-out, border-color 0.15s ease-out;
+  position: relative;
+  scroll-snap-align: center;
+}
+
+.dayCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  border: 1.5px solid var(--color-primary);
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+  pointer-events: none;
+}
+
+.dayCard.selected::before {
+  opacity: 1;
+}
+
+.dayCard.selected {
+  background: rgba(40, 50, 42, 0.98);
+  box-shadow: 0 0 20px rgba(188, 255, 49, 0.15);
+}
+
+.dayCard.isToday {
+  position: relative;
+}
+
+.dayCard.isPast {
+  opacity: 0.5;
+}
+
+.dayCard.selected.isPast {
+  opacity: 1;
+}
+
+.dayCardWeekday {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: capitalize;
+  letter-spacing: 0;
+}
+
+.dayCard.selected .dayCardWeekday {
+  color: var(--color-primary);
+}
+
+.dayCardNumber {
+  display: none;
+}
+
+.dayCardMonth {
+  display: none;
+}
+
+.dayCardRoutine {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  text-align: left;
+  line-height: 1.3;
+  letter-spacing: 0.3px;
+}
+
+.dayCard.selected .dayCardRoutine {
+  color: var(--color-primary);
+}
+
+/* ==================== TIMELINE FIJA ==================== */
+.timelineContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 30px 8px;
+  position: relative;
+}
+
+.timelineLine {
+  position: absolute;
+  top: 12px;
+  left: 60px;
+  right: 60px;
+  height: 1px;
+  background: rgba(188, 255, 49, 0.25);
+}
+
+.timelineDotItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 1;
+}
+
+.timelineDot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.timelineDot.center {
+  width: 12px;
+  height: 12px;
+  box-shadow: 0 0 10px rgba(188, 255, 49, 0.5);
+}
+
+.timelineDotLabel {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.timelineDotLabel.center {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+/* Indicador central del picker - oculto */
+.pickerIndicator {
+  display: none;
+}
+
+/* Legacy timeline styles - keeping for compatibility */
+.timelineLabels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 var(--spacing-2);
+  margin-top: var(--spacing-2);
+}
+
+.timelineLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-1);
+}
+
+.timelineLabel.active {
+  color: var(--color-primary);
+}
+
+/* ==================== ACTIVIDAD RECIENTE ==================== */
+.activitySection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.activityCards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-3);
+}
+
+.activityCard {
+  background: linear-gradient(145deg, rgba(40, 45, 42, 0.9) 0%, rgba(28, 32, 30, 0.95) 100%);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  position: relative;
+}
+
+/* Level Ring */
+.levelRing {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.levelRingSvg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.levelRingBg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 6;
+}
+
+.levelRingProgress {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.levelBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-3);
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  color: var(--color-bg-0);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+.activityLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-1);
+  margin-top: var(--spacing-2);
+  text-align: center;
+}
+
+/* Heatmap - Estilo círculos dispersos */
+.heatmapContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 10px;
+}
+
+.heatmapSvg {
+  width: 120px;
+  height: 120px;
+}
+
+/* Líneas de ejes cruzados */
+.heatmapAxis {
+  stroke: rgba(188, 255, 49, 0.3);
+  stroke-width: 1;
+}
+
+/* Círculos de diferentes tamaños y colores */
+.heatmapPoint {
+  transition: all 0.3s ease;
+}
+
+.heatmapPointGreen {
+  fill: var(--color-primary);
+}
+
+.heatmapPointYellow {
+  fill: #C4D93E;
+}
+
+.heatmapPointOlive {
+  fill: #8B9A3B;
+}
+
+.heatmapLabel {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 9px;
+  fill: rgba(188, 255, 49, 0.7);
+  text-anchor: middle;
+}
+
+.heatmapCenter {
+  fill: var(--color-primary);
+}
+
+/* ==================== HISTORIAL TAB ==================== */
+.historyContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+/* Toggle Lista/Calendario */
+.historyToggle {
+  display: flex;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  gap: 4px;
+}
+
+.historyToggleBtn {
+  flex: 1;
+  padding: var(--spacing-2) var(--spacing-4);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.historyToggleBtn:hover:not(.historyToggleActive) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.historyToggleBtn:active {
+  transform: scale(0.97);
+}
+
+.historyToggleActive {
+  background: var(--color-primary);
+  color: #000;
+  font-weight: 600;
+}
+
+/* Lista de historial */
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+/* Paginación */
+.historyPagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-4);
+}
+
+.paginationBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.6);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.paginationBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.paginationInfo {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  min-width: 50px;
+  text-align: center;
+}
+
+.historyCard {
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-4);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.historyCard:hover {
+  background: linear-gradient(145deg, rgba(15, 17, 16, 0.45) 0%, rgba(8, 10, 9, 0.55) 100%);
+  transform: translateX(4px);
+}
+
+.historyDateBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 48px;
+  flex-shrink: 0;
+}
+
+.historyDateDay {
+  font-size: var(--font-size-xl);
+  font-weight: 800;
+  color: var(--color-text-0);
+  line-height: 1;
+}
+
+.historyDateMonth {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-primary);
+  letter-spacing: 0.5px;
+}
+
+.historyDateTime {
+  font-size: 9px;
+  color: var(--color-text-2);
+  margin-top: 2px;
+}
+
+.historyInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.historyTitle {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.historyMeta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-2);
+}
+
+.historyBadge {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(188, 255, 49, 0.15);
+  border: 1px solid rgba(188, 255, 49, 0.3);
+  border-radius: var(--radius-full);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.historyBadgeFree {
+  background: rgba(255, 193, 7, 0.15);
+  border-color: rgba(255, 193, 7, 0.3);
+  color: #ffc107;
+}
+
+.emptyHistory {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-8);
+  text-align: center;
+  color: var(--color-text-1);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+}
+
+.emptyHistory p {
+  margin: 0 0 var(--spacing-2) 0;
+  font-weight: 500;
+}
+
+.emptyHistory span {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-2);
+}
+
+/* Calendario */
+.calendarContainer {
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-4);
+}
+
+.calendarNav {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.calendarNav:hover {
+  background: rgba(188, 255, 49, 0.1);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.calendarMonthLabel {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text-0);
+  text-transform: capitalize;
+}
+
+.calendarWeekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: var(--spacing-2);
+}
+
+.calendarWeekday {
+  text-align: center;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-2);
+  padding: var(--spacing-2);
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendarDay {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.calendarDay:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.calendarDayEmpty {
+  aspect-ratio: 1;
+}
+
+.calendarDayToday {
+  border: 2px solid var(--color-primary);
+}
+
+.calendarDayActive {
+  background: rgba(188, 255, 49, 0.15);
+}
+
+.calendarDayActive:hover {
+  background: rgba(188, 255, 49, 0.25);
+}
+
+.calendarDayNumber {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-1);
+}
+
+.calendarDayActive .calendarDayNumber {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.calendarDayToday .calendarDayNumber {
+  color: var(--color-primary);
+}
+
+.calendarDayDot {
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  margin-top: 2px;
+}
+
+/* ==================== CREATE ROUTINE CARD ==================== */
+.createRoutineCard {
+  position: relative;
+  background: linear-gradient(75deg, rgba(15, 20, 17, 0.4) 0%, rgba(10, 15, 12, 0.35) 50%, rgba(8, 12, 10, 0.45) 100%);
+  border: none;
+  border-radius: 24px;
+  padding: var(--spacing-8) var(--spacing-6);
+  overflow: hidden;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.createRoutineCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(75deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 40%, transparent 60%);
+  pointer-events: none;
+  border-radius: 22px;
+}
+
+.createRoutineGlow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(188, 255, 49, 0.15) 0%, transparent 70%);
+  animation: rotateGlow 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes rotateGlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.createRoutineContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-4);
+  max-width: 400px;
+}
+
+.createRoutineIcon {
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(188, 255, 49, 0.2), rgba(188, 255, 49, 0.05));
+  border: 2px solid rgba(188, 255, 49, 0.3);
+  border-radius: 50%;
+  color: var(--color-primary);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(188, 255, 49, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(188, 255, 49, 0); }
+}
+
+.createRoutineTitle {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text-0);
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.createRoutineDesc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.createRoutineBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-6);
+  background: var(--color-primary);
+  color: var(--color-bg-0);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(188, 255, 49, 0.3);
+  margin-top: var(--spacing-2);
+}
+
+.createRoutineBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(188, 255, 49, 0.5);
+}
+
+.createRoutineBtn svg {
+  transition: transform 0.3s ease;
+}
+
+.createRoutineBtn:hover svg {
+  transform: rotate(90deg);
+}
+
+.createRoutineFeatures {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
+  width: 100%;
+}
+
+.createRoutineFeature {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: rgba(188, 255, 49, 0.05);
+  border: 1px solid rgba(188, 255, 49, 0.1);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-1);
+}
+
+.createRoutineFeature svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* ==================== SLIDE TO UNLOCK ==================== */
+.slideSection {
+  margin-top: var(--spacing-2);
+}
+
+.slideContainer {
+  position: relative;
+  width: 100%;
+  height: 56px;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.12) 0%, 
+    rgba(255, 255, 255, 0.06) 30%,
+    rgba(255, 255, 255, 0.08) 60%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.slideContainer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+
+.slideProgress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(188, 255, 49, 0.3), rgba(188, 255, 49, 0.5));
+  border-radius: 28px;
+  transition: width 0.1s ease-out;
+  z-index: 1;
+}
+
+.slideThumb {
+  position: absolute;
+  left: 4px;
+  width: 48px;
+  height: 48px;
+  background: rgba(188, 255, 49, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  cursor: grab;
+  transition: background 0.2s;
+  z-index: 2;
+}
+
+.slideThumb:active {
+  cursor: grabbing;
+  background: rgba(188, 255, 49, 0.25);
+}
+
+.slideUnlocked {
+  background: var(--color-primary) !important;
+  color: var(--color-bg-0) !important;
+}
+
+.slideText {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--color-text-0);
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+
+/* Animación de hint para indicar que es swipeable */
+.slideHint {
+  animation: slideHintPulse 0.6s ease-out;
+}
+
+@keyframes slideHintPulse {
+  0% {
+    transform: translateX(0);
+  }
+  30% {
+    transform: translateX(20px);
+  }
+  60% {
+    transform: translateX(5px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* ==================== QUICK ACTIONS SECTION ==================== */
+.quickActionsSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-3);
+  margin-top: calc(var(--spacing-2) * -1);
+}
+
+.quickActionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-4);
+  background: var(--color-bg-2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.quickActionCard:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.quickActionIcon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(188, 255, 49, 0.15);
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+}
+
+.quickActionIconAlt {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(59, 130, 246, 0.15);
+  border-radius: var(--radius-md);
+  color: #3B82F6;
+}
+
+.quickActionInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.quickActionTitle {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
+}
+
+.quickActionDesc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-2);
+}
+
+/* Legacy - keep for backwards compatibility */
+.freeWorkoutSection {
+  margin-top: calc(var(--spacing-2) * -1);
+}
+
+.freeWorkoutCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background: linear-gradient(135deg, rgba(26, 71, 42, 0.6) 0%, rgba(45, 90, 61, 0.4) 100%);
+  border: 1px solid rgba(188, 255, 49, 0.2);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.freeWorkoutCard:hover {
+  border-color: rgba(188, 255, 49, 0.4);
+  background: linear-gradient(135deg, rgba(26, 71, 42, 0.8) 0%, rgba(45, 90, 61, 0.6) 100%);
+  transform: translateY(-2px);
+}
+
+.freeWorkoutIcon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(188, 255, 49, 0.15);
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.freeWorkoutInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.freeWorkoutTitle {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
+}
+
+.freeWorkoutDesc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-2);
+}
+
+.freeWorkoutCard > svg:last-child {
+  color: var(--color-text-2);
+  flex-shrink: 0;
+}
+
+/* ==================== MIS RUTINAS TAB ==================== */
+.routinesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.routinesSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.routinesSection + .routinesSection {
+  padding-top: var(--spacing-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.routinesSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-1);
+}
+
+.routinesSectionTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-0);
+  margin: 0;
+}
+
+.createRoutineBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: rgba(188, 255, 49, 0.12);
+  border: 1px solid rgba(188, 255, 49, 0.25);
+  border-radius: var(--radius-full);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.createRoutineBtn:hover {
+  background: rgba(188, 255, 49, 0.2);
+  border-color: rgba(188, 255, 49, 0.4);
+  transform: translateY(-1px);
+}
+
+.emptyRoutines {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-8) var(--spacing-4);
+  background: linear-gradient(145deg, rgba(40, 45, 42, 0.6) 0%, rgba(28, 32, 30, 0.7) 100%);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-xl);
+  text-align: center;
+}
+
+.emptyRoutines svg {
+  color: var(--color-primary);
+  opacity: 0.4;
+}
+
+.emptyRoutines p {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-1);
+  margin: 0;
+}
+
+.emptyRoutines span {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-2);
+}
+
+.routinesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.routineCard {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  transition: all var(--transition-normal);
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.routineCard:hover {
+  background: linear-gradient(145deg, rgba(15, 17, 16, 0.45) 0%, rgba(8, 10, 9, 0.55) 100%);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.routineCardExpanded {
+  border-color: rgba(188, 255, 49, 0.3);
+}
+
+.routineCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-4);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.routineCardHeader:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.routineCardHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.routineExpandIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: var(--color-text-2);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.routineExpandIcon.rotated {
+  transform: rotate(180deg);
+}
+
+/* Contenido colapsable con transición suave */
+.routineCardContentWrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.25s ease;
+}
+
+.routineCardContentWrapper.expanded {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.routineCardContentInner {
+  overflow: hidden;
+}
+
+.routineCardContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: 0 var(--spacing-4) var(--spacing-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: var(--spacing-4);
+}
+
+.routineCardMain {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.routineCardIcon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(188, 255, 49, 0.12);
+  border-radius: var(--radius-lg);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.routineCardIconAssigned {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(54, 98, 228, 0.12);
+  border-radius: var(--radius-lg);
+  color: #3662E4;
+  flex-shrink: 0;
+}
+
+.routineCardInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.routineCardName {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.routineCardMeta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-2);
+}
+
+.routineCardBadge {
+  padding: 0.35rem 0.75rem;
+  background: rgba(188, 255, 49, 0.15);
+  border: 1px solid rgba(188, 255, 49, 0.25);
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.routineCardBadgeAssigned {
+  padding: 0.35rem 0.75rem;
+  background: rgba(54, 98, 228, 0.15);
+  border: 1px solid rgba(54, 98, 228, 0.25);
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: var(--font-weight-bold);
+  color: #3662E4;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.routineCardDays {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  padding: var(--spacing-1) 0;
+}
+
+.routineDayPill {
+  padding: 0.35rem 0.6rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-2);
+  transition: all var(--transition-fast);
+}
+
+.routineDayActive {
+  background: rgba(188, 255, 49, 0.18);
+  border-color: rgba(188, 255, 49, 0.4);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.routineDayActiveAssigned {
+  background: rgba(54, 98, 228, 0.18);
+  border-color: rgba(54, 98, 228, 0.4);
+  color: #3662E4;
+  font-weight: var(--font-weight-semibold);
+}
+
+.routineCardActions {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.routineActionBtn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-full);
+  color: var(--color-bg-0);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.routineActionBtn:hover {
+  opacity: 0.9;
+}
+
+.routineActionBtnSecondary {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.routineActionBtnSecondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.routineActionBtnDelete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-lg);
+  color: #ef4444;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.routineActionBtnDelete:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #ef4444;
+}
+
+/* Calendar Day Selected */
+.calendarDaySelected {
+  background: var(--color-primary) !important;
+  color: #000 !important;
+}
+
+.calendarDaySelected .calendarDayNumber {
+  color: #000;
+}
+
+.calendarDaySelected .calendarDayDot {
+  background: #000;
+}
+
+/* Calendar Day Sessions List */
+.calendarDaySessions {
+  margin-top: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.calendarDaySessionsTitle {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-0);
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.calendarDaySessionsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.calendarSessionCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: linear-gradient(145deg, rgba(10, 12, 11, 0.35) 0%, rgba(5, 7, 6, 0.45) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.calendarSessionCard:hover {
+  background: linear-gradient(145deg, rgba(15, 17, 16, 0.45) 0%, rgba(8, 10, 9, 0.55) 100%);
+  border-color: rgba(188, 255, 49, 0.2);
+}
+
+.calendarSessionIcon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(188, 255, 49, 0.12);
+  border-radius: 10px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.calendarSessionInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.calendarSessionTitle {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calendarSessionMeta {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.calendarSessionArrow {
+  color: rgba(255, 255, 255, 0.8);
+  flex-shrink: 0;
+}

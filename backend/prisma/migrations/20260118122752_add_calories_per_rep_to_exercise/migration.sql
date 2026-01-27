@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Exercise" ADD COLUMN     "caloriesPerRep" DOUBLE PRECISION NOT NULL DEFAULT 0.5;

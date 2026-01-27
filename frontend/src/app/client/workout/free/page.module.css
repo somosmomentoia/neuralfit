@@ -1,0 +1,377 @@
+/* ==================== VARIABLES ==================== */
+:root {
+  --training-green: #BCFF31;
+  --training-bg: #0d1210;
+}
+
+/* ==================== CONTAINER ==================== */
+.container {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--training-bg);
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow-y: auto;
+}
+
+/* Gradiente verde en la parte superior - opacidad reducida */
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 280px;
+  background: linear-gradient(180deg, rgba(188, 255, 49, 0.12) 0%, rgba(188, 255, 49, 0) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ==================== HEADER ==================== */
+/* Header oculto - solo mantiene el espaciado */
+.header {
+  display: none;
+}
+
+.headerSpacer {
+  height: 80px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.backBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.backBtn:active {
+  opacity: 0.7;
+}
+
+.headerTitle {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+/* ==================== LOADING ==================== */
+.loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--training-green);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==================== SELECTION PHASE ==================== */
+.selectionPhase {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--spacing-4);
+  padding-top: var(--spacing-4);
+  padding-bottom: 120px;
+}
+
+.selectionHeader {
+  margin-bottom: var(--spacing-5);
+}
+
+.selectionTitle {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.selectionSubtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+/* Selected exercises count */
+.selectedCount {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-4);
+  margin: var(--spacing-4);
+  background: linear-gradient(135deg, rgba(188, 255, 49, 0.15) 0%, rgba(188, 255, 49, 0.05) 100%);
+  border: 1px solid rgba(188, 255, 49, 0.3);
+  border-radius: 16px;
+}
+
+.selectedCountText {
+  font-size: 14px;
+  color: #fff;
+}
+
+.selectedCountNumber {
+  font-weight: 700;
+  color: var(--training-green);
+}
+
+.startWorkoutBtn {
+  width: 100%;
+  padding: 16px 24px;
+  background: var(--training-green);
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #000;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: var(--spacing-2);
+}
+
+.startWorkoutBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.startWorkoutBtn:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+/* Muscle filter pills */
+.muscleFilter {
+  display: flex;
+  gap: var(--spacing-2);
+  overflow-x: auto;
+  padding-bottom: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.muscleFilter::-webkit-scrollbar {
+  display: none;
+}
+
+.musclePill {
+  flex-shrink: 0;
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.musclePill:active {
+  transform: scale(0.96);
+}
+
+.musclePillActive {
+  background: #fff;
+  border-color: #fff;
+  color: #000;
+}
+
+/* Exercise list */
+.exerciseList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.exerciseItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4) var(--spacing-3);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.exerciseItem:active {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.exerciseItemSelected {
+  background: transparent;
+}
+
+.exerciseCheckbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.exerciseItemSelected .exerciseCheckbox {
+  background: var(--training-green);
+  border-color: var(--training-green);
+}
+
+.exerciseCheckbox svg {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.exerciseItemSelected .exerciseCheckbox svg {
+  opacity: 1;
+}
+
+.exerciseItemInfo {
+  flex: 1;
+}
+
+.exerciseItemName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.exerciseItemMuscle {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.exerciseItemSeries {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Empty state */
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-6);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.emptyStateIcon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--spacing-4);
+  opacity: 0.3;
+}
+
+.emptyStateText {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Name input section */
+.nameInputSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+}
+
+.nameInput {
+  width: 100%;
+  padding: 16px;
+  background: transparent;
+  border: 1.5px solid var(--training-green);
+  border-radius: 12px;
+  font-size: 15px;
+  color: #fff;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.nameInput::placeholder {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.nameInput:focus {
+  border-color: var(--training-green);
+  background: rgba(188, 255, 49, 0.05);
+}
+
+.saveAsRoutineLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  cursor: pointer;
+  padding: 0;
+  background: transparent;
+  border: none;
+  transition: all 0.2s;
+}
+
+.saveAsRoutineCheckbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.saveAsRoutineCheckbox:checked {
+  background: var(--training-green);
+  border-color: var(--training-green);
+}
+
+.saveAsRoutineCheckbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 9px;
+  border: solid #000;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.saveAsRoutineText {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
