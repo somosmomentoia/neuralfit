@@ -1,13 +1,19 @@
 import { Router, Response } from 'express';
 import multer from 'multer';
 import sharp from 'sharp';
-import path from 'path';
-import fs from 'fs';
+import { v2 as cloudinary } from 'cloudinary';
 import { AuthRequest, authMiddleware } from '../middleware/auth';
 
 const router = Router();
 
-// Configuración de multer para almacenamiento temporal
+// Configurar Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dm5vg7gdx',
+  api_key: process.env.CLOUDINARY_API_KEY || '944364977436961',
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Configuración de multer para almacenamiento temporal en memoria
 const storage = multer.memoryStorage();
 
 const upload = multer({
@@ -25,11 +31,22 @@ const upload = multer({
   },
 });
 
-// Asegurar que exista el directorio de uploads
-const uploadsDir = path.join(__dirname, '../../uploads/benefits');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
+// Helper para subir buffer a Cloudinary
+const uploadToCloudinary = (buffer: Buffer, folder: string, options: object = {}): Promise<{ secure_url: string; public_id: string }> => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream(
+      {
+        folder: `neuralfit/${folder}`,
+        format: 'webp',
+        ...options,
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result as { secure_url: string; public_id: string });
+      }
+    ).end(buffer);
+  });
+};
 
 // POST /api/upload/benefit-image - Subir imagen de beneficio
 router.post('/benefit-image', authMiddleware, upload.single('image'), async (req: AuthRequest, res: Response) => {
@@ -43,29 +60,22 @@ router.post('/benefit-image', authMiddleware, upload.single('image'), async (req
 
     console.log('📁 File received:', req.file.originalname, req.file.size, 'bytes');
 
-    // Generar nombre único para el archivo
-    const filename = `benefit_${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
-    const filepath = path.join(uploadsDir, filename);
-
-    console.log('💾 Saving to:', filepath);
-
-    // Procesar imagen con sharp - solo redimensionar (el crop ya viene del frontend)
-    await sharp(req.file.buffer)
-      .resize(800, 450, {
-        fit: 'cover',
-        position: 'center',
-      })
+    // Procesar imagen con sharp
+    const processedBuffer = await sharp(req.file.buffer)
+      .resize(800, 450, { fit: 'cover', position: 'center' })
       .webp({ quality: 85 })
-      .toFile(filepath);
+      .toBuffer();
 
-    // Construir URL pública
-    const imageUrl = `/uploads/benefits/${filename}`;
+    // Subir a Cloudinary
+    const result = await uploadToCloudinary(processedBuffer, 'benefits', {
+      transformation: [{ width: 800, height: 450, crop: 'fill' }],
+    });
 
-    console.log('✅ Image saved successfully:', imageUrl);
+    console.log('✅ Image uploaded to Cloudinary:', result.secure_url);
 
     return res.json({ 
       success: true, 
-      imageUrl,
+      imageUrl: result.secure_url,
       message: 'Imagen subida correctamente' 
     });
   } catch (error) {
@@ -86,37 +96,24 @@ router.post('/avatar', authMiddleware, upload.single('image'), async (req: AuthR
 
     console.log('📁 File received:', req.file.originalname, req.file.size, 'bytes');
 
-    // Asegurar directorio de avatares
-    const avatarDir = path.join(__dirname, '../../uploads/avatars');
-    if (!fs.existsSync(avatarDir)) {
-      fs.mkdirSync(avatarDir, { recursive: true });
-    }
-
-    // Generar nombre único para el archivo
-    const filename = `avatar_${req.user!.id}_${Date.now()}.webp`;
-    const filepath = path.join(avatarDir, filename);
-
-    console.log('💾 Saving to:', filepath);
-
     // Procesar imagen con sharp - cuadrada para avatar
-    // .rotate() sin argumentos auto-corrige la orientación basándose en EXIF
-    await sharp(req.file.buffer)
+    const processedBuffer = await sharp(req.file.buffer)
       .rotate()
-      .resize(200, 200, {
-        fit: 'cover',
-        position: 'center',
-      })
+      .resize(200, 200, { fit: 'cover', position: 'center' })
       .webp({ quality: 85 })
-      .toFile(filepath);
+      .toBuffer();
 
-    // Construir URL pública
-    const imageUrl = `/uploads/avatars/${filename}`;
+    // Subir a Cloudinary
+    const result = await uploadToCloudinary(processedBuffer, 'avatars', {
+      public_id: `avatar_${req.user!.id}`,
+      overwrite: true,
+    });
 
-    console.log('✅ Avatar saved successfully:', imageUrl);
+    console.log('✅ Avatar uploaded to Cloudinary:', result.secure_url);
 
     return res.json({ 
       success: true, 
-      imageUrl,
+      imageUrl: result.secure_url,
       message: 'Avatar subido correctamente' 
     });
   } catch (error) {
@@ -137,35 +134,20 @@ router.post('/gym-logo', authMiddleware, upload.single('image'), async (req: Aut
 
     console.log('📁 File received:', req.file.originalname, req.file.size, 'bytes');
 
-    // Asegurar directorio de logos
-    const logosDir = path.join(__dirname, '../../uploads/logos');
-    if (!fs.existsSync(logosDir)) {
-      fs.mkdirSync(logosDir, { recursive: true });
-    }
-
-    // Generar nombre único para el archivo
-    const filename = `logo_${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
-    const filepath = path.join(logosDir, filename);
-
-    console.log('💾 Saving to:', filepath);
-
     // Procesar imagen con sharp - cuadrado para logos
-    await sharp(req.file.buffer)
-      .resize(400, 400, {
-        fit: 'cover',
-        position: 'center',
-      })
+    const processedBuffer = await sharp(req.file.buffer)
+      .resize(400, 400, { fit: 'cover', position: 'center' })
       .webp({ quality: 90 })
-      .toFile(filepath);
+      .toBuffer();
 
-    // Construir URL pública
-    const imageUrl = `/uploads/logos/${filename}`;
+    // Subir a Cloudinary
+    const result = await uploadToCloudinary(processedBuffer, 'logos');
 
-    console.log('✅ Logo saved successfully:', imageUrl);
+    console.log('✅ Logo uploaded to Cloudinary:', result.secure_url);
 
     return res.json({ 
       success: true, 
-      imageUrl,
+      imageUrl: result.secure_url,
       message: 'Logo subido correctamente' 
     });
   } catch (error) {
@@ -186,37 +168,21 @@ router.post('/medical-clearance', authMiddleware, upload.single('image'), async 
 
     console.log('📁 File received:', req.file.originalname, req.file.size, 'bytes');
 
-    // Asegurar directorio de aptos médicos
-    const medicalDir = path.join(__dirname, '../../uploads/medical');
-    if (!fs.existsSync(medicalDir)) {
-      fs.mkdirSync(medicalDir, { recursive: true });
-    }
-
-    // Generar nombre único para el archivo
-    const filename = `medical_${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
-    const filepath = path.join(medicalDir, filename);
-
-    console.log('💾 Saving to:', filepath);
-
     // Procesar imagen con sharp - mantener buena calidad para documentos
-    // .rotate() sin argumentos auto-corrige la orientación basándose en EXIF
-    await sharp(req.file.buffer)
+    const processedBuffer = await sharp(req.file.buffer)
       .rotate()
-      .resize(1200, 1600, {
-        fit: 'inside',
-        withoutEnlargement: true,
-      })
+      .resize(1200, 1600, { fit: 'inside', withoutEnlargement: true })
       .webp({ quality: 90 })
-      .toFile(filepath);
+      .toBuffer();
 
-    // Construir URL pública
-    const imageUrl = `/uploads/medical/${filename}`;
+    // Subir a Cloudinary
+    const result = await uploadToCloudinary(processedBuffer, 'medical');
 
-    console.log('✅ Medical clearance saved successfully:', imageUrl);
+    console.log('✅ Medical clearance uploaded to Cloudinary:', result.secure_url);
 
     return res.json({ 
       success: true, 
-      imageUrl,
+      imageUrl: result.secure_url,
       message: 'Apto médico subido correctamente' 
     });
   } catch (error) {
@@ -230,15 +196,20 @@ router.delete('/benefit-image', authMiddleware, async (req: AuthRequest, res: Re
   try {
     const { imageUrl } = req.body;
     
-    if (!imageUrl || !imageUrl.startsWith('/uploads/benefits/')) {
+    if (!imageUrl) {
       return res.status(400).json({ error: 'URL de imagen inválida' });
     }
 
-    const filename = path.basename(imageUrl);
-    const filepath = path.join(uploadsDir, filename);
-
-    if (fs.existsSync(filepath)) {
-      fs.unlinkSync(filepath);
+    // Extraer public_id de la URL de Cloudinary
+    if (imageUrl.includes('cloudinary.com')) {
+      const parts = imageUrl.split('/');
+      const filenameWithExt = parts[parts.length - 1];
+      const filename = filenameWithExt.split('.')[0];
+      const folder = parts[parts.length - 2];
+      const publicId = `neuralfit/${folder}/${filename}`;
+      
+      await cloudinary.uploader.destroy(publicId);
+      console.log('🗑️ Deleted from Cloudinary:', publicId);
     }
 
     return res.json({ success: true });
