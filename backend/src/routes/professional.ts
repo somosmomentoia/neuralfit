@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, requireRole, AuthRequest } from '../middleware/auth';
+import { notifyRoutineAssigned } from '../services/notificationService';
 
 const router = Router();
 
@@ -798,8 +799,20 @@ router.post('/clients/:clientId/day-assignment', async (req: AuthRequest, res: R
             _count: { select: { exercises: true } },
           },
         },
+        clientProfile: {
+          include: { user: true },
+        },
       },
     });
+
+    // Notificar al cliente
+    if (assignment.clientProfile?.user) {
+      notifyRoutineAssigned(
+        assignment.clientProfile.user.id,
+        assignment.routine.name,
+        req.user!.gymId || undefined
+      );
+    }
 
     return res.status(201).json({ assignment });
   } catch (error) {

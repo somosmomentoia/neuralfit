@@ -1,68 +1,69 @@
 .container {
-  padding: 1rem;
-  max-width: 600px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
 }
 
 .header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  gap: var(--spacing-3);
 }
 
 .title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #fff;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
   margin: 0;
 }
 
 .badge {
-  background: #c4f400;
-  color: #000;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
+  background: var(--color-primary);
+  color: var(--color-bg-0);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-full);
 }
 
 .actions {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: var(--spacing-3);
 }
 
 .actionBtn {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  font-size: 0.875rem;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  color: var(--color-text-0);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
 }
 
 .actionBtn:hover {
   background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .actionBtnDanger {
-  background: transparent;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
   color: #ef4444;
-  font-size: 0.875rem;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
 }
 
 .actionBtnDanger:hover {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .loading {
@@ -70,7 +71,7 @@
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-1);
 }
 
 .empty {
@@ -79,8 +80,13 @@
   align-items: center;
   justify-content: center;
   min-height: 300px;
-  color: rgba(255, 255, 255, 0.4);
-  gap: 1rem;
+  padding: var(--spacing-8);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  color: var(--color-text-2);
+  gap: var(--spacing-4);
 }
 
 .empty svg {
@@ -89,75 +95,82 @@
 
 .empty p {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
 }
 
 .list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--spacing-3);
 }
 
 .notification {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
   position: relative;
 }
 
 .notification:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .notification.unread {
-  background: rgba(196, 244, 0, 0.05);
-  border-left: 3px solid #c4f400;
+  background: rgba(196, 244, 0, 0.03);
+  border-left: 3px solid var(--color-primary);
+}
+
+.notification.unread:hover {
+  background: rgba(196, 244, 0, 0.06);
 }
 
 .icon {
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-0);
 }
 
 .icon.info {
-  background: rgba(59, 130, 246, 0.2);
+  background: rgba(59, 130, 246, 0.15);
   color: #3b82f6;
 }
 
 .icon.routine {
-  background: rgba(168, 85, 247, 0.2);
+  background: rgba(168, 85, 247, 0.15);
   color: #a855f7;
 }
 
 .icon.subscription {
-  background: rgba(34, 197, 94, 0.2);
+  background: rgba(34, 197, 94, 0.15);
   color: #22c55e;
 }
 
 .icon.payment {
-  background: rgba(234, 179, 8, 0.2);
+  background: rgba(234, 179, 8, 0.15);
   color: #eab308;
 }
 
 .icon.benefit {
-  background: rgba(196, 244, 0, 0.2);
-  color: #c4f400;
+  background: rgba(196, 244, 0, 0.15);
+  color: var(--color-primary);
 }
 
 .icon.system {
-  background: rgba(156, 163, 175, 0.2);
+  background: rgba(156, 163, 175, 0.15);
   color: #9ca3af;
 }
 
@@ -167,29 +180,29 @@
 }
 
 .notificationTitle {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: #fff;
-  margin: 0 0 0.25rem 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-0);
+  margin: 0 0 var(--spacing-1) 0;
 }
 
 .message {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0 0 0.5rem 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+  margin: 0 0 var(--spacing-2) 0;
   line-height: 1.4;
 }
 
 .time {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-2);
 }
 
 .unreadDot {
   width: 8px;
   height: 8px;
-  background: #c4f400;
-  border-radius: 50%;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
   flex-shrink: 0;
-  margin-top: 0.5rem;
+  margin-top: var(--spacing-2);
 }

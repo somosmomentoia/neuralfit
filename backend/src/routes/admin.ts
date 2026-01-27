@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { authMiddleware, requireRole, AuthRequest } from '../middleware/auth';
+import { notifyWelcome, notifyNewBenefit } from '../services/notificationService';
 
 const router = Router();
 
@@ -413,6 +414,12 @@ router.post('/clients', async (req: AuthRequest, res: Response) => {
         }
       },
     });
+
+    // Enviar notificación de bienvenida
+    const gym = await prisma.gym.findUnique({ where: { id: req.user!.gymId } });
+    if (gym) {
+      notifyWelcome(user.id, gym.name, gym.id);
+    }
 
     return res.status(201).json({ client: user, tempPassword: password });
   } catch (error) {
@@ -1398,6 +1405,16 @@ router.post('/benefits', async (req: AuthRequest, res: Response) => {
         gymId: req.user!.gymId,
       },
     });
+
+    // Notificar a todos los clientes del gym sobre el nuevo beneficio
+    const subscriptions = await prisma.subscription.findMany({
+      where: { gymId: req.user!.gymId, status: 'ACTIVE' },
+      select: { userId: true },
+    });
+    
+    for (const sub of subscriptions) {
+      notifyNewBenefit(sub.userId, name, discount, req.user!.gymId);
+    }
 
     return res.status(201).json({ benefit });
   } catch (error) {
