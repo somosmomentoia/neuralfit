@@ -15,8 +15,16 @@ const prisma = new PrismaClient();
 const PORT = process.env.PORT || 4000;
 
 // Middleware
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'];
 app.use(cors({
-  origin: true,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
   credentials: true,
 }));
 app.use(express.json());
