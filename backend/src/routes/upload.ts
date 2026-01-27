@@ -7,10 +7,20 @@ import { AuthRequest, authMiddleware } from '../middleware/auth';
 const router = Router();
 
 // Configurar Cloudinary
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'dm5vg7gdx';
+const apiKey = process.env.CLOUDINARY_API_KEY || '944364977436961';
+const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+console.log('☁️ Cloudinary config:', { 
+  cloud_name: cloudName, 
+  api_key: apiKey ? '***' + apiKey.slice(-4) : 'NOT SET',
+  api_secret: apiSecret ? '***' + apiSecret.slice(-4) : 'NOT SET'
+});
+
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dm5vg7gdx',
-  api_key: process.env.CLOUDINARY_API_KEY || '944364977436961',
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: cloudName,
+  api_key: apiKey,
+  api_secret: apiSecret,
 });
 
 // Configuración de multer para almacenamiento temporal en memoria
@@ -34,17 +44,27 @@ const upload = multer({
 // Helper para subir buffer a Cloudinary
 const uploadToCloudinary = (buffer: Buffer, folder: string, options: object = {}): Promise<{ secure_url: string; public_id: string }> => {
   return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream(
+    console.log('☁️ Uploading to Cloudinary folder:', folder, 'buffer size:', buffer.length);
+    
+    const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: `neuralfit/${folder}`,
         format: 'webp',
+        resource_type: 'image',
         ...options,
       },
       (error, result) => {
-        if (error) reject(error);
-        else resolve(result as { secure_url: string; public_id: string });
+        if (error) {
+          console.error('❌ Cloudinary upload error:', error);
+          reject(error);
+        } else {
+          console.log('✅ Cloudinary upload success:', result?.secure_url);
+          resolve(result as { secure_url: string; public_id: string });
+        }
       }
-    ).end(buffer);
+    );
+    
+    uploadStream.end(buffer);
   });
 };
 
