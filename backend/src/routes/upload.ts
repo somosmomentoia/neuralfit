@@ -7,21 +7,28 @@ import { AuthRequest, authMiddleware } from '../middleware/auth';
 const router = Router();
 
 // Configurar Cloudinary
-const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'dm5vg7gdx';
-const apiKey = process.env.CLOUDINARY_API_KEY || '944364977436961';
-const apiSecret = process.env.CLOUDINARY_API_SECRET;
+// Soporta tanto CLOUDINARY_URL como variables individuales
+if (process.env.CLOUDINARY_URL) {
+  console.log('☁️ Cloudinary config from CLOUDINARY_URL');
+  cloudinary.config({ secure: true });
+} else {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'dm5vg7gdx';
+  const apiKey = process.env.CLOUDINARY_API_KEY || '944364977436961';
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-console.log('☁️ Cloudinary config:', { 
-  cloud_name: cloudName, 
-  api_key: apiKey ? '***' + apiKey.slice(-4) : 'NOT SET',
-  api_secret: apiSecret ? '***' + apiSecret.slice(-4) : 'NOT SET'
-});
+  console.log('☁️ Cloudinary config:', { 
+    cloud_name: cloudName, 
+    api_key: apiKey ? '***' + apiKey.slice(-4) : 'NOT SET',
+    api_secret: apiSecret ? '***' + apiSecret.slice(-4) : 'NOT SET'
+  });
 
-cloudinary.config({
-  cloud_name: cloudName,
-  api_key: apiKey,
-  api_secret: apiSecret,
-});
+  cloudinary.config({
+    cloud_name: cloudName,
+    api_key: apiKey,
+    api_secret: apiSecret,
+    secure: true,
+  });
+}
 
 // Configuración de multer para almacenamiento temporal en memoria
 const storage = multer.memoryStorage();
