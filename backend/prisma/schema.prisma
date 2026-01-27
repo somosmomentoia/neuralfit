@@ -96,6 +96,7 @@ model Gym {
   planFeatures  PlanFeature[]
   benefits      Benefit[]
   subscriptions Subscription[]
+  notifications Notification[]
 }
 
 model User {
@@ -129,6 +130,9 @@ model User {
   
   // Entrenamientos libres (sin suscripción)
   freeWorkoutSessions WorkoutSession[] @relation("FreeWorkouts")
+  
+  // Notificaciones
+  notifications       Notification[]
 
   @@index([gymId])
   @@index([email])
@@ -628,6 +632,41 @@ model Payment {
   createdAt DateTime @default(now())
 
   @@index([clientProfileId])
+}
+
+// ==================== NOTIFICACIONES ====================
+
+enum NotificationType {
+  INFO           // Información general
+  ROUTINE        // Rutina asignada/modificada
+  SUBSCRIPTION   // Suscripción próxima a vencer, renovada, etc.
+  PAYMENT        // Pago recibido, pendiente, etc.
+  BENEFIT        // Nuevo beneficio disponible
+  SYSTEM         // Notificaciones del sistema
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  title       String
+  message     String
+  type        NotificationType @default(INFO)
+  isRead      Boolean          @default(false)
+  actionUrl   String?          // URL para navegar al hacer click
+  
+  // Usuario destinatario
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Gym relacionado (opcional, para notificaciones específicas de un gym)
+  gymId       String?
+  gym         Gym?             @relation(fields: [gymId], references: [id])
+  
+  createdAt   DateTime         @default(now())
+  readAt      DateTime?
+  
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
 }
 
 // ==================== CONTABILIDAD ====================

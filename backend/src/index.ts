@@ -9,6 +9,7 @@ import adminRoutes from './routes/admin';
 import professionalRoutes from './routes/professional';
 import clientRoutes from './routes/client';
 import uploadRoutes from './routes/upload';
+import notificationsRoutes from './routes/notifications';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -47,6 +48,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/professional', professionalRoutes);
 app.use('/api/client', clientRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 // Error handler
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
