@@ -49,6 +49,7 @@ export default function ClientProfilePage() {
           avatar: userData.user?.avatar || null,
         };
 
+        console.log('Profile loaded, avatar URL:', profileData.avatar);
         setProfile(profileData);
         setFormData({
           firstName: profileData.firstName,
