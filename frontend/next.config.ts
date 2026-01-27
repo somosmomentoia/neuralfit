@@ -21,10 +21,15 @@ const nextConfig: NextConfig = {
         hostname: '*.up.railway.app',
         pathname: '/uploads/**',
       },
-      // Custom domain - add your domain here
+      // Custom domain
       {
         protocol: 'https',
-        hostname: process.env.NEXT_PUBLIC_API_HOSTNAME || 'localhost',
+        hostname: 'api.neuralfit.co',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.neuralfit.co',
         pathname: '/uploads/**',
       },
     ],
