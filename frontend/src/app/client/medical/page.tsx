@@ -135,7 +135,7 @@ export default function ClientMedicalPage() {
               </svg>
             ) : (
               <img 
-                src={`${API_URL.replace('/api', '')}${healthData.medicalClearanceUrl}`}
+                src={healthData.medicalClearanceUrl.startsWith('http') ? healthData.medicalClearanceUrl : `${API_URL.replace('/api', '')}${healthData.medicalClearanceUrl}`}
                 alt="Apto médico"
                 className={styles.documentImage}
               />
@@ -144,7 +144,7 @@ export default function ClientMedicalPage() {
           </div>
           <button 
             className={styles.viewBtn}
-            onClick={() => window.open(`${API_URL.replace('/api', '')}${healthData.medicalClearanceUrl}`, '_blank')}
+            onClick={() => window.open(healthData.medicalClearanceUrl.startsWith('http') ? healthData.medicalClearanceUrl : `${API_URL.replace('/api', '')}${healthData.medicalClearanceUrl}`, '_blank')}
           >
             Ver documento
           </button>

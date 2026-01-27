@@ -131,7 +131,7 @@ export default function ClientSidebar({
             {avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img 
-                src={`${baseUrl}${avatarUrl}`} 
+                src={avatarUrl.startsWith('http') ? avatarUrl : `${baseUrl}${avatarUrl}`} 
                 alt="Avatar" 
                 className={styles.avatarImage}
               />

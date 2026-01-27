@@ -152,7 +152,7 @@ export default function ClientProfilePage() {
         <div className={styles.avatar} onClick={() => avatarInputRef.current?.click()}>
           {profile?.avatar ? (
             <img 
-              src={`${API_URL.replace('/api', '')}${profile.avatar}`} 
+              src={profile.avatar.startsWith('http') ? profile.avatar : `${API_URL.replace('/api', '')}${profile.avatar}`} 
               alt="Avatar" 
               className={styles.avatarImage}
             />

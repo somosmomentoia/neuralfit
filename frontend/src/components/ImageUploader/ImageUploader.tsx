@@ -175,9 +175,11 @@ export default function ImageUploader({
         throw new Error(data.error || 'Error al subir la imagen');
       }
 
-      // Construir URL completa usando el mismo host que la API
-      const apiHost = API_URL.replace('/api', '');
-      const fullImageUrl = `${apiHost}${data.imageUrl}`;
+      // Si la URL ya es completa (Cloudinary), usarla directamente
+      // Si es relativa (/uploads/...), construir URL completa
+      const fullImageUrl = data.imageUrl.startsWith('http') 
+        ? data.imageUrl 
+        : `${API_URL.replace('/api', '')}${data.imageUrl}`;
       onImageUploaded(fullImageUrl);
       
       // Limpiar estado
