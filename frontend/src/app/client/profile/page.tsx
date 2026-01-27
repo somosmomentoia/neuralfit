@@ -155,6 +155,7 @@ export default function ClientProfilePage() {
               src={profile.avatar.startsWith('http') ? profile.avatar : `${API_URL.replace('/api', '')}${profile.avatar}`} 
               alt="Avatar" 
               className={styles.avatarImage}
+              onError={(e) => console.error('Avatar load error, URL:', profile.avatar)}
             />
           ) : (
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

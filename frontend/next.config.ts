@@ -32,6 +32,12 @@ const nextConfig: NextConfig = {
         hostname: '*.neuralfit.co',
         pathname: '/uploads/**',
       },
+      // Cloudinary
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
     ],
   },
 };
