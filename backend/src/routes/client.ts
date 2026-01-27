@@ -965,10 +965,26 @@ router.get('/benefits/:id', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
     
+    // Obtener todos los gymIds donde el usuario tiene suscripción activa
+    const subscriptions = await prisma.subscription.findMany({
+      where: { 
+        userId: req.user!.id,
+        status: 'ACTIVE',
+      },
+      select: { gymId: true },
+    });
+
+    const gymIds = subscriptions.map(s => s.gymId);
+    
+    // Agregar el gym principal del usuario si existe
+    if (req.user!.gymId && !gymIds.includes(req.user!.gymId)) {
+      gymIds.push(req.user!.gymId);
+    }
+
     const benefit = await prisma.benefit.findFirst({
       where: { 
         id: req.params.id,
-        gym: { id: req.user!.gymId },
+        gymId: { in: gymIds },
         isActive: true,
       },
       include: {
