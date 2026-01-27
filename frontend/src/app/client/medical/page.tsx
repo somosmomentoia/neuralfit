@@ -144,7 +144,7 @@ export default function ClientMedicalPage() {
           </div>
           <button 
             className={styles.viewBtn}
-            onClick={() => window.open(healthData.medicalClearanceUrl.startsWith('http') ? healthData.medicalClearanceUrl : `${API_URL.replace('/api', '')}${healthData.medicalClearanceUrl}`, '_blank')}
+            onClick={() => healthData.medicalClearanceUrl && window.open(healthData.medicalClearanceUrl.startsWith('http') ? healthData.medicalClearanceUrl : `${API_URL.replace('/api', '')}${healthData.medicalClearanceUrl}`, '_blank')}
           >
             Ver documento
           </button>
