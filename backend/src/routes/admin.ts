@@ -2,7 +2,7 @@ import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { authMiddleware, requireRole, AuthRequest } from '../middleware/auth';
-import { notifyWelcome, notifyNewBenefit } from '../services/notificationService';
+import { notifyWelcome, notifyNewBenefit, notifyPaymentReceived, notifySubscriptionRenewed } from '../services/notificationService';
 
 const router = Router();
 
@@ -741,6 +741,14 @@ router.post('/payments', async (req: AuthRequest, res: Response) => {
         },
       },
     });
+
+    // Notificar al cliente sobre el pago recibido
+    if (payment.clientProfile?.user) {
+      const gym = await prisma.gym.findUnique({ where: { id: req.user!.gymId } });
+      if (gym) {
+        notifyPaymentReceived(payment.clientProfile.user.id, amount, gym.name, gym.id);
+      }
+    }
 
     return res.status(201).json({ payment });
   } catch (error) {
@@ -1667,6 +1675,9 @@ router.put('/subscriptions/:id/activate', async (req: AuthRequest, res: Response
         data: { gymId: req.user!.gymId },
       });
     }
+
+    // Notificar al cliente sobre la renovación
+    notifySubscriptionRenewed(subscription.userId, subscription.gym.name, endDate, subscription.gymId);
 
     return res.json({ subscription });
   } catch (error) {

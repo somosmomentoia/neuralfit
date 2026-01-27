@@ -10,6 +10,7 @@ import professionalRoutes from './routes/professional';
 import clientRoutes from './routes/client';
 import uploadRoutes from './routes/upload';
 import notificationsRoutes from './routes/notifications';
+import cronRoutes from './routes/cron';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -49,6 +50,7 @@ app.use('/api/professional', professionalRoutes);
 app.use('/api/client', clientRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/notifications', notificationsRoutes);
+app.use('/api/cron', cronRoutes);
 
 // Error handler
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
