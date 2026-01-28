@@ -23,6 +23,7 @@ interface NotificationsDropdownProps {
 export default function NotificationsDropdown({ isOpen, onClose }: NotificationsDropdownProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -132,24 +133,24 @@ export default function NotificationsDropdown({ isOpen, onClose }: Notifications
       />
       <div className={`${styles.dropdown} ${isOpen ? styles.dropdownOpen : ''}`}>
         <div className={styles.header}>
-          <div className={styles.headerTitle}>
-            <Bell size={20} />
-            <span>Notificaciones</span>
-            {unreadCount > 0 && (
-              <span className={styles.badge}>{unreadCount}</span>
-            )}
-          </div>
-          <div className={styles.headerActions}>
-            {unreadCount > 0 && (
-              <button onClick={markAllAsRead} className={styles.markAllBtn}>
-                <Check size={16} />
-                <span>Marcar todas</span>
-              </button>
-            )}
+          <div className={styles.headerTop}>
+            <div className={styles.headerTitle}>
+              <Bell size={20} />
+              <span>Notificaciones</span>
+              {unreadCount > 0 && (
+                <span className={styles.badge}>{unreadCount}</span>
+              )}
+            </div>
             <button onClick={onClose} className={styles.closeBtn}>
               <X size={20} />
             </button>
           </div>
+          {unreadCount > 0 && (
+            <button onClick={markAllAsRead} className={styles.markAllBtn}>
+              <Check size={14} />
+              <span>Marcar todas como leídas</span>
+            </button>
+          )}
         </div>
 
         <div className={styles.content}>
@@ -164,33 +165,55 @@ export default function NotificationsDropdown({ isOpen, onClose }: Notifications
             </div>
           ) : (
             <div className={styles.list}>
-              {notifications.map(notification => (
-                <div
-                  key={notification.id}
-                  className={`${styles.item} ${!notification.isRead ? styles.itemUnread : ''}`}
-                  onClick={() => !notification.isRead && markAsRead(notification.id)}
-                >
-                  <div className={`${styles.icon} ${getIconClass(notification.type)}`}>
-                    {getIcon(notification.type)}
-                  </div>
-                  <div className={styles.itemContent}>
-                    <div className={styles.itemHeader}>
-                      <span className={styles.itemTitle}>{notification.title}</span>
-                      <span className={styles.itemTime}>{formatDate(notification.createdAt)}</span>
-                    </div>
-                    <p className={styles.itemMessage}>{notification.message}</p>
-                  </div>
-                  <button
-                    className={styles.deleteBtn}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteNotification(notification.id);
+              {notifications.map(notification => {
+                const isExpanded = expandedId === notification.id;
+                return (
+                  <div
+                    key={notification.id}
+                    className={`${styles.item} ${!notification.isRead ? styles.itemUnread : ''} ${isExpanded ? styles.itemExpanded : ''}`}
+                    onClick={() => {
+                      if (!notification.isRead) markAsRead(notification.id);
+                      setExpandedId(isExpanded ? null : notification.id);
                     }}
                   >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              ))}
+                    <div className={styles.itemRow}>
+                      <div className={`${styles.icon} ${getIconClass(notification.type)}`}>
+                        {getIcon(notification.type)}
+                      </div>
+                      <div className={styles.itemContent}>
+                        <span className={styles.itemTitle}>{notification.title}</span>
+                        <span className={styles.itemTime}>{formatDate(notification.createdAt)}</span>
+                      </div>
+                      <svg 
+                        className={`${styles.chevron} ${isExpanded ? styles.chevronOpen : ''}`}
+                        width="16" 
+                        height="16" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2"
+                      >
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </div>
+                    {isExpanded && (
+                      <div className={styles.itemDetails}>
+                        <p className={styles.itemMessage}>{notification.message}</p>
+                        <button
+                          className={styles.deleteBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteNotification(notification.id);
+                          }}
+                        >
+                          <Trash2 size={14} />
+                          <span>Eliminar</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
