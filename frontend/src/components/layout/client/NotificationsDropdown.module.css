@@ -15,26 +15,27 @@
 
 .dropdown {
   position: fixed;
-  top: 0;
-  right: 0;
-  width: 100%;
+  top: calc(var(--spacing-3) + env(safe-area-inset-top, 0px));
+  right: var(--spacing-3);
+  bottom: calc(var(--spacing-3) + env(safe-area-inset-bottom, 0px));
+  width: calc(100% - var(--spacing-6));
   max-width: 380px;
-  height: 100vh;
-  height: 100dvh;
-  background: var(--glass-bg);
+  background: var(--color-bg-1);
   backdrop-filter: blur(var(--glass-blur));
-  border-left: 1px solid var(--glass-border);
-  transform: translateX(100%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  transform: translateX(calc(100% + var(--spacing-6)));
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+  opacity: 0;
   z-index: calc(var(--z-fixed) + 11);
   display: flex;
   flex-direction: column;
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: var(--shadow-xl);
 }
 
 .dropdownOpen {
   transform: translateX(0);
+  opacity: 1;
 }
 
 .header {

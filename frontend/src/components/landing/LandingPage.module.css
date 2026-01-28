@@ -156,7 +156,7 @@
 
 .mobileMenuClose {
   position: absolute;
-  top: 1.5rem;
+  top: calc(1.5rem + env(safe-area-inset-top, 0px));
   right: 1.5rem;
   background: none;
   border: none;
