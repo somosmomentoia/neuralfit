@@ -29,6 +29,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   const [user, setUser] = useState<User | null>(null);
   const [clientData, setClientData] = useState<ClientData | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -117,6 +118,9 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
       <ClientHeader 
         title={getPageTitle()}
         onMenuClick={() => setSidebarOpen(true)}
+        onNotificationsClick={() => setNotificationsOpen(true)}
+        onNotificationsClose={() => setNotificationsOpen(false)}
+        notificationsOpen={notificationsOpen}
       />
 
       <ClientSidebar
@@ -130,7 +134,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
         onLogout={handleLogout}
       />
 
-      <main className={`${styles.main} ${sidebarOpen ? styles.shifted : ''}`}>
+      <main className={`${styles.main} ${sidebarOpen ? styles.shifted : ''} ${notificationsOpen ? styles.shiftedLeft : ''}`}>
         <div className={styles.content}>
           {children}
         </div>

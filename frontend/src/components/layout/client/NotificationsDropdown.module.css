@@ -1,16 +1,17 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
-  z-index: calc(var(--z-fixed) + 10);
+  background: rgba(0, 0, 0, 0);
+  backdrop-filter: blur(0);
+  z-index: var(--z-modal-backdrop);
+  pointer-events: none;
+  transition: background 300ms ease, backdrop-filter 300ms ease;
 }
 
 .overlayVisible {
-  opacity: 1;
-  visibility: visible;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  pointer-events: auto;
 }
 
 .dropdown {
@@ -18,18 +19,17 @@
   top: calc(var(--spacing-3) + env(safe-area-inset-top, 0px));
   right: var(--spacing-3);
   bottom: calc(var(--spacing-3) + env(safe-area-inset-bottom, 0px));
-  width: calc(100% - var(--spacing-6));
-  max-width: 380px;
+  width: var(--sidebar-width);
+  max-width: calc(85vw - var(--spacing-6));
   background: var(--color-bg-1);
-  backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
-  transform: translateX(calc(100% + var(--spacing-6)));
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
-  opacity: 0;
-  z-index: calc(var(--z-fixed) + 11);
+  z-index: var(--z-modal);
   display: flex;
   flex-direction: column;
+  transform: translateX(calc(100% + var(--spacing-6)));
+  opacity: 0;
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease;
   box-shadow: var(--shadow-xl);
 }
 

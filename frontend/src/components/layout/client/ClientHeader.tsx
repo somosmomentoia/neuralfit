@@ -8,12 +8,20 @@ import NotificationsDropdown from './NotificationsDropdown';
 interface ClientHeaderProps {
   title: string;
   onMenuClick: () => void;
+  onNotificationsClick: () => void;
+  onNotificationsClose: () => void;
+  notificationsOpen: boolean;
 }
 
-export default function ClientHeader({ title, onMenuClick }: ClientHeaderProps) {
+export default function ClientHeader({ 
+  title, 
+  onMenuClick,
+  onNotificationsClick,
+  onNotificationsClose,
+  notificationsOpen 
+}: ClientHeaderProps) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   useEffect(() => {
     const fetchUnreadCount = async () => {
@@ -40,12 +48,8 @@ export default function ClientHeader({ title, onMenuClick }: ClientHeaderProps) 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleNotificationsClick = () => {
-    setNotificationsOpen(true);
-  };
-
   const handleNotificationsClose = () => {
-    setNotificationsOpen(false);
+    onNotificationsClose();
     // Refetch unread count when closing
     apiFetch('/notifications/unread-count')
       .then(res => res.json())
@@ -68,7 +72,7 @@ export default function ClientHeader({ title, onMenuClick }: ClientHeaderProps) 
 
         <button 
           className={styles.notificationButton} 
-          onClick={handleNotificationsClick}
+          onClick={onNotificationsClick}
           aria-label="Notificaciones"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

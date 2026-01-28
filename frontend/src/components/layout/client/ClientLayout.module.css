@@ -40,6 +40,10 @@
   transform: translateX(40px);
 }
 
+.main.shiftedLeft {
+  transform: translateX(-40px);
+}
+
 .content {
   padding: var(--spacing-4);
   max-width: 480px;
