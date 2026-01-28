@@ -11,6 +11,12 @@
   padding-top: calc(var(--spacing-3) + env(safe-area-inset-top, 0px));
   background: transparent;
   z-index: var(--z-fixed);
+  transition: background 0.3s ease, backdrop-filter 0.3s ease;
+}
+
+.headerScrolled {
+  background: rgba(13, 18, 16, 0.85);
+  backdrop-filter: blur(20px);
 }
 
 .menuButton,
