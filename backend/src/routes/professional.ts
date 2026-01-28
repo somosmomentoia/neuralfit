@@ -996,4 +996,49 @@ router.put('/clients/:clientId/week', async (req: AuthRequest, res: Response) =>
   }
 });
 
+// GET /api/professional/profile - Obtener perfil profesional
+router.get('/profile', async (req: AuthRequest, res: Response) => {
+  try {
+    const prisma: PrismaClient = req.app.get('prisma');
+    
+    const profile = await prisma.professionalProfile.findFirst({
+      where: { userId: req.user!.id },
+    });
+
+    return res.json({ profile });
+  } catch (error) {
+    console.error('Error fetching professional profile:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// PUT /api/professional/profile - Actualizar perfil profesional
+router.put('/profile', async (req: AuthRequest, res: Response) => {
+  try {
+    const prisma: PrismaClient = req.app.get('prisma');
+    const { specialty, bio } = req.body;
+    
+    const profile = await prisma.professionalProfile.findFirst({
+      where: { userId: req.user!.id },
+    });
+
+    if (!profile) {
+      return res.status(404).json({ error: 'Perfil profesional no encontrado' });
+    }
+
+    const updatedProfile = await prisma.professionalProfile.update({
+      where: { id: profile.id },
+      data: {
+        specialty: specialty || null,
+        bio: bio || null,
+      },
+    });
+
+    return res.json({ profile: updatedProfile });
+  } catch (error) {
+    console.error('Error updating professional profile:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 export default router;

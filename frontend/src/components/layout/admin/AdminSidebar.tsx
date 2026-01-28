@@ -135,7 +135,7 @@ export default function AdminSidebar({
         </div>
 
         {/* User Profile */}
-        <div className={styles.userProfile}>
+        <Link href="/admin/profile" className={styles.userProfile} onClick={handleNavClick}>
           <div className={styles.avatar}>
             {userName.charAt(0).toUpperCase()}
           </div>
@@ -143,7 +143,7 @@ export default function AdminSidebar({
             <span className={styles.userName}>{userName}</span>
             <span className={styles.userRole}>ADMINISTRADOR</span>
           </div>
-        </div>
+        </Link>
 
         {/* Navigation */}
         <nav className={styles.nav}>

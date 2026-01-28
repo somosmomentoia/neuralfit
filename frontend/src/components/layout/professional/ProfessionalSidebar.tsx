@@ -103,7 +103,7 @@ export default function ProfessionalSidebar({
         </div>
 
         {/* User Profile */}
-        <div className={styles.userProfile}>
+        <Link href="/professional/profile" className={styles.userProfile} onClick={handleNavClick}>
           <div className={styles.avatar}>
             {userName.charAt(0).toUpperCase()}
           </div>
@@ -111,7 +111,7 @@ export default function ProfessionalSidebar({
             <span className={styles.userName}>{userName}</span>
             <span className={styles.userRole}>ENTRENADOR</span>
           </div>
-        </div>
+        </Link>
 
         {/* Navigation */}
         <nav className={styles.nav}>

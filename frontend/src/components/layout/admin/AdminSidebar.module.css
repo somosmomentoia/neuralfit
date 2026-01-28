@@ -18,9 +18,9 @@
 /* Sidebar */
 .sidebar {
   position: fixed;
-  top: var(--spacing-3);
+  top: calc(var(--spacing-3) + env(safe-area-inset-top, 0px));
   left: var(--spacing-3);
-  bottom: var(--spacing-3);
+  bottom: calc(var(--spacing-3) + env(safe-area-inset-bottom, 0px));
   width: var(--sidebar-width);
   max-width: calc(85vw - var(--spacing-6));
   background: var(--color-bg-1);
