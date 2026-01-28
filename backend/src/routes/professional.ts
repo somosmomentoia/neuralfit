@@ -807,9 +807,12 @@ router.post('/clients/:clientId/day-assignment', async (req: AuthRequest, res: R
 
     // Notificar al cliente
     if (assignment.clientProfile?.user) {
+      const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      const dayName = dayNames[dayOfWeek] || `Día ${dayOfWeek}`;
       notifyRoutineAssigned(
         assignment.clientProfile.user.id,
         assignment.routine.name,
+        dayName,
         req.user!.gymId || undefined
       );
     }
