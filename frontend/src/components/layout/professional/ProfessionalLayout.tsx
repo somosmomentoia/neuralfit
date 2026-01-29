@@ -5,12 +5,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import ProfessionalHeader from './ProfessionalHeader';
 import ProfessionalSidebar from './ProfessionalSidebar';
 import styles from './ProfessionalLayout.module.css';
-
-interface User {
-  firstName: string;
-  lastName: string;
-  role: string;
-}
+import { useUser } from '@/contexts/UserContext';
+import { getToken } from '@/lib/api';
 
 interface ProfessionalLayoutProps {
   children: React.ReactNode;
@@ -19,7 +15,7 @@ interface ProfessionalLayoutProps {
 export default function ProfessionalLayout({ children }: ProfessionalLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<User | null>(null);
+  const { user, setUser } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +23,7 @@ export default function ProfessionalLayout({ children }: ProfessionalLayoutProps
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
     const fetchUser = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
 
         const res = await fetch(`${API_URL}/auth/me`, { credentials: 'include', headers });
@@ -52,13 +48,15 @@ export default function ProfessionalLayout({ children }: ProfessionalLayoutProps
     };
 
     fetchUser();
-  }, [router]);
+  }, [router, setUser]);
 
   const handleLogout = async () => {
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
       await fetch(`${API_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
       localStorage.removeItem('token');
+      localStorage.removeItem('rememberMe');
+      sessionStorage.removeItem('token');
       router.push('/login');
     } catch (error) {
       console.error('Logout error:', error);

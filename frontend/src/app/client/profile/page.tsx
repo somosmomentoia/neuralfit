@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, getToken } from '@/lib/api';
 import styles from './page.module.css';
+import { useUser } from '@/contexts/UserContext';
 
 interface UserProfile {
   firstName: string;
@@ -21,6 +22,7 @@ interface HealthData {
 
 export default function ClientProfilePage() {
   const router = useRouter();
+  const { refreshUser } = useUser();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [healthData, setHealthData] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -96,6 +98,7 @@ export default function ClientProfilePage() {
           phone: data.user.phone,
         } : null);
         setEditing(false);
+        refreshUser();
       }
     } catch (error) {
       console.error('Error saving profile:', error);
@@ -113,7 +116,7 @@ export default function ClientProfilePage() {
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-      const token = localStorage.getItem('token');
+      const token = getToken();
       
       const res = await fetch(`${API_URL}/upload/avatar`, {
         method: 'POST',
@@ -132,8 +135,7 @@ export default function ClientProfilePage() {
           body: JSON.stringify({ avatar: data.imageUrl }),
         });
         setProfile(prev => prev ? { ...prev, avatar: data.imageUrl } : null);
-        // Refresh para actualizar el sidebar
-        window.location.reload();
+        refreshUser();
       }
     } catch (error) {
       console.error('Error uploading avatar:', error);

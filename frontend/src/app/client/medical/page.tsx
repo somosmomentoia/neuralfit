@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, getToken } from '@/lib/api';
 import styles from './page.module.css';
 
 interface HealthData {
@@ -42,7 +42,7 @@ export default function ClientMedicalPage() {
     formData.append('image', file);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       const res = await fetch(`${API_URL}/upload/medical-clearance`, {
         method: 'POST',
         headers: {

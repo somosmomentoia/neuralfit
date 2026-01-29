@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo_Narrow } from "next/font/google";
 import "@/styles/globals.css";
+import { UserProvider } from "@/contexts/UserContext";
 
 const archivoNarrow = Archivo_Narrow({
   subsets: ["latin"],
@@ -51,7 +52,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="NeuralFit" />
       </head>
-      <body>{children}</body>
+      <body>
+        <UserProvider>{children}</UserProvider>
+      </body>
     </html>
   );
 }

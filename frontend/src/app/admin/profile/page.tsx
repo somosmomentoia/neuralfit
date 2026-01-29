@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api';
 import styles from './page.module.css';
 import ImageUploader from '@/components/ImageUploader/ImageUploader';
+import { useUser } from '@/contexts/UserContext';
 
 interface User {
   id: string;
@@ -17,6 +18,7 @@ interface User {
 export default function AdminProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { refreshUser } = useUser();
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -73,6 +75,7 @@ export default function AdminProfilePage() {
 
       setMessage({ type: 'success', text: 'Perfil actualizado correctamente' });
       fetchUser();
+      refreshUser();
     } catch (error) {
       setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Error al actualizar' });
     } finally {

@@ -10,6 +10,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -38,10 +39,17 @@ export default function LoginPage() {
         return;
       }
 
-      // Store token in localStorage for mobile app compatibility
+      // Store token based on remember me preference
       if (data.token) {
-        localStorage.setItem('token', data.token);
-        console.log('Token stored');
+        if (rememberMe) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('rememberMe', 'true');
+        } else {
+          sessionStorage.setItem('token', data.token);
+          localStorage.removeItem('token');
+          localStorage.removeItem('rememberMe');
+        }
+        console.log('Token stored, rememberMe:', rememberMe);
       }
 
       // Redirect based on role
@@ -101,6 +109,16 @@ export default function LoginPage() {
                 autoComplete="current-password"
               />
             </div>
+
+            <label className={styles.rememberMe}>
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className={styles.checkbox}
+              />
+              <span>Mantener sesión iniciada</span>
+            </label>
 
             <button 
               type="submit" 

@@ -6,13 +6,8 @@ import styles from './ClientLayout.module.css';
 import ClientHeader from './ClientHeader';
 import ClientBottomNav from './ClientBottomNav';
 import ClientSidebar from './ClientSidebar';
-
-interface User {
-  firstName: string;
-  lastName: string;
-  email: string;
-  avatar: string | null;
-}
+import { useUser } from '@/contexts/UserContext';
+import { getToken } from '@/lib/api';
 
 interface ClientData {
   subscriptionStatus: string;
@@ -26,7 +21,7 @@ interface ClientLayoutProps {
 export default function ClientLayout({ children }: ClientLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<User | null>(null);
+  const { user, setUser } = useUser();
   const [clientData, setClientData] = useState<ClientData | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -36,7 +31,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
 
         const [userRes, profileRes] = await Promise.all([
@@ -68,13 +63,15 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
     };
 
     fetchData();
-  }, [router]);
+  }, [router, setUser]);
 
   const handleLogout = async () => {
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
       await fetch(`${API_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
       localStorage.removeItem('token');
+      localStorage.removeItem('rememberMe');
+      sessionStorage.removeItem('token');
       router.push('/login');
     } catch (error) {
       console.error('Logout error:', error);

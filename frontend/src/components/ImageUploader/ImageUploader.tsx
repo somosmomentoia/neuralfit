@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from 'react';
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import styles from './ImageUploader.module.css';
+import { getToken } from '@/lib/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
@@ -157,8 +158,8 @@ export default function ImageUploader({
       const formData = new FormData();
       formData.append('image', imageToUpload, 'benefit-image.jpg');
 
-      // Obtener token de localStorage (igual que en apiFetch)
-      const token = localStorage.getItem('token');
+      // Obtener token
+      const token = getToken();
 
       const response = await fetch(`${API_URL}${uploadEndpoint}`, {
         method: 'POST',
