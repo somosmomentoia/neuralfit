@@ -39,13 +39,13 @@ export default function LoginPage() {
         return;
       }
 
-      // Store token - always use localStorage for PWA standalone mode
+      // Store token - always use localStorage on iOS/mobile for PWA compatibility
       if (data.token) {
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                            (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
-        // En PWA standalone siempre persistir, o si el usuario marcó "mantener sesión"
-        if (rememberMe || isStandalone) {
+        // En móviles siempre persistir en localStorage para evitar problemas con PWA
+        if (rememberMe || isIOS || isMobile) {
           localStorage.setItem('token', data.token);
           localStorage.setItem('rememberMe', 'true');
         } else {
@@ -53,7 +53,7 @@ export default function LoginPage() {
           localStorage.removeItem('token');
           localStorage.removeItem('rememberMe');
         }
-        console.log('Token stored, rememberMe:', rememberMe, 'isStandalone:', isStandalone);
+        console.log('Token stored in localStorage, isIOS:', isIOS, 'isMobile:', isMobile);
       }
 
       // Redirect based on role
