@@ -3,7 +3,10 @@ export const BASE_URL = API_URL.replace('/api', '');
 
 export function getToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('token') || sessionStorage.getItem('token');
+  const localToken = localStorage.getItem('token');
+  const sessionToken = sessionStorage.getItem('token');
+  console.log('[getToken] localStorage:', localToken ? 'exists' : 'null', 'sessionStorage:', sessionToken ? 'exists' : 'null');
+  return localToken || sessionToken;
 }
 
 export function getAuthHeaders(): HeadersInit {
