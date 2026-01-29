@@ -39,9 +39,13 @@ export default function LoginPage() {
         return;
       }
 
-      // Store token based on remember me preference
+      // Store token - always use localStorage for PWA standalone mode
       if (data.token) {
-        if (rememberMe) {
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                            (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+        
+        // En PWA standalone siempre persistir, o si el usuario marcó "mantener sesión"
+        if (rememberMe || isStandalone) {
           localStorage.setItem('token', data.token);
           localStorage.setItem('rememberMe', 'true');
         } else {
@@ -49,7 +53,7 @@ export default function LoginPage() {
           localStorage.removeItem('token');
           localStorage.removeItem('rememberMe');
         }
-        console.log('Token stored, rememberMe:', rememberMe);
+        console.log('Token stored, rememberMe:', rememberMe, 'isStandalone:', isStandalone);
       }
 
       // Redirect based on role
