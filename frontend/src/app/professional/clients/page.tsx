@@ -29,6 +29,12 @@ interface Routine {
   _count?: { exercises: number };
 }
 
+interface PlanOption {
+  id: string;
+  name: string;
+  price: number;
+}
+
 interface DayAssignment {
   id: string;
   dayOfWeek: number;
@@ -51,21 +57,22 @@ export default function ProfessionalClientsPage() {
   const [search, setSearch] = useState('');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [showWeekModal, setShowWeekModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [expandedClient, setExpandedClient] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const res = await apiFetch('/professional/clients');
-        const data = await res.json();
-        setClients(data.clients || []);
-      } catch (error) {
-        console.error('Error fetching clients:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchClients = async () => {
+    try {
+      const res = await apiFetch('/professional/clients');
+      const data = await res.json();
+      setClients(data.clients || []);
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchClients();
   }, []);
 
@@ -77,8 +84,13 @@ export default function ProfessionalClientsPage() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Mis Clientes</h1>
-        <p className={styles.subtitle}>{clients.length} clientes asignados</p>
+        <div>
+          <h1 className={styles.title}>Mis Clientes</h1>
+          <p className={styles.subtitle}>{clients.length} clientes asignados</p>
+        </div>
+        <button className={styles.addClientBtn} onClick={() => setShowCreateModal(true)}>
+          Nuevo cliente
+        </button>
       </div>
 
       <div className={styles.searchBar}>
@@ -218,6 +230,155 @@ export default function ProfessionalClientsPage() {
           }}
         />
       )}
+      {showCreateModal && (
+        <CreateClientModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={() => {
+            setShowCreateModal(false);
+            setLoading(true);
+            fetchClients();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function CreateClientModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+  const today = new Date().toISOString().split('T')[0];
+  const [plans, setPlans] = useState<PlanOption[]>([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    password: '',
+    planId: '',
+    startDate: today,
+    specialConsiderations: '',
+  });
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const res = await apiFetch('/professional/plans');
+        const data = await res.json();
+        setPlans(data.plans || []);
+      } catch (err) {
+        console.error('Error fetching plans:', err);
+      } finally {
+        setLoadingPlans(false);
+      }
+    };
+
+    fetchPlans();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!formData.password || formData.password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await apiFetch('/professional/clients', {
+        method: 'POST',
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Error al crear cliente');
+      }
+
+      alert(`Cliente creado exitosamente.\n\nEmail: ${formData.email}\nContraseña: ${formData.password}`);
+      onCreated();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <h2 className={styles.modalTitle}>Nuevo cliente</h2>
+          <button className={styles.closeBtn} onClick={onClose}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <form className={styles.createForm} onSubmit={handleSubmit}>
+          {error && <div className={styles.formError}>{error}</div>}
+
+          <div className={styles.formGrid}>
+            <div className={styles.formField}>
+              <label>Nombre</label>
+              <input value={formData.firstName} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} required />
+            </div>
+            <div className={styles.formField}>
+              <label>Apellido</label>
+              <input value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} required />
+            </div>
+          </div>
+
+          <div className={styles.formField}>
+            <label>Email</label>
+            <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
+          </div>
+
+          <div className={styles.formGrid}>
+            <div className={styles.formField}>
+              <label>Teléfono</label>
+              <input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+            </div>
+            <div className={styles.formField}>
+              <label>Contraseña</label>
+              <input type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} required />
+            </div>
+          </div>
+
+          <div className={styles.formGrid}>
+            <div className={styles.formField}>
+              <label>Plan</label>
+              <select value={formData.planId} onChange={(e) => setFormData({ ...formData, planId: e.target.value })} disabled={loadingPlans}>
+                <option value="">Sin plan asignado</option>
+                {plans.map((plan) => (
+                  <option key={plan.id} value={plan.id}>
+                    {plan.name} - ${plan.price}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.formField}>
+              <label>Inicio</label>
+              <input type="date" value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} />
+            </div>
+          </div>
+
+          <div className={styles.formField}>
+            <label>Consideraciones</label>
+            <textarea value={formData.specialConsiderations} onChange={(e) => setFormData({ ...formData, specialConsiderations: e.target.value })} rows={3} />
+          </div>
+
+          <div className={styles.formActions}>
+            <button type="button" className={styles.secondaryBtn} onClick={onClose}>Cancelar</button>
+            <button type="submit" className={styles.primaryBtn} disabled={saving}>{saving ? 'Creando...' : 'Crear cliente'}</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

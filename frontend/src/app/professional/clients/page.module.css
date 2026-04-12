@@ -8,6 +8,13 @@
 
 /* Header */
 
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+}
+
 .title {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
@@ -20,6 +27,20 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-1);
   margin: var(--spacing-1) 0 0 0;
+}
+
+.addClientBtn {
+  padding: var(--spacing-2) var(--spacing-4);
+  background: var(--color-primary);
+  color: var(--color-bg-0);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.addClientBtn:hover {
+  opacity: 0.92;
 }
 
 /* Search Bar */
@@ -304,6 +325,91 @@
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
   padding: var(--spacing-6);
+}
+
+.createForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-3);
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.formField label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-1);
+}
+
+.formField input,
+.formField select,
+.formField textarea {
+  width: 100%;
+  padding: var(--spacing-3);
+  background: var(--color-bg-2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-0);
+}
+
+.formField textarea {
+  resize: vertical;
+}
+
+.formField input:focus,
+.formField select:focus,
+.formField textarea:focus {
+  outline: none;
+  border-color: rgba(188, 255, 49, 0.45);
+}
+
+.formError {
+  padding: var(--spacing-3);
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--radius-md);
+  color: #fca5a5;
+  font-size: var(--font-size-sm);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+}
+
+.primaryBtn,
+.secondaryBtn {
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.primaryBtn {
+  background: var(--color-primary);
+  color: var(--color-bg-0);
+  border: none;
+}
+
+.secondaryBtn {
+  background: transparent;
+  color: var(--color-text-1);
+  border: 1px solid var(--glass-border);
+}
+
+.primaryBtn:disabled,
+.secondaryBtn:disabled {
+  opacity: 0.5;
 }
 
 .modalLarge {

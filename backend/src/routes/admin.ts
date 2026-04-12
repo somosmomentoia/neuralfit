@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { authMiddleware, requireRole, AuthRequest } from '../middleware/auth';
 import { notifyWelcome, notifyNewBenefit, notifyPaymentReceived, notifySubscriptionRenewed } from '../services/notificationService';
+import { getGymAttributionCandidates, validateGymAttributionUser } from '../utils/gymAttribution';
 
 const router = Router();
 
@@ -16,32 +17,43 @@ router.use(requireRole('ADMIN'));
 router.get('/gym', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
-    const gym = await prisma.gym.findUnique({
-      where: { id: req.user!.gymId! },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        logo: true,
-        description: true,
-        isPublic: true,
-        mpAccessToken: true,
-        mpPublicKey: true,
-        mpUserId: true,
-      },
-    });
+    const [gym, attributionCandidates] = await Promise.all([
+      prisma.gym.findUnique({
+        where: { id: req.user!.gymId! },
+      }) as Promise<({
+        id: string;
+        name: string;
+        slug: string;
+        logo: string | null;
+        description: string | null;
+        isPublic: boolean;
+        mpAccessToken: string | null;
+        mpPublicKey: string | null;
+        mpUserId: string | null;
+        defaultClientAttributionUserId?: string | null;
+      } | null)>,
+      getGymAttributionCandidates(prisma, req.user!.gymId!),
+    ]);
 
     if (!gym) {
       return res.status(404).json({ error: 'Gimnasio no encontrado' });
     }
 
     // Ocultar el access token completo, solo mostrar si está configurado
+    const defaultClientAttributionUser = await validateGymAttributionUser(
+      prisma,
+      req.user!.gymId!,
+      gym.defaultClientAttributionUserId,
+    );
+
     return res.json({ 
       gym: {
         ...gym,
         mpAccessToken: gym.mpAccessToken ? '••••••••' + gym.mpAccessToken.slice(-8) : null,
         hasMpConfigured: !!gym.mpAccessToken,
-      }
+        defaultClientAttributionUser,
+      },
+      attributionCandidates,
     });
   } catch (error) {
     console.error('Error fetching gym:', error);
@@ -53,7 +65,22 @@ router.get('/gym', async (req: AuthRequest, res: Response) => {
 router.put('/gym', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
-    const { name, description, logo, isPublic } = req.body;
+    const { name, description, logo, isPublic, defaultClientAttributionUserId } = req.body;
+
+    let validatedAttributionUserId: string | null | undefined = undefined;
+    if (defaultClientAttributionUserId !== undefined) {
+      const resolvedAttributionUser = await validateGymAttributionUser(
+        prisma,
+        req.user!.gymId!,
+        defaultClientAttributionUserId || null,
+      );
+
+      if (defaultClientAttributionUserId && !resolvedAttributionUser) {
+        return res.status(400).json({ error: 'El usuario de atribución debe pertenecer al gimnasio y estar activo' });
+      }
+
+      validatedAttributionUserId = resolvedAttributionUser?.id ?? null;
+    }
 
     const gym = await prisma.gym.update({
       where: { id: req.user!.gymId! },
@@ -62,10 +89,17 @@ router.put('/gym', async (req: AuthRequest, res: Response) => {
         description: description !== undefined ? description : undefined,
         logo: logo !== undefined ? logo : undefined,
         isPublic: isPublic !== undefined ? isPublic : undefined,
-      },
-    });
+        defaultClientAttributionUserId: validatedAttributionUserId,
+      } as any,
+    }) as { id: string; name: string; slug: string; logo: string | null; description: string | null; isPublic: boolean; mpAccessToken: string | null; mpPublicKey: string | null; mpUserId: string | null; defaultClientAttributionUserId?: string | null; };
 
-    return res.json({ gym, message: 'Configuración actualizada' });
+    const defaultClientAttributionUser = await validateGymAttributionUser(
+      prisma,
+      req.user!.gymId!,
+      gym.defaultClientAttributionUserId,
+    );
+
+    return res.json({ gym: { ...gym, defaultClientAttributionUser }, message: 'Configuración actualizada' });
   } catch (error) {
     console.error('Error updating gym:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -243,8 +277,10 @@ router.post('/leads/:id/convert', async (req: AuthRequest, res: Response) => {
         clientProfile: {
           create: {
             planId,
+            createdByUserId: req.user!.id,
+            createdByGymId: req.user!.gymId,
             subscriptionStatus: 'ACTIVE',
-          },
+          } as any,
         },
         subscriptions: {
           create: {
@@ -256,7 +292,9 @@ router.post('/leads/:id/convert', async (req: AuthRequest, res: Response) => {
             startDate: subscriptionStartDate,
             endDate: subscriptionEndDate,
             autoRenew: false,
-          },
+            createdByUserId: req.user!.id,
+            attributedToUserId: req.user!.id,
+          } as any,
         },
       },
     });
@@ -379,11 +417,13 @@ router.post('/clients', async (req: AuthRequest, res: Response) => {
         clientProfile: {
           create: {
             planId: planId || null,
+            createdByUserId: req.user!.id,
+            createdByGymId: req.user!.gymId,
             assignedProfessionalId: assignedProfessionalId || null,
             startDate: subscriptionStartDate,
             specialConsiderations: specialConsiderations || null,
             subscriptionStatus: 'ACTIVE',
-          },
+          } as any,
         },
         // Crear suscripción en el nuevo modelo
         subscriptions: {
@@ -397,7 +437,9 @@ router.post('/clients', async (req: AuthRequest, res: Response) => {
             endDate: subscriptionEndDate,
             autoRenew: false, // Las otorgadas por admin no se renuevan automáticamente
             assignedProfessionalId: assignedProfessionalId || null,
-          },
+            createdByUserId: req.user!.id,
+            attributedToUserId: req.user!.id,
+          } as any,
         },
       },
       include: { 

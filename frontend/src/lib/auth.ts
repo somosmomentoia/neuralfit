@@ -11,7 +11,7 @@ export interface JWTPayload {
   userId: string;
   email: string;
   role: Role;
-  gymId: string;
+  gymId: string | null;
 }
 
 export interface AuthUser {
@@ -20,7 +20,7 @@ export interface AuthUser {
   firstName: string;
   lastName: string;
   role: Role;
-  gymId: string;
+  gymId: string | null;
   avatar: string | null;
 }
 

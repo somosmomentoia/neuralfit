@@ -97,12 +97,6 @@ router.post('/register', async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'El email ya está registrado' });
     }
 
-    // Get default gym (first gym in the system)
-    const defaultGym = await prisma.gym.findFirst();
-    if (!defaultGym) {
-      return res.status(500).json({ error: 'No hay gimnasio configurado' });
-    }
-
     // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -115,15 +109,12 @@ router.post('/register', async (req: AuthRequest, res: Response) => {
         phone: phone || null,
         passwordHash,
         role: 'CLIENT',
-        gymId: defaultGym.id,
-      },
-    });
-
-    // Create client profile with PENDING subscription status
-    await prisma.clientProfile.create({
-      data: {
-        userId: user.id,
-        subscriptionStatus: 'PENDING',
+        gymId: null,
+        clientProfile: {
+          create: {
+            subscriptionStatus: 'PENDING',
+          },
+        },
       },
     });
 

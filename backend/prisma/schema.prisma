@@ -81,10 +81,13 @@ model Gym {
   mpPublicKey       String?  // Public key de MP para el frontend
   mpUserId          String?  // ID de usuario de MP
   
+  defaultClientAttributionUserId String?
+  defaultClientAttributionUser   User?   @relation("GymDefaultClientAttributionUser", fields: [defaultClientAttributionUserId], references: [id])
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users         User[]
+  users         User[] @relation("GymMembers")
   leads         Lead[]
   exercises     Exercise[]
   routines      Routine[]
@@ -97,6 +100,9 @@ model Gym {
   benefits      Benefit[]
   subscriptions Subscription[]
   notifications Notification[]
+  createdClientProfiles ClientProfile[] @relation("GymCreatedClientProfiles")
+
+  @@index([defaultClientAttributionUserId])
 }
 
 model User {
@@ -115,11 +121,13 @@ model User {
   // Gym es opcional para clientes (pueden existir sin gym)
   // Obligatorio para ADMIN y PROFESSIONAL
   gymId String?
-  gym   Gym?    @relation(fields: [gymId], references: [id])
+  gym   Gym?    @relation("GymMembers", fields: [gymId], references: [id])
 
   // Relaciones según rol
   clientProfile       ClientProfile?
   professionalProfile ProfessionalProfile?
+  defaultAttributionGyms Gym[] @relation("GymDefaultClientAttributionUser")
+  createdClientProfiles ClientProfile[] @relation("ClientProfileCreatedBy")
 
   // Profesional: ejercicios y rutinas creadas
   createdExercises Exercise[] @relation("CreatedBy")
@@ -127,6 +135,8 @@ model User {
   
   // Suscripciones del usuario (para clientes)
   subscriptions    Subscription[]
+  createdSubscriptions Subscription[] @relation("SubscriptionCreatedBy")
+  attributedSubscriptions Subscription[] @relation("SubscriptionAttributedTo")
   
   // Entrenamientos libres (sin suscripción)
   freeWorkoutSessions WorkoutSession[] @relation("FreeWorkouts")
@@ -138,11 +148,15 @@ model User {
   @@index([email])
 }
 
-
 model ClientProfile {
   id                String             @id @default(cuid())
   userId            String             @unique
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdByUserId   String?
+  createdByUser     User?              @relation("ClientProfileCreatedBy", fields: [createdByUserId], references: [id])
+  createdByGymId    String?
+  createdByGym      Gym?               @relation("GymCreatedClientProfiles", fields: [createdByGymId], references: [id])
   
   assignedProfessionalId String?
   assignedProfessional   ProfessionalProfile? @relation(fields: [assignedProfessionalId], references: [id])
@@ -169,6 +183,8 @@ model ClientProfile {
   updatedAt DateTime @updatedAt
 
   @@index([assignedProfessionalId])
+  @@index([createdByUserId])
+  @@index([createdByGymId])
 }
 
 // ==================== SUSCRIPCIONES MÚLTIPLES ====================
@@ -203,6 +219,10 @@ model Subscription {
   mpPreapprovalId       String?  // ID de preapproval para suscripciones recurrentes
   autoRenew             Boolean   @default(true)
   cancelledAt           DateTime? // Fecha en que se solicitó cancelación (sigue activa hasta endDate)
+  createdByUserId       String?
+  createdByUser         User?     @relation("SubscriptionCreatedBy", fields: [createdByUserId], references: [id])
+  attributedToUserId    String?
+  attributedToUser      User?     @relation("SubscriptionAttributedTo", fields: [attributedToUserId], references: [id])
   
   // Profesional asignado (opcional)
   assignedProfessionalId String?
@@ -225,6 +245,8 @@ model Subscription {
   @@index([userId])
   @@index([gymId])
   @@index([status])
+  @@index([createdByUserId])
+  @@index([attributedToUserId])
 }
 
 model ProfessionalProfile {
@@ -360,8 +382,8 @@ model Routine {
   sportId String?
   sport   Sport?  @relation(fields: [sportId], references: [id])
   
-  gymId String
-  gym   Gym    @relation(fields: [gymId], references: [id])
+  gymId String?
+  gym   Gym?   @relation(fields: [gymId], references: [id])
   
   createdById String
   createdBy   User   @relation("CreatedBy", fields: [createdById], references: [id])

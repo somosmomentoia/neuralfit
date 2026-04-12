@@ -33,7 +33,7 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
       userId: string;
       email: string;
       role: string;
-      gymId: string;
+      gymId: string | null;
     };
 
     const prisma: PrismaClient = req.app.get('prisma');

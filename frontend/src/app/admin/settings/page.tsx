@@ -44,6 +44,14 @@ interface Benefit {
   isActive: boolean;
 }
 
+interface AttributionCandidate {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: 'ADMIN' | 'PROFESSIONAL';
+}
+
 type ActiveTab = 'general' | 'branches' | 'plans' | 'features' | 'benefits';
 
 interface GymConfig {
@@ -55,6 +63,8 @@ interface GymConfig {
   isPublic: boolean;
   hasMpConfigured: boolean;
   mpPublicKey: string | null;
+  defaultClientAttributionUserId: string | null;
+  defaultClientAttributionUser?: AttributionCandidate | null;
 }
 
 export default function SettingsPage() {
@@ -64,6 +74,7 @@ export default function SettingsPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [features, setFeatures] = useState<PlanFeature[]>([]);
   const [benefits, setBenefits] = useState<Benefit[]>([]);
+  const [attributionCandidates, setAttributionCandidates] = useState<AttributionCandidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -84,6 +95,7 @@ export default function SettingsPage() {
     description: '',
     logo: '',
     isPublic: true,
+    defaultClientAttributionUserId: '',
   });
 
   const [mpForm, setMpForm] = useState({
@@ -144,11 +156,13 @@ export default function SettingsPage() {
 
       if (gymData.gym) {
         setGymConfig(gymData.gym);
+        setAttributionCandidates(gymData.attributionCandidates || []);
         setGymForm({
           name: gymData.gym.name || '',
           description: gymData.gym.description || '',
           logo: gymData.gym.logo || '',
           isPublic: gymData.gym.isPublic ?? true,
+          defaultClientAttributionUserId: gymData.gym.defaultClientAttributionUserId || '',
         });
       }
       setBranches(branchesData.branches || []);
@@ -519,6 +533,24 @@ export default function SettingsPage() {
                 />
                 <span>Visible en el explorador de gimnasios</span>
               </label>
+
+              <div className={styles.field}>
+                <label>Responsable por defecto para altas/compras</label>
+                <select
+                  value={gymForm.defaultClientAttributionUserId}
+                  onChange={(e) => setGymForm({ ...gymForm, defaultClientAttributionUserId: e.target.value })}
+                >
+                  <option value="">Sin asignación automática</option>
+                  {attributionCandidates.map((candidate) => (
+                    <option key={candidate.id} value={candidate.id}>
+                      {candidate.firstName} {candidate.lastName} · {candidate.role === 'ADMIN' ? 'Admin' : 'Entrenador'}
+                    </option>
+                  ))}
+                </select>
+                <small className={styles.fieldHint}>
+                  Este usuario recibirá la atribución por defecto cuando un cliente se registre solo y luego compre una suscripción del gimnasio.
+                </small>
+              </div>
 
               <button 
                 className={styles.saveBtn} 

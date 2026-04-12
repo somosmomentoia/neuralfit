@@ -1,11 +1,25 @@
 import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, requireRole, AuthRequest } from '../middleware/auth';
+import { resolveGymAttributionUserId } from '../utils/gymAttribution';
 
 const router = Router();
 
 router.use(authMiddleware);
 router.use(requireRole('CLIENT'));
+
+async function getPreferredRoutineGymId(prisma: PrismaClient, userId: string, fallbackGymId: string | null) {
+  const activeSubscription = await prisma.subscription.findFirst({
+    where: {
+      userId,
+      status: 'ACTIVE',
+    },
+    select: { gymId: true },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return activeSubscription?.gymId ?? fallbackGymId ?? null;
+}
 
 // GET /api/client/profile
 router.get('/profile', async (req: AuthRequest, res: Response) => {
@@ -43,7 +57,31 @@ router.get('/profile', async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Perfil no encontrado' });
     }
 
-    return res.json({ profile });
+    const latestActiveSubscription = await prisma.subscription.findFirst({
+      where: {
+        userId: req.user!.id,
+        status: 'ACTIVE',
+      },
+      include: {
+        plan: {
+          include: {
+            features: {
+              include: { feature: true },
+            },
+          },
+        },
+      },
+      orderBy: [{ startDate: 'desc' }, { createdAt: 'desc' }],
+    });
+
+    return res.json({
+      profile: {
+        ...profile,
+        subscriptionStatus: latestActiveSubscription?.status || profile.subscriptionStatus,
+        plan: latestActiveSubscription?.plan || profile.plan,
+        currentSubscriptionId: latestActiveSubscription?.id || null,
+      },
+    });
   } catch (error) {
     console.error('Error fetching profile:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -401,7 +439,6 @@ router.get('/routines/week', async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
-
 
 // POST /api/client/workout/start - Iniciar sesión de entrenamiento
 router.post('/workout/start', async (req: AuthRequest, res: Response) => {
@@ -1183,6 +1220,7 @@ router.post('/subscriptions/confirm-payment', async (req: AuthRequest, res: Resp
     // Calcular fecha de fin
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + plan.durationDays);
+    const attributedToUserId = await resolveGymAttributionUserId(prisma, gymId);
 
     // Crear suscripción activa
     const subscription = await prisma.subscription.create({
@@ -1198,18 +1236,20 @@ router.post('/subscriptions/confirm-payment', async (req: AuthRequest, res: Resp
         mpSubscriptionId: mpPaymentId,
         mpPreapprovalId: mpPreferenceId,
         autoRenew: true,
-      },
+        attributedToUserId,
+      } as any,
       include: {
         gym: true,
         plan: true,
       },
     });
 
-    // Actualizar gymId del usuario
-    await prisma.user.update({
-      where: { id: req.user!.id },
-      data: { gymId },
-    });
+    if (!req.user!.gymId) {
+      await prisma.user.update({
+        where: { id: req.user!.id },
+        data: { gymId },
+      });
+    }
 
     // Crear o actualizar ClientProfile
     await prisma.clientProfile.upsert({
@@ -1405,6 +1445,7 @@ router.post('/subscriptions', async (req: AuthRequest, res: Response) => {
         endDate.setDate(endDate.getDate() + plan.durationDays);
       }
     }
+    const attributedToUserId = await resolveGymAttributionUserId(prisma, gymId);
 
     // Crear suscripción con status ACTIVE (pago por MercadoPago)
     const subscription = await prisma.subscription.create({
@@ -1418,18 +1459,20 @@ router.post('/subscriptions', async (req: AuthRequest, res: Response) => {
         startDate: new Date(),
         endDate,
         autoRenew: true,
-      },
+        attributedToUserId,
+      } as any,
       include: {
         gym: true,
         plan: true,
       },
     });
 
-    // Actualizar el gymId del usuario para que pertenezca a este gym
-    await prisma.user.update({
-      where: { id: req.user!.id },
-      data: { gymId },
-    });
+    if (!req.user!.gymId) {
+      await prisma.user.update({
+        where: { id: req.user!.id },
+        data: { gymId },
+      });
+    }
 
     // Crear o actualizar ClientProfile con el plan y status activo
     await prisma.clientProfile.upsert({
@@ -1650,46 +1693,31 @@ router.post('/workout/free', async (req: AuthRequest, res: Response) => {
     // Si el usuario quiere guardar como rutina, crear la rutina
     let savedRoutine = null;
     if (saveAsRoutine && exercisesCompleted && exercisesCompleted.length > 0) {
-      // Obtener el gymId del usuario (de su primera suscripción activa o del gym por defecto)
-      const userWithGym = await prisma.user.findUnique({
-        where: { id: req.user!.id },
-        include: { 
-          gym: true,
-          subscriptions: {
-            where: { status: 'ACTIVE' },
-            include: { plan: { include: { gym: true } } },
-            take: 1,
+      const gymId = await getPreferredRoutineGymId(prisma, req.user!.id, req.user!.gymId || null);
+
+      savedRoutine = await prisma.routine.create({
+        data: {
+          name: workoutName || 'Mi Rutina',
+          description: `Rutina creada desde entrenamiento libre`,
+          category: 'MUSCULACION',
+          gymId,
+          createdById: req.user!.id,
+          exercises: {
+            create: exercisesCompleted.map((ex: { exerciseId: string; sets: number; reps: string }, index: number) => ({
+              exerciseId: ex.exerciseId,
+              sets: ex.sets || 3,
+              reps: ex.reps || '12',
+              restSeconds: 60,
+              order: index + 1,
+            })),
+          },
+        },
+        include: {
+          exercises: {
+            include: { exercise: true },
           },
         },
       });
-      
-      const gymId = userWithGym?.subscriptions?.[0]?.plan?.gymId || userWithGym?.gymId;
-      
-      if (gymId) {
-        savedRoutine = await prisma.routine.create({
-          data: {
-            name: workoutName || 'Mi Rutina',
-            description: `Rutina creada desde entrenamiento libre`,
-            category: 'MUSCULACION',
-            gymId,
-            createdById: req.user!.id,
-            exercises: {
-              create: exercisesCompleted.map((ex: { exerciseId: string; sets: number; reps: string }, index: number) => ({
-                exerciseId: ex.exerciseId,
-                sets: ex.sets || 3,
-                reps: ex.reps || '12',
-                restSeconds: 60,
-                order: index + 1,
-              })),
-            },
-          },
-          include: {
-            exercises: {
-              include: { exercise: true },
-            },
-          },
-        });
-      }
     }
 
     const session = await prisma.workoutSession.create({
@@ -1780,14 +1808,7 @@ router.post('/routines/my', async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'Nombre y ejercicios son requeridos' });
     }
 
-    // Obtener el gymId del usuario (puede ser null para usuarios libres)
-    const gymId = req.user!.gymId;
-    
-    // Si no tiene gym, usar un gym por defecto o crear sin gym
-    // Para rutinas personalizadas, usamos el gym del usuario si existe
-    if (!gymId) {
-      return res.status(400).json({ error: 'Necesitas estar suscrito a un gimnasio para crear rutinas' });
-    }
+    const gymId = await getPreferredRoutineGymId(prisma, req.user!.id, req.user!.gymId || null);
 
     // Obtener el clientProfileId del usuario
     const clientProfile = await prisma.clientProfile.findFirst({

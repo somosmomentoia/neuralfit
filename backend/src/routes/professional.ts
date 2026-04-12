@@ -1,12 +1,133 @@
 import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 import { authMiddleware, requireRole, AuthRequest } from '../middleware/auth';
-import { notifyRoutineAssigned } from '../services/notificationService';
+import { notifyRoutineAssigned, notifyWelcome } from '../services/notificationService';
 
 const router = Router();
 
 router.use(authMiddleware);
 router.use(requireRole('PROFESSIONAL'));
+
+// GET /api/professional/plans - Planes activos del gimnasio del profesional
+router.get('/plans', async (req: AuthRequest, res: Response) => {
+  try {
+    const prisma: PrismaClient = req.app.get('prisma');
+    const plans = await prisma.plan.findMany({
+      where: {
+        gymId: req.user!.gymId!,
+        isActive: true,
+      },
+      orderBy: [{ price: 'asc' }, { name: 'asc' }],
+    });
+
+    return res.json({ plans });
+  } catch (error) {
+    console.error('Error fetching professional plans:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// POST /api/professional/clients - Crear cliente desde el lado del entrenador
+router.post('/clients', async (req: AuthRequest, res: Response) => {
+  try {
+    const prisma: PrismaClient = req.app.get('prisma');
+    const {
+      email,
+      password,
+      firstName,
+      lastName,
+      phone,
+      planId,
+      startDate,
+      specialConsiderations,
+    } = req.body;
+
+    const professional = await prisma.professionalProfile.findFirst({
+      where: { userId: req.user!.id },
+    });
+
+    if (!professional) {
+      return res.status(404).json({ error: 'Perfil profesional no encontrado' });
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ error: 'El email ya está registrado' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    let plan = null;
+    if (planId) {
+      plan = await prisma.plan.findFirst({
+        where: { id: planId, gymId: req.user!.gymId!, isActive: true },
+      });
+    }
+
+    const subscriptionStartDate = startDate ? new Date(startDate) : new Date();
+    const subscriptionEndDate = new Date(subscriptionStartDate);
+    if (plan) {
+      subscriptionEndDate.setDate(subscriptionEndDate.getDate() + plan.durationDays);
+    } else {
+      subscriptionEndDate.setDate(subscriptionEndDate.getDate() + 30);
+    }
+
+    const user = await prisma.user.create({
+      data: {
+        email,
+        passwordHash: hashedPassword,
+        firstName,
+        lastName,
+        phone,
+        role: 'CLIENT',
+        gymId: req.user!.gymId,
+        clientProfile: {
+          create: {
+            planId: planId || null,
+            createdByUserId: req.user!.id,
+            createdByGymId: req.user!.gymId,
+            assignedProfessionalId: professional.id,
+            startDate: subscriptionStartDate,
+            specialConsiderations: specialConsiderations || null,
+            subscriptionStatus: 'ACTIVE',
+          } as any,
+        },
+        subscriptions: {
+          create: {
+            gymId: req.user!.gymId!,
+            planId: planId || null,
+            status: 'ACTIVE',
+            type: 'MONTHLY',
+            source: 'ADMIN_GRANTED',
+            startDate: subscriptionStartDate,
+            endDate: subscriptionEndDate,
+            autoRenew: false,
+            assignedProfessionalId: professional.id,
+            createdByUserId: req.user!.id,
+            attributedToUserId: req.user!.id,
+          } as any,
+        },
+      },
+      include: {
+        subscriptions: {
+          include: { plan: true, gym: true },
+        },
+        clientProfile: true,
+      },
+    });
+
+    const gym = await prisma.gym.findUnique({ where: { id: req.user!.gymId! } });
+    if (gym) {
+      notifyWelcome(user.id, gym.name, gym.id);
+    }
+
+    return res.status(201).json({ client: user, tempPassword: password });
+  } catch (error) {
+    console.error('Error creating professional client:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
 
 // GET /api/professional/clients
 router.get('/clients', async (req: AuthRequest, res: Response) => {
