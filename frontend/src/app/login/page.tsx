@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './page.module.css';
@@ -58,6 +59,7 @@ export default function LoginPage() {
 
       // Redirect based on role
       const redirectPath = 
+        data.user.role === 'SUPERADMIN' ? '/superadmin' :
         data.user.role === 'ADMIN' ? '/admin' :
         data.user.role === 'PROFESSIONAL' ? '/professional' : '/client';
       
@@ -75,7 +77,7 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.content}>
         <div className={styles.logo}>
-          <img src="/Recurso 4.svg" alt="NeuralFit" className={styles.logoIcon} />
+          <Image src="/Recurso 4.svg" alt="NeuralFit" className={styles.logoIcon} width={72} height={72} priority />
           <h1 className={styles.brand}><span className={styles.brandNeural}>Neural</span><span className={styles.brandFit}>Fit</span></h1>
           <p className={styles.tagline}>Tu gimnasio, tu progreso</p>
         </div>

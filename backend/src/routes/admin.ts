@@ -1,5 +1,5 @@
 import { Router, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, SubscriptionStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { authMiddleware, requireRole, AuthRequest } from '../middleware/auth';
 import { notifyWelcome, notifyNewBenefit, notifyPaymentReceived, notifySubscriptionRenewed } from '../services/notificationService';
@@ -10,6 +10,91 @@ const router = Router();
 // All admin routes require authentication and ADMIN role
 router.use(authMiddleware);
 router.use(requireRole('ADMIN'));
+
+const ADMIN_SUBSCRIPTION_STATUS_PRIORITY: Record<string, number> = {
+  ACTIVE: 0,
+  PENDING: 1,
+  SUSPENDED: 2,
+  EXPIRED: 3,
+  CANCELLED: 4,
+};
+
+const compareAdminSubscriptions = (a: any, b: any) => {
+  const priorityA = ADMIN_SUBSCRIPTION_STATUS_PRIORITY[a.status] ?? 99;
+  const priorityB = ADMIN_SUBSCRIPTION_STATUS_PRIORITY[b.status] ?? 99;
+  if (priorityA !== priorityB) {
+    return priorityA - priorityB;
+  }
+
+  const dateA = new Date(a.startDate ?? a.createdAt).getTime();
+  const dateB = new Date(b.startDate ?? b.createdAt).getTime();
+  return dateB - dateA;
+};
+
+const pickPreferredAdminSubscription = (subscriptions: any[]) => {
+  return [...subscriptions].sort(compareAdminSubscriptions)[0] ?? null;
+};
+
+const normalizeAdminSubscriptionStatus = (status?: string): SubscriptionStatus | undefined => {
+  if (!status) {
+    return undefined;
+  }
+
+  return status === 'INACTIVE' ? 'SUSPENDED' : status as SubscriptionStatus;
+};
+
+const formatAdminClient = (subscription: any) => ({
+  id: subscription.user.id,
+  firstName: subscription.user.firstName,
+  lastName: subscription.user.lastName,
+  email: subscription.user.email,
+  phone: subscription.user.phone,
+  avatar: subscription.user.avatar,
+  isActive: subscription.user.isActive,
+  createdAt: subscription.user.createdAt,
+  subscription: {
+    id: subscription.id,
+    status: subscription.status,
+    startDate: subscription.startDate ?? null,
+    endDate: subscription.endDate ?? null,
+    plan: subscription.plan ?? null,
+    assignedProfessional: subscription.assignedProfessional ?? null,
+    specialConsiderations: subscription.specialConsiderations ?? null,
+    notes: subscription.notes ?? null,
+    medicalClearanceUrl: subscription.medicalClearanceUrl ?? null,
+    assignedRoutines: subscription.dayRoutineAssignments ?? [],
+  },
+  clientProfile: {
+    subscriptionStatus: subscription.status,
+    plan: subscription.plan ?? null,
+  },
+});
+
+const formatAdminProfessionalAssignedClient = (subscription: any) => ({
+  id: subscription.user.id,
+  subscriptionStatus: subscription.status,
+  user: subscription.user,
+  plan: subscription.plan ?? null,
+});
+
+const formatSubscriptionPriceOption = (priceOption: any) => ({
+  id: priceOption.id,
+  name: priceOption.name,
+  description: priceOption.description ?? null,
+  monthlyPrice: priceOption.monthlyPrice,
+  isActive: priceOption.isActive,
+  isPublic: priceOption.isPublic,
+  isDefault: priceOption.isDefault,
+  plan: priceOption.plan
+    ? {
+        id: priceOption.plan.id,
+        name: priceOption.plan.name,
+      }
+    : null,
+  subscriptionsCount: priceOption._count?.subscriptions ?? 0,
+  createdAt: priceOption.createdAt,
+  updatedAt: priceOption.updatedAt,
+});
 
 // ============ GYM CONFIG ============
 
@@ -132,6 +217,224 @@ router.put('/gym/mercadopago', async (req: AuthRequest, res: Response) => {
     });
   } catch (error) {
     console.error('Error configuring MercadoPago:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.get('/subscription-price-options', async (req: AuthRequest, res: Response) => {
+  try {
+    const prisma: PrismaClient = req.app.get('prisma');
+    const prismaAny = prisma as any;
+    const priceOptions = await prismaAny.subscriptionPriceOption.findMany({
+      where: { gymId: req.user!.gymId! },
+      include: {
+        plan: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            subscriptions: true,
+          },
+        },
+      },
+      orderBy: [
+        { isDefault: 'desc' },
+        { monthlyPrice: 'asc' },
+        { createdAt: 'asc' },
+      ],
+    } as any);
+
+    return res.json({ priceOptions: priceOptions.map(formatSubscriptionPriceOption) });
+  } catch (error) {
+    console.error('Error fetching subscription price options:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.post('/subscription-price-options', async (req: AuthRequest, res: Response) => {
+  try {
+    const prisma: PrismaClient = req.app.get('prisma');
+    const prismaAny = prisma as any;
+    const { name, description, monthlyPrice, planId, isActive, isPublic, isDefault } = req.body;
+
+    if (!name || !planId || !Number.isFinite(Number(monthlyPrice)) || Number(monthlyPrice) <= 0) {
+      return res.status(400).json({ error: 'Nombre, plan y precio mensual válido son requeridos' });
+    }
+
+    const plan = await prisma.plan.findFirst({
+      where: {
+        id: planId,
+        gymId: req.user!.gymId!,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!plan) {
+      return res.status(404).json({ error: 'Plan no encontrado' });
+    }
+
+    const priceOption = await prisma.$transaction(async (tx) => {
+      const txAny = tx as any;
+      if (isDefault) {
+        await txAny.subscriptionPriceOption.updateMany({
+          where: { gymId: req.user!.gymId! },
+          data: { isDefault: false },
+        } as any);
+      }
+
+      return txAny.subscriptionPriceOption.create({
+        data: {
+          name,
+          description: description || null,
+          monthlyPrice: Number(monthlyPrice),
+          isActive: isActive !== undefined ? Boolean(isActive) : true,
+          isPublic: isPublic !== undefined ? Boolean(isPublic) : false,
+          isDefault: Boolean(isDefault),
+          gymId: req.user!.gymId!,
+          planId,
+        },
+        include: {
+          plan: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          _count: {
+            select: {
+              subscriptions: true,
+            },
+          },
+        },
+      } as any);
+    });
+
+    return res.status(201).json({ priceOption: formatSubscriptionPriceOption(priceOption) });
+  } catch (error) {
+    console.error('Error creating subscription price option:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.put('/subscription-price-options/:id', async (req: AuthRequest, res: Response) => {
+  try {
+    const prisma: PrismaClient = req.app.get('prisma');
+    const prismaAny = prisma as any;
+    const { name, description, monthlyPrice, planId, isActive, isPublic, isDefault } = req.body;
+
+    const existingPriceOption = await prismaAny.subscriptionPriceOption.findFirst({
+      where: {
+        id: req.params.id,
+        gymId: req.user!.gymId!,
+      },
+      select: {
+        id: true,
+      },
+    } as any);
+
+    if (!existingPriceOption) {
+      return res.status(404).json({ error: 'Precio/promoción no encontrado' });
+    }
+
+    if (planId) {
+      const plan = await prisma.plan.findFirst({
+        where: {
+          id: planId,
+          gymId: req.user!.gymId!,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!plan) {
+        return res.status(404).json({ error: 'Plan no encontrado' });
+      }
+    }
+
+    const updatedPriceOption = await prisma.$transaction(async (tx) => {
+      const txAny = tx as any;
+      if (isDefault) {
+        await txAny.subscriptionPriceOption.updateMany({
+          where: {
+            gymId: req.user!.gymId!,
+            id: { not: req.params.id },
+          },
+          data: { isDefault: false },
+        } as any);
+      }
+
+      return txAny.subscriptionPriceOption.update({
+        where: { id: req.params.id },
+        data: {
+          name: name ?? undefined,
+          description: description !== undefined ? (description || null) : undefined,
+          monthlyPrice: monthlyPrice !== undefined ? Number(monthlyPrice) : undefined,
+          isActive: isActive !== undefined ? Boolean(isActive) : undefined,
+          isPublic: isPublic !== undefined ? Boolean(isPublic) : undefined,
+          isDefault: isDefault !== undefined ? Boolean(isDefault) : undefined,
+          planId: planId ?? undefined,
+        },
+        include: {
+          plan: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          _count: {
+            select: {
+              subscriptions: true,
+            },
+          },
+        },
+      } as any);
+    });
+
+    return res.json({ priceOption: formatSubscriptionPriceOption(updatedPriceOption) });
+  } catch (error) {
+    console.error('Error updating subscription price option:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.delete('/subscription-price-options/:id', async (req: AuthRequest, res: Response) => {
+  try {
+    const prisma: PrismaClient = req.app.get('prisma');
+    const prismaAny = prisma as any;
+
+    const priceOption = await prismaAny.subscriptionPriceOption.findFirst({
+      where: {
+        id: req.params.id,
+        gymId: req.user!.gymId!,
+      },
+      include: {
+        _count: {
+          select: {
+            subscriptions: true,
+          },
+        },
+      },
+    } as any);
+
+    if (!priceOption) {
+      return res.status(404).json({ error: 'Precio/promoción no encontrado' });
+    }
+
+    if (priceOption._count.subscriptions > 0) {
+      return res.status(400).json({ error: 'No se puede eliminar un precio/promoción con suscripciones asociadas' });
+    }
+
+    await prismaAny.subscriptionPriceOption.delete({ where: { id: req.params.id } } as any);
+
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting subscription price option:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -318,8 +621,7 @@ router.get('/clients', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
     const adminGymId = req.user!.gymId;
-    
-    // Buscar suscripciones de este gym y traer los usuarios
+
     const subscriptions = await prisma.subscription.findMany({
       where: { gymId: adminGymId },
       include: {
@@ -340,32 +642,21 @@ router.get('/clients', async (req: AuthRequest, res: Response) => {
           include: { user: { select: { firstName: true, lastName: true } } },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ startDate: 'desc' }, { createdAt: 'desc' }],
     });
 
-    // Formatear para compatibilidad con frontend
-    const clients = subscriptions.map(sub => ({
-      id: sub.user.id,
-      firstName: sub.user.firstName,
-      lastName: sub.user.lastName,
-      email: sub.user.email,
-      phone: sub.user.phone,
-      avatar: sub.user.avatar,
-      isActive: sub.user.isActive,
-      createdAt: sub.user.createdAt,
-      // Datos de la suscripción en este gym
-      subscription: {
-        id: sub.id,
-        status: sub.status,
-        plan: sub.plan,
-        assignedProfessional: sub.assignedProfessional,
-      },
-      // Compatibilidad legacy
-      clientProfile: {
-        subscriptionStatus: sub.status,
-        plan: sub.plan,
-      },
-    }));
+    const subscriptionsByUserId = new Map<string, any[]>();
+    for (const subscription of subscriptions) {
+      const userSubscriptions = subscriptionsByUserId.get(subscription.user.id) ?? [];
+      userSubscriptions.push(subscription);
+      subscriptionsByUserId.set(subscription.user.id, userSubscriptions);
+    }
+
+    const clients = Array.from(subscriptionsByUserId.values())
+      .map((userSubscriptions) => pickPreferredAdminSubscription(userSubscriptions))
+      .filter(Boolean)
+      .sort(compareAdminSubscriptions)
+      .map((subscription) => formatAdminClient(subscription));
 
     return res.json({ clients });
   } catch (error) {
@@ -491,6 +782,7 @@ router.get('/clients/:id', async (req: AuthRequest, res: Response) => {
         createdAt: true,
         subscriptions: {
           where: { gymId: adminGymId },
+          orderBy: [{ startDate: 'desc' }, { createdAt: 'desc' }],
           include: {
             plan: true,
             assignedProfessional: {
@@ -508,36 +800,24 @@ router.get('/clients/:id', async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Cliente no encontrado' });
     }
 
-    // Verificar que tenga suscripción en este gym
-    const subscription = user.subscriptions[0];
+    const subscription = pickPreferredAdminSubscription(user.subscriptions);
     if (!subscription) {
       return res.status(404).json({ error: 'El cliente no tiene suscripción en este gimnasio' });
     }
 
-    // Formatear respuesta compatible con el frontend actual
-    const client = {
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      phone: user.phone,
-      avatar: user.avatar,
-      isActive: user.isActive,
-      createdAt: user.createdAt,
-      // Datos específicos de este gym (desde Subscription)
-      subscription: {
-        id: subscription.id,
-        status: subscription.status,
-        startDate: subscription.startDate,
-        endDate: subscription.endDate,
-        plan: subscription.plan,
-        assignedProfessional: subscription.assignedProfessional,
-        specialConsiderations: subscription.specialConsiderations,
-        notes: subscription.notes,
-        medicalClearanceUrl: subscription.medicalClearanceUrl,
-        assignedRoutines: subscription.dayRoutineAssignments,
+    const client = formatAdminClient({
+      ...subscription,
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        avatar: user.avatar,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
       },
-    };
+    });
 
     return res.json({ client });
   } catch (error) {
@@ -551,12 +831,19 @@ router.put('/clients/:id', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
     const adminGymId = req.user!.gymId;
-    const { status, planId, assignedProfessionalId, specialConsiderations, notes } = req.body;
+    const { status, subscriptionStatus, planId, assignedProfessionalId, specialConsiderations, notes } = req.body;
+    const nextStatus = normalizeAdminSubscriptionStatus(status ?? subscriptionStatus);
+    const nextPlanId = planId !== undefined ? (planId || null) : undefined;
+    const nextAssignedProfessionalId = assignedProfessionalId !== undefined
+      ? (assignedProfessionalId || null)
+      : undefined;
 
-    // Buscar la suscripción del cliente en este gym
-    const subscription = await prisma.subscription.findFirst({
+    const subscriptions = await prisma.subscription.findMany({
       where: { userId: req.params.id, gymId: adminGymId },
+      orderBy: [{ startDate: 'desc' }, { createdAt: 'desc' }],
     });
+
+    const subscription = pickPreferredAdminSubscription(subscriptions);
 
     if (!subscription) {
       return res.status(404).json({ error: 'El cliente no tiene suscripción en este gimnasio' });
@@ -566,9 +853,9 @@ router.put('/clients/:id', async (req: AuthRequest, res: Response) => {
     const updatedSubscription = await prisma.subscription.update({
       where: { id: subscription.id },
       data: {
-        status: status || undefined,
-        planId: planId || null,
-        assignedProfessionalId: assignedProfessionalId || null,
+        status: nextStatus || undefined,
+        planId: nextPlanId,
+        assignedProfessionalId: nextAssignedProfessionalId,
         specialConsiderations: specialConsiderations ?? subscription.specialConsiderations,
         notes: notes ?? subscription.notes,
       },
@@ -595,30 +882,24 @@ router.put('/clients/:id', async (req: AuthRequest, res: Response) => {
       },
     });
 
-    // También actualizar el ClientProfile para mantener sincronizado
-    if (assignedProfessionalId !== undefined) {
+    if (
+      assignedProfessionalId !== undefined
+      || planId !== undefined
+      || nextStatus !== undefined
+      || specialConsiderations !== undefined
+    ) {
       await prisma.clientProfile.updateMany({
         where: { userId: req.params.id },
-        data: { assignedProfessionalId: assignedProfessionalId || null },
+        data: {
+          assignedProfessionalId: nextAssignedProfessionalId,
+          planId: nextPlanId,
+          subscriptionStatus: nextStatus || undefined,
+          specialConsiderations: specialConsiderations ?? undefined,
+        },
       });
     }
 
-    // Formatear respuesta
-    const client = {
-      ...updatedSubscription.user,
-      subscription: {
-        id: updatedSubscription.id,
-        status: updatedSubscription.status,
-        startDate: updatedSubscription.startDate,
-        endDate: updatedSubscription.endDate,
-        plan: updatedSubscription.plan,
-        assignedProfessional: updatedSubscription.assignedProfessional,
-        specialConsiderations: updatedSubscription.specialConsiderations,
-        notes: updatedSubscription.notes,
-        medicalClearanceUrl: updatedSubscription.medicalClearanceUrl,
-        assignedRoutines: updatedSubscription.dayRoutineAssignments,
-      },
-    };
+    const client = formatAdminClient(updatedSubscription);
 
     return res.json({ client });
   } catch (error) {
@@ -634,10 +915,12 @@ router.patch('/clients/:id/medical-clearance', async (req: AuthRequest, res: Res
     const adminGymId = req.user!.gymId;
     const { medicalClearanceUrl } = req.body;
 
-    // Buscar la suscripción del cliente en este gym
-    const subscription = await prisma.subscription.findFirst({
+    const subscriptions = await prisma.subscription.findMany({
       where: { userId: req.params.id, gymId: adminGymId },
+      orderBy: [{ startDate: 'desc' }, { createdAt: 'desc' }],
     });
+
+    const subscription = pickPreferredAdminSubscription(subscriptions);
 
     if (!subscription) {
       return res.status(404).json({ error: 'El cliente no tiene suscripción en este gimnasio' });
@@ -647,6 +930,27 @@ router.patch('/clients/:id/medical-clearance', async (req: AuthRequest, res: Res
     const updatedSubscription = await prisma.subscription.update({
       where: { id: subscription.id },
       data: { medicalClearanceUrl },
+      include: {
+        plan: true,
+        assignedProfessional: {
+          include: { user: { select: { firstName: true, lastName: true } } },
+        },
+        dayRoutineAssignments: {
+          include: { routine: true },
+        },
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+            avatar: true,
+            isActive: true,
+            createdAt: true,
+          },
+        },
+      },
     });
 
     return res.json({ 
@@ -664,13 +968,16 @@ router.patch('/clients/:id/status', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
     const adminGymId = req.user!.gymId;
-    const { isActive, status } = req.body;
+    const { isActive, status, subscriptionStatus } = req.body;
+    const nextStatus = normalizeAdminSubscriptionStatus(status ?? subscriptionStatus);
 
     // Buscar la suscripción del cliente en este gym
-    const subscription = await prisma.subscription.findFirst({
+    const subscriptions = await prisma.subscription.findMany({
       where: { userId: req.params.id, gymId: adminGymId },
-      include: { user: true },
+      orderBy: [{ startDate: 'desc' }, { createdAt: 'desc' }],
     });
+
+    const subscription = pickPreferredAdminSubscription(subscriptions);
 
     if (!subscription) {
       return res.status(404).json({ error: 'El cliente no tiene suscripción en este gimnasio' });
@@ -685,10 +992,15 @@ router.patch('/clients/:id/status', async (req: AuthRequest, res: Response) => {
     }
 
     // Update subscription status si se proporciona
-    if (status) {
+    if (nextStatus) {
       await prisma.subscription.update({
         where: { id: subscription.id },
-        data: { status },
+        data: { status: nextStatus },
+      });
+
+      await prisma.clientProfile.updateMany({
+        where: { userId: req.params.id },
+        data: { subscriptionStatus: nextStatus },
       });
     }
 
@@ -712,18 +1024,13 @@ router.patch('/clients/:id/status', async (req: AuthRequest, res: Response) => {
         assignedProfessional: {
           include: { user: { select: { firstName: true, lastName: true } } },
         },
+        dayRoutineAssignments: {
+          include: { routine: true },
+        },
       },
     });
 
-    const client = {
-      ...updatedSubscription!.user,
-      subscription: {
-        id: updatedSubscription!.id,
-        status: updatedSubscription!.status,
-        plan: updatedSubscription!.plan,
-        assignedProfessional: updatedSubscription!.assignedProfessional,
-      },
-    };
+    const client = formatAdminClient(updatedSubscription!);
 
     return res.json({ client });
   } catch (error) {
@@ -741,7 +1048,16 @@ router.get('/payments', async (req: AuthRequest, res: Response) => {
     const payments = await prisma.payment.findMany({
       where: {
         clientProfile: {
-          user: { gymId: req.user!.gymId },
+          OR: [
+            { createdByGymId: req.user!.gymId },
+            {
+              user: {
+                subscriptions: {
+                  some: { gymId: req.user!.gymId },
+                },
+              },
+            },
+          ],
         },
       },
       include: {
@@ -816,7 +1132,53 @@ router.get('/professionals', async (req: AuthRequest, res: Response) => {
       },
       orderBy: { createdAt: 'desc' },
     });
-    return res.json({ professionals });
+
+    const professionalIds = professionals
+      .map((professional) => professional.professionalProfile?.id)
+      .filter((id): id is string => Boolean(id));
+
+    const subscriptions = professionalIds.length > 0
+      ? await prisma.subscription.findMany({
+        where: {
+          gymId: req.user!.gymId,
+          assignedProfessionalId: { in: professionalIds },
+        },
+        select: {
+          assignedProfessionalId: true,
+          userId: true,
+        },
+      })
+      : [];
+
+    const clientIdsByProfessionalId = new Map<string, Set<string>>();
+    for (const subscription of subscriptions) {
+      if (!subscription.assignedProfessionalId) {
+        continue;
+      }
+
+      const userIds = clientIdsByProfessionalId.get(subscription.assignedProfessionalId) ?? new Set<string>();
+      userIds.add(subscription.userId);
+      clientIdsByProfessionalId.set(subscription.assignedProfessionalId, userIds);
+    }
+
+    const normalizedProfessionals = professionals.map((professional) => {
+      if (!professional.professionalProfile) {
+        return professional;
+      }
+
+      return {
+        ...professional,
+        professionalProfile: {
+          ...professional.professionalProfile,
+          _count: {
+            ...professional.professionalProfile._count,
+            assignedClients: clientIdsByProfessionalId.get(professional.professionalProfile.id)?.size ?? 0,
+          },
+        },
+      };
+    });
+
+    return res.json({ professionals: normalizedProfessionals });
   } catch (error) {
     console.error('Error fetching professionals:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -832,12 +1194,7 @@ router.get('/professionals/:id', async (req: AuthRequest, res: Response) => {
       include: {
         professionalProfile: {
           include: {
-            assignedClients: {
-              include: {
-                user: true,
-                plan: true,
-              },
-            },
+            assignedClients: true,
           },
         },
       },
@@ -847,7 +1204,50 @@ router.get('/professionals/:id', async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Profesional no encontrado' });
     }
 
-    return res.json({ professional });
+    const assignedSubscriptions = professional.professionalProfile
+      ? await prisma.subscription.findMany({
+        where: {
+          gymId: req.user!.gymId,
+          assignedProfessionalId: professional.professionalProfile.id,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+          plan: true,
+        },
+        orderBy: [{ startDate: 'desc' }, { createdAt: 'desc' }],
+      })
+      : [];
+
+    const subscriptionsByUserId = new Map<string, any[]>();
+    for (const subscription of assignedSubscriptions) {
+      const userSubscriptions = subscriptionsByUserId.get(subscription.userId) ?? [];
+      userSubscriptions.push(subscription);
+      subscriptionsByUserId.set(subscription.userId, userSubscriptions);
+    }
+
+    const assignedClients = Array.from(subscriptionsByUserId.values())
+      .map((userSubscriptions) => pickPreferredAdminSubscription(userSubscriptions))
+      .filter(Boolean)
+      .map((subscription) => formatAdminProfessionalAssignedClient(subscription));
+
+    return res.json({
+      professional: {
+        ...professional,
+        professionalProfile: professional.professionalProfile
+          ? {
+            ...professional.professionalProfile,
+            assignedClients,
+          }
+          : null,
+      },
+    });
   } catch (error) {
     console.error('Error fetching professional:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });

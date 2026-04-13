@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
@@ -10,10 +11,15 @@ interface Subscription {
   id: string;
   status: 'PENDING' | 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'SUSPENDED';
   type: string;
+  source?: 'ADMIN_GRANTED' | 'PLATFORM_PURCHASE' | 'LEAD_CONVERSION' | string;
   startDate: string | null;
   endDate: string | null;
   autoRenew: boolean;
   cancelledAt: string | null;
+  monthsCount?: number | null;
+  monthlyPriceSnapshot?: number | null;
+  totalPriceSnapshot?: number | null;
+  priceOptionNameSnapshot?: string | null;
   gym: {
     id: string;
     name: string;
@@ -24,9 +30,15 @@ interface Subscription {
   plan: {
     id: string;
     name: string;
-    price: number;
+    price?: number;
     durationDays: number;
     description: string | null;
+  } | null;
+  priceOption?: {
+    id: string;
+    name: string;
+    description?: string | null;
+    monthlyPrice: number;
   } | null;
 }
 
@@ -90,6 +102,37 @@ export default function SubscriptionDetailPage() {
     });
   };
 
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(price);
+  };
+
+  const getSubscriptionDisplayName = (currentSubscription: Subscription) => {
+    return currentSubscription.priceOptionNameSnapshot || currentSubscription.priceOption?.name || currentSubscription.plan?.name || 'Sin plan';
+  };
+
+  const getSubscriptionDescription = (currentSubscription: Subscription) => {
+    return currentSubscription.priceOption?.description || currentSubscription.plan?.description || null;
+  };
+
+  const getSubscriptionMonthlyPrice = (currentSubscription: Subscription) => {
+    return currentSubscription.monthlyPriceSnapshot ?? currentSubscription.priceOption?.monthlyPrice ?? currentSubscription.plan?.price ?? null;
+  };
+
+  const getSubscriptionTotalPrice = (currentSubscription: Subscription) => {
+    if (currentSubscription.totalPriceSnapshot != null) {
+      return currentSubscription.totalPriceSnapshot;
+    }
+
+    const monthlyPrice = getSubscriptionMonthlyPrice(currentSubscription);
+    if (monthlyPrice == null) {
+      return null;
+    }
+
+    return monthlyPrice * Math.max(1, currentSubscription.monthsCount || 1);
+  };
+
+  const getMonthsLabel = (count: number) => `${count} mes${count === 1 ? '' : 'es'}`;
+
   const getDaysRemaining = (endDate: string | null) => {
     if (!endDate) return null;
     const end = new Date(endDate);
@@ -150,7 +193,9 @@ export default function SubscriptionDetailPage() {
       <div className={styles.gymCard}>
         <div className={styles.gymHeader}>
           {subscription.gym.logo ? (
-            <img src={subscription.gym.logo} alt={subscription.gym.name} className={styles.gymLogo} />
+            <div className={styles.gymLogoWrapper}>
+              <Image src={subscription.gym.logo} alt={subscription.gym.name} fill sizes="72px" className={styles.gymLogo} />
+            </div>
           ) : (
             <div className={styles.gymLogoPlaceholder}>
               {subscription.gym.name.charAt(0)}
@@ -172,14 +217,16 @@ export default function SubscriptionDetailPage() {
       <div className={styles.detailsCard}>
         <h3 className={styles.sectionTitle}>Plan Actual</h3>
         <div className={styles.planInfo}>
-          <div className={styles.planName}>{subscription.plan?.name || 'Sin plan'}</div>
-          {subscription.plan?.description && (
-            <p className={styles.planDescription}>{subscription.plan.description}</p>
+          <div className={styles.planName}>{getSubscriptionDisplayName(subscription)}</div>
+          {getSubscriptionDescription(subscription) && (
+            <p className={styles.planDescription}>{getSubscriptionDescription(subscription)}</p>
           )}
-          <div className={styles.planPrice}>
-            ${subscription.plan?.price?.toLocaleString('es-AR') || 0}
-            <span>/mes</span>
-          </div>
+          {getSubscriptionMonthlyPrice(subscription) != null && (
+            <div className={styles.planPrice}>
+              {formatPrice(getSubscriptionMonthlyPrice(subscription) || 0)}
+              <span>/mes</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -219,6 +266,16 @@ export default function SubscriptionDetailPage() {
             <span className={styles.infoLabel}>Método de pago</span>
             <span className={styles.infoValue}>💳 MercadoPago</span>
           </div>
+          <div className={styles.infoItem}>
+            <span className={styles.infoLabel}>Duración contratada</span>
+            <span className={styles.infoValue}>{getMonthsLabel(Math.max(1, subscription.monthsCount || 1))}</span>
+          </div>
+          {getSubscriptionTotalPrice(subscription) != null && (
+            <div className={styles.infoItem}>
+              <span className={styles.infoLabel}>Total pagado</span>
+              <span className={styles.infoValue}>{formatPrice(getSubscriptionTotalPrice(subscription) || 0)}</span>
+            </div>
+          )}
           {isCancelled && (
             <div className={styles.infoItem}>
               <span className={styles.infoLabel}>Cancelada el</span>

@@ -53,6 +53,14 @@ const DAY_NAMES: Record<number, string> = {
   0: 'Domingo',
 };
 
+const statusLabels: Record<string, string> = {
+  ACTIVE: 'Activo',
+  PENDING: 'Pendiente',
+  SUSPENDED: 'Suspendido',
+  EXPIRED: 'Vencido',
+  CANCELLED: 'Cancelado',
+};
+
 export default function ClientDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -115,6 +123,7 @@ export default function ClientDetailPage() {
   }
 
   const isActive = client.subscriptionStatus === 'ACTIVE';
+  const statusLabel = statusLabels[client.subscriptionStatus] || client.subscriptionStatus;
 
   return (
     <div className={styles.container}>
@@ -138,7 +147,7 @@ export default function ClientDetailPage() {
               {client.plan?.name?.toUpperCase() || 'SIN PLAN'}
             </span>
             <span className={`${styles.status} ${isActive ? styles.active : styles.inactive}`}>
-              {isActive ? 'Activo' : 'Inactivo'}
+              {statusLabel}
               {isActive && (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>

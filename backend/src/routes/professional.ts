@@ -9,6 +9,180 @@ const router = Router();
 router.use(authMiddleware);
 router.use(requireRole('PROFESSIONAL'));
 
+const PROFESSIONAL_CURRENT_SUBSCRIPTION_STATUSES = ['ACTIVE', 'PENDING', 'SUSPENDED'] as const;
+const SUBSCRIPTION_STATUS_PRIORITY: Record<string, number> = {
+  ACTIVE: 0,
+  PENDING: 1,
+  SUSPENDED: 2,
+  EXPIRED: 3,
+  CANCELLED: 4,
+};
+
+const pickPreferredSubscription = (subscriptions: any[]) => {
+  const sortedSubscriptions = [...subscriptions].sort((a, b) => {
+    const priorityA = SUBSCRIPTION_STATUS_PRIORITY[a.status] ?? 99;
+    const priorityB = SUBSCRIPTION_STATUS_PRIORITY[b.status] ?? 99;
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB;
+    }
+
+    const dateA = new Date(a.startDate ?? a.createdAt).getTime();
+    const dateB = new Date(b.startDate ?? b.createdAt).getTime();
+    return dateB - dateA;
+  });
+
+  return sortedSubscriptions[0] ?? null;
+};
+
+async function getProfessionalClientContext(
+  prisma: PrismaClient,
+  professionalId: string,
+  gymId: string,
+  clientProfileId: string,
+) {
+  const clientProfile = await prisma.clientProfile.findUnique({
+    where: { id: clientProfileId },
+    include: {
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+        },
+      },
+      plan: true,
+    },
+  });
+
+  if (!clientProfile) {
+    return null;
+  }
+
+  const subscriptions = await prisma.subscription.findMany({
+    where: {
+      userId: clientProfile.userId,
+      gymId,
+    },
+    include: {
+      plan: true,
+    },
+    orderBy: [{ startDate: 'desc' }, { createdAt: 'desc' }],
+  });
+
+  const assignedSubscription = subscriptions.find(
+    (subscription) =>
+      subscription.assignedProfessionalId === professionalId
+      && PROFESSIONAL_CURRENT_SUBSCRIPTION_STATUSES.includes(subscription.status as any),
+  );
+
+  if (clientProfile.assignedProfessionalId !== professionalId && !assignedSubscription) {
+    return null;
+  }
+
+  return {
+    clientProfile,
+    currentSubscription: pickPreferredSubscription(subscriptions),
+    assignedSubscription,
+  };
+}
+
+async function getProfessionalClients(
+  prisma: PrismaClient,
+  professionalId: string,
+  gymId: string,
+) {
+  const clientProfiles = await prisma.clientProfile.findMany({
+    where: {
+      OR: [
+        { assignedProfessionalId: professionalId },
+        {
+          user: {
+            subscriptions: {
+              some: {
+                gymId,
+                assignedProfessionalId: professionalId,
+                status: { in: [...PROFESSIONAL_CURRENT_SUBSCRIPTION_STATUSES] },
+              },
+            },
+          },
+        },
+      ],
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+        },
+      },
+      plan: true,
+      assignedRoutines: {
+        where: {
+          isActive: true,
+          routine: {
+            gymId,
+            createdBy: {
+              role: 'PROFESSIONAL',
+            },
+          },
+        },
+        include: {
+          routine: {
+            select: {
+              id: true,
+              name: true,
+              createdAt: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  if (clientProfiles.length === 0) {
+    return [];
+  }
+
+  const subscriptions = await prisma.subscription.findMany({
+    where: {
+      gymId,
+      userId: { in: clientProfiles.map((clientProfile) => clientProfile.userId) },
+    },
+    include: {
+      plan: true,
+    },
+    orderBy: [{ startDate: 'desc' }, { createdAt: 'desc' }],
+  });
+
+  const subscriptionsByUserId = new Map<string, any[]>();
+  for (const subscription of subscriptions) {
+    const userSubscriptions = subscriptionsByUserId.get(subscription.userId) ?? [];
+    userSubscriptions.push(subscription);
+    subscriptionsByUserId.set(subscription.userId, userSubscriptions);
+  }
+
+  return clientProfiles.map((clientProfile) => {
+    const currentSubscription = pickPreferredSubscription(
+      subscriptionsByUserId.get(clientProfile.userId) ?? [],
+    );
+
+    return {
+      id: clientProfile.id,
+      user: clientProfile.user,
+      subscriptionStatus: currentSubscription?.status ?? clientProfile.subscriptionStatus,
+      plan: currentSubscription?.plan ?? clientProfile.plan,
+      startDate: currentSubscription?.startDate ?? clientProfile.startDate,
+      assignedRoutines: clientProfile.assignedRoutines,
+    };
+  });
+}
+
 // GET /api/professional/plans - Planes activos del gimnasio del profesional
 router.get('/plans', async (req: AuthRequest, res: Response) => {
   try {
@@ -133,7 +307,7 @@ router.post('/clients', async (req: AuthRequest, res: Response) => {
 router.get('/clients', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
-    
+
     const professional = await prisma.professionalProfile.findFirst({
       where: { userId: req.user!.id },
     });
@@ -142,75 +316,7 @@ router.get('/clients', async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Perfil profesional no encontrado' });
     }
 
-    // Buscar clientes asignados a través de ClientProfile O a través de Subscription
-    const clientsFromProfile = await prisma.clientProfile.findMany({
-      where: { assignedProfessionalId: professional.id },
-      include: {
-        user: { select: { id: true, firstName: true, lastName: true, email: true } },
-        plan: true,
-        assignedRoutines: { 
-          where: {
-            routine: {
-              gymId: req.user!.gymId, // Solo rutinas del gym del profesional
-              createdBy: {
-                role: 'PROFESSIONAL', // Solo rutinas creadas por profesionales
-              },
-            },
-          },
-          include: { routine: true } 
-        },
-      },
-    });
-
-    // También buscar clientes asignados a través de Subscription (nuevo modelo)
-    const subscriptions = await prisma.subscription.findMany({
-      where: { 
-        assignedProfessionalId: professional.id,
-      },
-      include: {
-        user: {
-          include: {
-            clientProfile: {
-              include: {
-                plan: true,
-                assignedRoutines: { 
-                  where: {
-                    routine: {
-                      gymId: req.user!.gymId, // Solo rutinas del gym del profesional
-                      createdBy: {
-                        role: 'PROFESSIONAL', // Solo rutinas creadas por profesionales
-                      },
-                    },
-                  },
-                  include: { routine: true } 
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    // Combinar y deduplicar clientes
-    const clientsFromSubscriptions = subscriptions
-      .filter(sub => sub.user.clientProfile)
-      .map(sub => ({
-        ...sub.user.clientProfile!,
-        user: { 
-          id: sub.user.id, 
-          firstName: sub.user.firstName, 
-          lastName: sub.user.lastName, 
-          email: sub.user.email 
-        },
-      }));
-
-    // Deduplicar por ID
-    const allClientsMap = new Map();
-    [...clientsFromProfile, ...clientsFromSubscriptions].forEach(client => {
-      allClientsMap.set(client.id, client);
-    });
-
-    const clients = Array.from(allClientsMap.values());
+    const clients = await getProfessionalClients(prisma, professional.id, req.user!.gymId!);
 
     return res.json({ clients });
   } catch (error) {
@@ -223,7 +329,7 @@ router.get('/clients', async (req: AuthRequest, res: Response) => {
 router.get('/clients/:id', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
-    
+
     const professional = await prisma.professionalProfile.findFirst({
       where: { userId: req.user!.id },
     });
@@ -232,94 +338,46 @@ router.get('/clients/:id', async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Perfil profesional no encontrado' });
     }
 
-    // Buscar cliente por ClientProfile.assignedProfessionalId
-    let client = await prisma.clientProfile.findFirst({
-      where: { 
-        id: req.params.id,
-        assignedProfessionalId: professional.id,
-      },
-      include: {
-        user: { select: { id: true, firstName: true, lastName: true, email: true, phone: true } },
-        plan: true,
-        assignedRoutines: { 
-          where: {
-            routine: {
-              gymId: req.user!.gymId, // Solo rutinas del gym del profesional
-              createdBy: {
-                role: 'PROFESSIONAL', // Solo rutinas creadas por profesionales
-              },
-            },
-          },
-          include: { 
-            routine: {
-              select: { id: true, name: true, createdAt: true }
-            } 
-          } 
-        },
-      },
-    });
+    const clientContext = await getProfessionalClientContext(
+      prisma,
+      professional.id,
+      req.user!.gymId!,
+      req.params.id,
+    );
 
-    // Si no se encontró, buscar a través de Subscription
-    if (!client) {
-      const subscription = await prisma.subscription.findFirst({
-        where: {
-          assignedProfessionalId: professional.id,
-          status: 'ACTIVE',
-          user: {
-            clientProfile: {
-              id: req.params.id,
-            },
-          },
-        },
-        include: {
-          user: {
-            include: {
-              clientProfile: {
-                include: {
-                  plan: true,
-                  assignedRoutines: {
-                    where: {
-                      routine: {
-                        gymId: req.user!.gymId, // Solo rutinas del gym del profesional
-                        createdBy: {
-                          role: 'PROFESSIONAL', // Solo rutinas creadas por profesionales
-                        },
-                      },
-                    },
-                    include: {
-                      routine: {
-                        select: { id: true, name: true, createdAt: true }
-                      }
-                    }
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      if (subscription?.user?.clientProfile) {
-        client = {
-          ...subscription.user.clientProfile,
-          user: {
-            id: subscription.user.id,
-            firstName: subscription.user.firstName,
-            lastName: subscription.user.lastName,
-            email: subscription.user.email,
-            phone: subscription.user.phone,
-          },
-        } as unknown as typeof client;
-      }
-    }
-
-    if (!client) {
+    if (!clientContext) {
       return res.status(404).json({ error: 'Cliente no encontrado' });
     }
 
+    const assignedRoutines = await prisma.clientRoutine.findMany({
+      where: {
+        clientProfileId: clientContext.clientProfile.id,
+        routine: {
+          gymId: req.user!.gymId,
+          createdBy: {
+            role: 'PROFESSIONAL',
+          },
+        },
+      },
+      include: {
+        routine: {
+          select: {
+            id: true,
+            name: true,
+            createdAt: true,
+          },
+        },
+      },
+      orderBy: [{ isActive: 'desc' }, { createdAt: 'desc' }],
+    });
+
     const formattedClient = {
-      ...client,
-      routines: client.assignedRoutines.map(ar => ar.routine),
+      id: clientContext.clientProfile.id,
+      user: clientContext.clientProfile.user,
+      subscriptionStatus: clientContext.currentSubscription?.status ?? clientContext.clientProfile.subscriptionStatus,
+      plan: clientContext.currentSubscription?.plan ?? clientContext.clientProfile.plan,
+      startDate: clientContext.currentSubscription?.startDate ?? clientContext.clientProfile.startDate,
+      routines: assignedRoutines.map((assignedRoutine) => assignedRoutine.routine),
     };
 
     return res.json({ client: formattedClient });
@@ -333,10 +391,10 @@ router.get('/clients/:id', async (req: AuthRequest, res: Response) => {
 router.get('/exercises', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
-    
+
     // Solo ejercicios creados por este profesional
     const exercises = await prisma.exercise.findMany({
-      where: { 
+      where: {
         createdById: req.user!.id,
       },
       include: {
@@ -382,26 +440,26 @@ router.post('/exercises', async (req: AuthRequest, res: Response) => {
 router.get('/exercises/approved', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
-    
+
     // Obtener el gymId del user
     const gymId = req.user!.gymId;
-    
+
     // Construir condiciones OR
     const orConditions: object[] = [
       { gymId: null, status: 'APPROVED' }, // Ejercicios globales aprobados
       { createdById: req.user!.id }, // Ejercicios creados por el profesional
     ];
-    
+
     // Solo agregar condición de gymId si existe
     if (gymId) {
       orConditions.push({ gymId, status: 'APPROVED' });
     }
-    
+
     const exercises = await prisma.exercise.findMany({
       where: { OR: orConditions },
       orderBy: { name: 'asc' },
     });
-    
+
     return res.json({ exercises });
   } catch (error) {
     console.error('Error fetching approved exercises:', error);
@@ -414,7 +472,7 @@ router.get('/exercises/:id', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
     const exercise = await prisma.exercise.findFirst({
-      where: { 
+      where: {
         id: req.params.id,
         OR: [
           { gymId: req.user!.gymId },
@@ -514,7 +572,7 @@ router.get('/routines/:id', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
     const routine = await prisma.routine.findFirst({
-      where: { 
+      where: {
         id: req.params.id,
         gymId: req.user!.gymId,
         OR: [
@@ -760,49 +818,20 @@ router.get('/clients/:clientId/week', async (req: AuthRequest, res: Response) =>
       return res.status(403).json({ error: 'Perfil profesional no encontrado' });
     }
 
-    // Buscar cliente asignado directamente
-    let client = await prisma.clientProfile.findFirst({
-      where: { 
-        id: req.params.clientId,
-        assignedProfessionalId: professional.id,
-      },
-      include: {
-        user: { select: { firstName: true, lastName: true } },
-      },
-    });
+    const clientContext = await getProfessionalClientContext(
+      prisma,
+      professional.id,
+      req.user!.gymId!,
+      req.params.clientId,
+    );
 
-    // Si no está asignado directamente, buscar via Subscription
-    if (!client) {
-      const subscription = await prisma.subscription.findFirst({
-        where: {
-          assignedProfessionalId: professional.id,
-          status: 'ACTIVE',
-        },
-        include: {
-          user: {
-            include: {
-              clientProfile: {
-                include: {
-                  user: { select: { firstName: true, lastName: true } },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      if (subscription?.user?.clientProfile?.id === req.params.clientId) {
-        client = subscription.user.clientProfile as unknown as typeof client;
-      }
-    }
-
-    if (!client) {
+    if (!clientContext) {
       return res.status(404).json({ error: 'Cliente no encontrado o no asignado a ti' });
     }
 
     const dayAssignments = await prisma.dayRoutineAssignment.findMany({
       where: { 
-        clientProfileId: req.params.clientId,
+        clientProfileId: clientContext.clientProfile.id,
         routine: {
           gymId: req.user!.gymId, // Solo rutinas del gym del profesional
           createdBy: {
@@ -829,7 +858,7 @@ router.get('/clients/:clientId/week', async (req: AuthRequest, res: Response) =>
       weekRoutines[assignment.dayOfWeek].push(assignment);
     }
 
-    return res.json({ client, weekRoutines, assignments: dayAssignments });
+    return res.json({ client: clientContext.clientProfile, weekRoutines, assignments: dayAssignments });
   } catch (error) {
     console.error('Error fetching client week:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -854,35 +883,14 @@ router.post('/clients/:clientId/day-assignment', async (req: AuthRequest, res: R
       return res.status(403).json({ error: 'Perfil profesional no encontrado' });
     }
 
-    // Buscar cliente asignado directamente
-    let client = await prisma.clientProfile.findFirst({
-      where: { 
-        id: req.params.clientId,
-        assignedProfessionalId: professional.id,
-      },
-    });
+    const clientContext = await getProfessionalClientContext(
+      prisma,
+      professional.id,
+      req.user!.gymId!,
+      req.params.clientId,
+    );
 
-    // Si no está asignado directamente, buscar via Subscription
-    if (!client) {
-      const subscription = await prisma.subscription.findFirst({
-        where: {
-          assignedProfessionalId: professional.id,
-        },
-        include: {
-          user: {
-            include: {
-              clientProfile: true,
-            },
-          },
-        },
-      });
-
-      if (subscription?.user?.clientProfile?.id === req.params.clientId) {
-        client = subscription.user.clientProfile;
-      }
-    }
-
-    if (!client) {
+    if (!clientContext) {
       return res.status(404).json({ error: 'Cliente no encontrado o no asignado a ti' });
     }
 
@@ -901,7 +909,7 @@ router.post('/clients/:clientId/day-assignment', async (req: AuthRequest, res: R
     // Contar cuántas rutinas ya hay en ese día para determinar el orden
     const existingCount = await prisma.dayRoutineAssignment.count({
       where: {
-        clientProfileId: req.params.clientId,
+        clientProfileId: clientContext.clientProfile.id,
         dayOfWeek,
       },
     });
@@ -909,7 +917,7 @@ router.post('/clients/:clientId/day-assignment', async (req: AuthRequest, res: R
     // Crear asignación
     const assignment = await prisma.dayRoutineAssignment.create({
       data: {
-        clientProfileId: req.params.clientId,
+        clientProfileId: clientContext.clientProfile.id,
         routineId,
         dayOfWeek,
         order: existingCount,
@@ -1025,15 +1033,15 @@ router.put('/clients/:clientId/week', async (req: AuthRequest, res: Response) =>
       return res.status(403).json({ error: 'Perfil profesional no encontrado' });
     }
 
-    const client = await prisma.clientProfile.findFirst({
-      where: { 
-        id: req.params.clientId,
-        assignedProfessionalId: professional.id,
-      },
-    });
+    const clientContext = await getProfessionalClientContext(
+      prisma,
+      professional.id,
+      req.user!.gymId!,
+      req.params.clientId,
+    );
 
-    if (!client) {
-      return res.status(404).json({ error: 'Cliente no encontrado' });
+    if (!clientContext) {
+      return res.status(404).json({ error: 'Cliente no encontrado o no asignado a ti' });
     }
 
     // Verificar que TODAS las rutinas pertenezcan al gym del profesional
@@ -1062,7 +1070,7 @@ router.put('/clients/:clientId/week', async (req: AuthRequest, res: Response) =>
     // Eliminar SOLO las asignaciones de rutinas de ESTE gym
     await prisma.dayRoutineAssignment.deleteMany({
       where: { 
-        clientProfileId: req.params.clientId,
+        clientProfileId: clientContext.clientProfile.id,
         routine: {
           gymId: req.user!.gymId,
         },
@@ -1075,7 +1083,7 @@ router.put('/clients/:clientId/week', async (req: AuthRequest, res: Response) =>
       const { dayOfWeek, routineIds } = dayData;
       for (let i = 0; i < routineIds.length; i++) {
         newAssignments.push({
-          clientProfileId: req.params.clientId,
+          clientProfileId: clientContext.clientProfile.id,
           routineId: routineIds[i],
           dayOfWeek,
           order: i,
@@ -1092,7 +1100,7 @@ router.put('/clients/:clientId/week', async (req: AuthRequest, res: Response) =>
     // Obtener las asignaciones actualizadas (solo de este gym y creadas por profesionales)
     const updatedAssignments = await prisma.dayRoutineAssignment.findMany({
       where: { 
-        clientProfileId: req.params.clientId,
+        clientProfileId: clientContext.clientProfile.id,
         routine: {
           gymId: req.user!.gymId,
           createdBy: {

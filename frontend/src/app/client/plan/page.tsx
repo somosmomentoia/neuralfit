@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
 import styles from './page.module.css';
@@ -15,10 +16,19 @@ interface PlanFeature {
 interface Plan {
   id: string;
   name: string;
-  price: number;
+  price?: number;
   description: string | null;
   durationDays: number;
   features: { feature: PlanFeature }[];
+}
+
+interface MarketplacePriceOption {
+  id: string;
+  name: string;
+  description: string | null;
+  monthlyPrice: number;
+  isFallbackPlan: boolean;
+  plan: Plan | null;
 }
 
 interface Gym {
@@ -28,7 +38,7 @@ interface Gym {
   logo: string | null;
   description: string | null;
   branches: { name: string; address: string }[];
-  plans: Plan[];
+  priceOptions: MarketplacePriceOption[];
   _count: { subscriptions: number };
   currentSubscription?: Subscription | null;
 }
@@ -37,92 +47,152 @@ interface Subscription {
   id: string;
   status: string;
   type: string;
-  source: 'ADMIN_GRANTED' | 'PLATFORM_PURCHASE' | 'LEAD_CONVERSION';
+  source: 'ADMIN_GRANTED' | 'PLATFORM_PURCHASE' | 'LEAD_CONVERSION' | string;
   startDate: string | null;
   endDate: string | null;
+  monthsCount?: number | null;
+  monthlyPriceSnapshot?: number | null;
+  totalPriceSnapshot?: number | null;
+  priceOptionNameSnapshot?: string | null;
   gym: {
     id: string;
     name: string;
     logo: string | null;
   };
   plan: Plan | null;
+  priceOption?: {
+    id: string;
+    name: string;
+    monthlyPrice: number;
+  } | null;
 }
+
+const subscriptionStatusPriority: Record<string, number> = {
+  ACTIVE: 0,
+  PENDING: 1,
+  SUSPENDED: 2,
+  EXPIRED: 3,
+  CANCELLED: 4,
+};
+
+const pickPreferredSubscription = (subscriptions: Subscription[]) => {
+  const sortedSubscriptions = [...subscriptions].sort((a, b) => {
+    const priorityA = subscriptionStatusPriority[a.status] ?? 99;
+    const priorityB = subscriptionStatusPriority[b.status] ?? 99;
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB;
+    }
+
+    if (a.source !== b.source) {
+      return a.source === 'PLATFORM_PURCHASE' ? -1 : 1;
+    }
+
+    const dateA = new Date(a.startDate ?? a.endDate ?? 0).getTime();
+    const dateB = new Date(b.startDate ?? b.endDate ?? 0).getTime();
+    return dateB - dateA;
+  });
+
+  return sortedSubscriptions[0] ?? null;
+};
 
 export default function ClientPlanPage() {
   const searchParams = useSearchParams();
+  const requestedGymId = searchParams.get('gym');
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [availableGyms, setAvailableGyms] = useState<Gym[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedGym, setSelectedGym] = useState<Gym | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [selectedPriceOption, setSelectedPriceOption] = useState<MarketplacePriceOption | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
   const [subscribeError, setSubscribeError] = useState<string | null>(null);
+  const [monthsCount, setMonthsCount] = useState(1);
   const initialTab = searchParams.get('tab') === 'explore' ? 'explore' : 'subscriptions';
   const [activeTab, setActiveTab] = useState<'subscriptions' | 'explore'>(initialTab);
   const [expandedSub, setExpandedSub] = useState<string | null>(null);
   const [expandedGym, setExpandedGym] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [subscriptionsRes, gymsRes] = await Promise.all([
-          apiFetch('/client/subscriptions'),
-          apiFetch('/client/gyms'),
-        ]);
+  const fetchData = useCallback(async () => {
+    try {
+      const [subscriptionsRes, gymsRes] = await Promise.all([
+        apiFetch('/client/subscriptions'),
+        apiFetch('/client/gyms'),
+      ]);
 
-        const subscriptionsData = await subscriptionsRes.json();
-        const gymsData = await gymsRes.json();
+      const subscriptionsData = await subscriptionsRes.json();
+      const gymsData = await gymsRes.json();
 
-        const subs = (subscriptionsData.subscriptions || []).sort((a: Subscription, b: Subscription) => {
-          // Primero por status (ACTIVE primero)
-          if (a.status !== b.status) {
-            return a.status === 'ACTIVE' ? -1 : 1;
-          }
-          // Luego por source (PLATFORM_PURCHASE primero)
-          if (a.source !== b.source) {
-            return a.source === 'PLATFORM_PURCHASE' ? -1 : 1;
-          }
-          return 0;
-        });
-        setSubscriptions(subs);
-        
-        // Mapear gyms con su suscripción actual (si existe)
-        const allGyms = (gymsData.gyms || []).map((g: Gym) => {
-          const currentSub = subs.find((s: Subscription) => s.gym.id === g.id);
-          return { ...g, currentSubscription: currentSub || null };
-        });
-        setAvailableGyms(allGyms);
-        
-        if ((subscriptionsData.subscriptions || []).length === 0) {
+      const subs = (subscriptionsData.subscriptions || []).sort((a: Subscription, b: Subscription) => {
+        const priorityA = subscriptionStatusPriority[a.status] ?? 99;
+        const priorityB = subscriptionStatusPriority[b.status] ?? 99;
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB;
+        }
+
+        if (a.source !== b.source) {
+          return a.source === 'PLATFORM_PURCHASE' ? -1 : 1;
+        }
+
+        const dateA = new Date(a.startDate ?? a.endDate ?? 0).getTime();
+        const dateB = new Date(b.startDate ?? b.endDate ?? 0).getTime();
+        return dateB - dateA;
+      });
+      setSubscriptions(subs);
+
+      const allGyms = (gymsData.gyms || []).map((g: Gym) => {
+        const currentSub = pickPreferredSubscription(
+          subs.filter((s: Subscription) => s.gym.id === g.id),
+        );
+        return { ...g, currentSubscription: currentSub || null };
+      });
+      setAvailableGyms(allGyms);
+      if (requestedGymId) {
+        const requestedGym = allGyms.find((gym: Gym) => gym.id === requestedGymId);
+        if (requestedGym) {
+          setExpandedGym(requestedGym.id);
           setActiveTab('explore');
         }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
       }
-    };
 
+      if ((subscriptionsData.subscriptions || []).length === 0) {
+        setActiveTab('explore');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [requestedGymId]);
+
+  useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
-  const openPaymentModal = (gym: Gym, plan: Plan) => {
+  const openPaymentModal = (gym: Gym, priceOption: MarketplacePriceOption) => {
     setSelectedGym(gym);
-    setSelectedPlan(plan);
+    setSelectedPriceOption(priceOption);
+    setMonthsCount(1);
     setShowPaymentModal(true);
   };
 
   const handleSubscribe = async () => {
-    if (!selectedGym || !selectedPlan) return;
+    if (!selectedGym || !selectedPriceOption) return;
     
     setSubscribing(true);
     setSubscribeError(null);
     
     try {
+      const payload = {
+        gymId: selectedGym.id,
+        planId: selectedPriceOption.isFallbackPlan ? selectedPriceOption.plan?.id : undefined,
+        priceOptionId: selectedPriceOption.isFallbackPlan ? undefined : selectedPriceOption.id,
+        type: 'MONTHLY',
+        monthsCount,
+      };
+
       const res = await apiFetch('/client/subscriptions', {
         method: 'POST',
-        body: JSON.stringify({ gymId: selectedGym.id, planId: selectedPlan.id, type: 'MONTHLY' }),
+        body: JSON.stringify(payload),
       });
       
       const data = await res.json();
@@ -132,10 +202,10 @@ export default function ClientPlanPage() {
         return;
       }
       
-      setSubscriptions(prev => [...prev, data.subscription]);
-      setAvailableGyms(prev => prev.filter(g => g.id !== selectedGym.id));
+      await fetchData();
       setSelectedGym(null);
-      setSelectedPlan(null);
+      setSelectedPriceOption(null);
+      setMonthsCount(1);
       setShowPaymentModal(false);
       setActiveTab('subscriptions');
     } catch (error) {
@@ -153,6 +223,43 @@ export default function ClientPlanPage() {
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return 'No definido';
     return new Date(dateStr).toLocaleDateString('es-AR');
+  };
+
+  const getSubscriptionDisplayName = (subscription: Subscription) => {
+    return subscription.priceOptionNameSnapshot || subscription.priceOption?.name || subscription.plan?.name || 'Sin plan';
+  };
+
+  const getSubscriptionMonthlyPrice = (subscription: Subscription) => {
+    return subscription.monthlyPriceSnapshot ?? subscription.priceOption?.monthlyPrice ?? subscription.plan?.price ?? null;
+  };
+
+  const getSubscriptionTotalPrice = (subscription: Subscription) => {
+    const monthlyPrice = getSubscriptionMonthlyPrice(subscription);
+    if (subscription.totalPriceSnapshot != null) {
+      return subscription.totalPriceSnapshot;
+    }
+    if (monthlyPrice == null) {
+      return null;
+    }
+    return monthlyPrice * Math.max(1, subscription.monthsCount || 1);
+  };
+
+  const getMonthsLabel = (count: number) => `${count} mes${count === 1 ? '' : 'es'}`;
+
+  const isCurrentMarketplaceOption = (subscription: Subscription | null | undefined, option: MarketplacePriceOption) => {
+    if (!subscription || subscription.status !== 'ACTIVE') {
+      return false;
+    }
+
+    if (!option.isFallbackPlan && subscription.priceOption?.id) {
+      return subscription.priceOption.id === option.id;
+    }
+
+    if (option.isFallbackPlan && !subscription.priceOption && subscription.plan?.id && option.plan?.id) {
+      return subscription.plan.id === option.plan.id;
+    }
+
+    return false;
   };
 
   const getStatusLabel = (status: string) => {
@@ -212,14 +319,14 @@ export default function ClientPlanPage() {
                     <div className={styles.subHeader}>
                       <div className={styles.subGymIcon}>
                         {sub.gym.logo ? (
-                          <img src={sub.gym.logo} alt={sub.gym.name} />
+                          <Image src={sub.gym.logo} alt={sub.gym.name} fill sizes="56px" className={styles.coverImage} />
                         ) : (
                           <span>{sub.gym.name.charAt(0)}</span>
                         )}
                       </div>
                       <div className={styles.subInfo}>
                         <h3 className={styles.subGymName}>{sub.gym.name}</h3>
-                        <span className={styles.subPlanName}>{sub.plan?.name || 'Sin plan'}</span>
+                        <span className={styles.subPlanName}>{getSubscriptionDisplayName(sub)}</span>
                       </div>
                       {sub.source === 'ADMIN_GRANTED' || sub.source === 'LEAD_CONVERSION' ? (
                         <span className={styles.grantedBadge}>
@@ -242,17 +349,17 @@ export default function ClientPlanPage() {
                             <span className={styles.subLabel}>Pago</span>
                             <span className={styles.subValue}>MercadoPago</span>
                           </div>
-                          {sub.plan && (
+                          {getSubscriptionMonthlyPrice(sub) != null && (
                             <div className={styles.subDetail}>
-                              <span className={styles.subLabel}>Precio</span>
-                              <span className={styles.subValue}>{formatPrice(sub.plan.price)}</span>
+                              <span className={styles.subLabel}>Total</span>
+                              <span className={styles.subValue}>{formatPrice(getSubscriptionTotalPrice(sub) || 0)}</span>
                             </div>
                           )}
                         </>
                       ) : (
                         <div className={styles.subDetail}>
                           <span className={styles.subLabel}>Tipo</span>
-                          <span className={styles.subValue}>Membresía del gym</span>
+                          <span className={styles.subValue}>{getMonthsLabel(Math.max(1, sub.monthsCount || 1))}</span>
                         </div>
                       )}
                     </div>
@@ -308,10 +415,9 @@ export default function ClientPlanPage() {
             <div className={styles.gymsList}>
               {availableGyms.map(gym => {
                 const hasSubscription = !!gym.currentSubscription;
-                const currentPlanId = gym.currentSubscription?.plan?.id;
                 const isExpanded = expandedGym === gym.id;
-                const lowestPrice = gym.plans.length > 0 
-                  ? Math.min(...gym.plans.map(p => p.price))
+                const lowestPrice = gym.priceOptions.length > 0 
+                  ? Math.min(...gym.priceOptions.map(option => option.monthlyPrice))
                   : null;
                 
                 return (
@@ -323,7 +429,7 @@ export default function ClientPlanPage() {
                     <div className={styles.gymHeader}>
                       <div className={styles.gymLogo}>
                         {gym.logo ? (
-                          <img src={gym.logo} alt={gym.name} />
+                          <Image src={gym.logo} alt={gym.name} fill sizes="56px" className={styles.coverImage} />
                         ) : (
                           <span>{gym.name.charAt(0)}</span>
                         )}
@@ -365,7 +471,7 @@ export default function ClientPlanPage() {
                       {hasSubscription && gym.currentSubscription?.plan && (
                         <div className={styles.currentPlanInfo}>
                           <span className={styles.currentPlanLabel}>Tu plan actual:</span>
-                          <span className={styles.currentPlanName}>{gym.currentSubscription.plan.name}</span>
+                          <span className={styles.currentPlanName}>{getSubscriptionDisplayName(gym.currentSubscription)}</span>
                           <span className={styles.currentPlanExpiry}>
                             Vence: {formatDate(gym.currentSubscription.endDate)}
                           </span>
@@ -374,33 +480,45 @@ export default function ClientPlanPage() {
                       
                       <div className={styles.gymPlans}>
                         <h4 className={styles.plansTitle}>
-                          {hasSubscription ? 'Cambiar de plan' : 'Planes disponibles'}
+                          {hasSubscription ? 'Opciones para renovar o cambiar' : 'Opciones disponibles'}
                         </h4>
-                        {gym.plans.map(plan => {
-                          const isCurrentPlan = plan.id === currentPlanId;
+                        {gym.priceOptions.map(option => {
+                          const isCurrentOption = isCurrentMarketplaceOption(gym.currentSubscription, option);
+                          const actionLabel = isCurrentOption
+                            ? 'Renovar'
+                            : gym.currentSubscription?.status === 'ACTIVE'
+                              ? 'Cambiar'
+                              : 'Renovar';
                           return (
-                            <div key={plan.id} className={`${styles.planOption} ${isCurrentPlan ? styles.currentPlan : ''}`}>
+                            <div key={option.id} className={`${styles.planOption} ${isCurrentOption ? styles.currentPlan : ''}`}>
                               <div className={styles.planInfo}>
                                 <span className={styles.planName}>
-                                  {plan.name}
-                                  {isCurrentPlan && <span className={styles.currentTag}>Actual</span>}
+                                  {option.name}
+                                  {isCurrentOption && <span className={styles.currentTag}>Actual</span>}
                                 </span>
-                                <span className={styles.planDuration}>{plan.durationDays} días</span>
+                                <span className={styles.planDuration}>
+                                  {option.plan ? option.plan.name : 'Sin plan asociado'} · valor mensual
+                                </span>
+                                {option.description && (
+                                  <span className={styles.planDescription}>{option.description}</span>
+                                )}
+                                <div className={styles.planBadges}>
+                                  {!option.isFallbackPlan && <span className={styles.promoBadge}>Promo</span>}
+                                  {option.plan && <span className={styles.planBadge}>{option.plan.durationDays} días base</span>}
+                                </div>
                               </div>
                               <div className={styles.planPriceAction}>
-                                <span className={styles.planPrice}>{formatPrice(plan.price)}</span>
-                                {!isCurrentPlan && (
-                                  <button
-                                    className={styles.subscribeBtn}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      openPaymentModal(gym, plan);
-                                    }}
-                                    disabled={subscribing}
-                                  >
-                                    {hasSubscription ? 'Cambiar' : 'Suscribirse'}
-                                  </button>
-                                )}
+                                <span className={styles.planPrice}>{formatPrice(option.monthlyPrice)}/mes</span>
+                                <button
+                                  className={styles.subscribeBtn}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openPaymentModal(gym, option);
+                                  }}
+                                  disabled={subscribing}
+                                >
+                                  {hasSubscription ? actionLabel : 'Suscribirse'}
+                                </button>
                               </div>
                             </div>
                           );
@@ -434,7 +552,7 @@ export default function ClientPlanPage() {
       )}
 
       {/* Payment Modal */}
-      {showPaymentModal && selectedGym && selectedPlan && (
+      {showPaymentModal && selectedGym && selectedPriceOption && (
         <div className={styles.modalOverlay} onClick={() => setShowPaymentModal(false)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
@@ -452,31 +570,64 @@ export default function ClientPlanPage() {
                 <div className={styles.summaryGym}>
                   <div className={styles.summaryGymLogo}>
                     {selectedGym.logo ? (
-                      <img src={selectedGym.logo} alt={selectedGym.name} />
+                      <Image src={selectedGym.logo} alt={selectedGym.name} fill sizes="52px" className={styles.coverImage} />
                     ) : (
                       <span>{selectedGym.name.charAt(0)}</span>
                     )}
                   </div>
                   <div className={styles.summaryGymInfo}>
                     <h3>{selectedGym.name}</h3>
-                    <span>{selectedPlan.name}</span>
+                    <span>{selectedPriceOption.name}</span>
                   </div>
                 </div>
                 
                 <div className={styles.summaryDetails}>
                   <div className={styles.summaryRow}>
-                    <span>Duración</span>
-                    <span>{selectedPlan.durationDays} días</span>
+                    <span>Plan</span>
+                    <span>{selectedPriceOption.plan?.name || 'Sin plan'}</span>
                   </div>
                   <div className={styles.summaryRow}>
                     <span>Precio mensual</span>
-                    <span>{formatPrice(selectedPlan.price)}</span>
+                    <span>{formatPrice(selectedPriceOption.monthlyPrice)}</span>
+                  </div>
+                  <div className={styles.summaryRow}>
+                    <span>Meses</span>
+                    <span>{getMonthsLabel(monthsCount)}</span>
+                  </div>
+                  <div className={styles.monthsSelector}>
+                    <span className={styles.monthsSelectorLabel}>Cantidad de meses</span>
+                    <div className={styles.monthsControls}>
+                      <button
+                        type="button"
+                        className={styles.monthStepBtn}
+                        onClick={() => setMonthsCount((prev) => Math.max(1, prev - 1))}
+                        disabled={monthsCount <= 1}
+                      >
+                        −
+                      </button>
+                      <input
+                        type="number"
+                        min="1"
+                        max="24"
+                        value={monthsCount}
+                        onChange={(e) => setMonthsCount(Math.min(24, Math.max(1, Number(e.target.value) || 1)))}
+                        className={styles.monthsInput}
+                      />
+                      <button
+                        type="button"
+                        className={styles.monthStepBtn}
+                        onClick={() => setMonthsCount((prev) => Math.min(24, prev + 1))}
+                        disabled={monthsCount >= 24}
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
                 </div>
                 
                 <div className={styles.summaryTotal}>
                   <span>Total a pagar</span>
-                  <span className={styles.totalPrice}>{formatPrice(selectedPlan.price)}</span>
+                  <span className={styles.totalPrice}>{formatPrice(selectedPriceOption.monthlyPrice * monthsCount)}</span>
                 </div>
               </div>
               
@@ -491,6 +642,9 @@ export default function ClientPlanPage() {
                 <p className={styles.mpNote}>
                   Serás redirigido a MercadoPago para completar el pago de forma segura.
                   Tu suscripción se activará automáticamente.
+                </p>
+                <p className={styles.summaryNote}>
+                  El vencimiento se calculará en base a la cantidad de meses elegida y se guardará el precio aplicado como snapshot.
                 </p>
               </div>
             </div>
@@ -507,7 +661,7 @@ export default function ClientPlanPage() {
                 onClick={handleSubscribe}
                 disabled={subscribing}
               >
-                {subscribing ? 'Procesando...' : `Pagar ${formatPrice(selectedPlan.price)}`}
+                {subscribing ? 'Procesando...' : `Pagar ${formatPrice(selectedPriceOption.monthlyPrice * monthsCount)}`}
               </button>
             </div>
           </div>

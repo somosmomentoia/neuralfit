@@ -1,0 +1,418 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  background: rgba(188, 255, 49, 0.12);
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-0);
+  margin: 0;
+}
+
+.description {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--color-text-1);
+  max-width: 780px;
+  margin: 0;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacing-4);
+}
+
+.metricCard,
+.panel,
+.gymCard {
+  background: rgba(17, 24, 39, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.metricCard {
+  padding: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.metricLabel {
+  color: var(--color-text-2);
+  font-size: var(--font-size-sm);
+}
+
+.metricValue {
+  color: var(--color-text-0);
+  font-size: 2rem;
+  font-weight: var(--font-weight-bold);
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(340px, 420px);
+  gap: var(--spacing-5);
+  align-items: start;
+}
+
+.panel {
+  padding: var(--spacing-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+}
+
+.panelHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--color-text-0);
+}
+
+.panelDescription {
+  margin: 0;
+  color: var(--color-text-1);
+  line-height: 1.5;
+}
+
+.status,
+.error,
+.success,
+.emptyState {
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-3) var(--spacing-4);
+  font-size: var(--font-size-sm);
+}
+
+.status {
+  background: rgba(59, 130, 246, 0.14);
+  color: #93c5fd;
+}
+
+.error {
+  background: rgba(239, 68, 68, 0.14);
+  color: #fca5a5;
+}
+
+.success {
+  background: rgba(34, 197, 94, 0.14);
+  color: #86efac;
+}
+
+.emptyState {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-1);
+}
+
+.gymList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.gymCard {
+  padding: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.gymHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  align-items: flex-start;
+}
+
+.gymTitleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.gymTitleRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+}
+
+.gymName {
+  margin: 0;
+  color: var(--color-text-0);
+  font-size: 1.125rem;
+}
+
+.visibilityBadge,
+.slugBadge,
+.countBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-semibold);
+}
+
+.visibilityBadge {
+  background: rgba(34, 197, 94, 0.14);
+  color: #86efac;
+}
+
+.privateBadge {
+  background: rgba(245, 158, 11, 0.14);
+  color: #fcd34d;
+}
+
+.slugBadge {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-1);
+}
+
+.countBadge {
+  background: rgba(188, 255, 49, 0.1);
+  color: var(--color-primary);
+}
+
+.gymDescription {
+  margin: 0;
+  color: var(--color-text-1);
+  line-height: 1.5;
+}
+
+.gymMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacing-3);
+}
+
+.metaItem {
+  padding: var(--spacing-3);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metaLabel {
+  color: var(--color-text-2);
+  font-size: 0.75rem;
+}
+
+.metaValue {
+  color: var(--color-text-0);
+  font-weight: var(--font-weight-semibold);
+}
+
+.adminList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--spacing-3);
+}
+
+.adminCard {
+  padding: var(--spacing-3);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.adminName {
+  color: var(--color-text-0);
+  font-weight: var(--font-weight-semibold);
+}
+
+.adminInfo {
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+  word-break: break-word;
+}
+
+.createdAt {
+  color: var(--color-text-2);
+  font-size: 0.75rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--color-text-0);
+  font-size: 1rem;
+}
+
+.fieldGrid,
+.fieldGridTwo {
+  display: grid;
+  gap: var(--spacing-3);
+}
+
+.fieldGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fieldGridTwo {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldFull {
+  grid-column: 1 / -1;
+}
+
+.label {
+  color: var(--color-text-1);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.input,
+.textarea {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-0);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  font-size: var(--font-size-base);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: rgba(188, 255, 49, 0.6);
+  box-shadow: 0 0 0 3px rgba(188, 255, 49, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-2);
+  font-size: 0.75rem;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: var(--spacing-3);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+}
+
+.submitButton {
+  width: 100%;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  background: linear-gradient(135deg, var(--color-primary), #d9ff76);
+  color: #0a0a0a;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.submitButton:disabled {
+  opacity: 0.7;
+}
+
+@media (max-width: 1024px) {
+  .metrics,
+  .metaGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .metrics,
+  .fieldGrid,
+  .fieldGridTwo,
+  .metaGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel,
+  .gymCard,
+  .metricCard {
+    padding: var(--spacing-4);
+  }
+
+  .gymHeader,
+  .gymTitleRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

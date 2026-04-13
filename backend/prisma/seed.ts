@@ -6,6 +6,22 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
+  const superadminPassword = await bcrypt.hash('superadmin123', 12);
+  const superadmin = await prisma.user.upsert({
+    where: { email: 'superadmin@gofit.com' },
+    update: {},
+    create: {
+      email: 'superadmin@gofit.com',
+      passwordHash: superadminPassword,
+      firstName: 'Super',
+      lastName: 'Admin',
+      role: 'SUPERADMIN',
+      gymId: null,
+    },
+  } as any);
+
+  console.log('✅ Superadmin created:', superadmin.email);
+
   // ==================== EJERCICIOS GLOBALES ====================
   console.log('📦 Creating global exercises...');
   
@@ -1133,6 +1149,9 @@ async function main() {
   console.log('');
   console.log('📧 Usuarios de prueba:');
   console.log('');
+  console.log('   🛡️ Superadmin plataforma:');
+  console.log('      superadmin@gofit.com / superadmin123');
+  console.log('');
   console.log('   🏢 GoFit Gimnasio:');
   console.log('      Admin: admin@gofit.com / admin123');
   console.log('      Profesional: entrenador@gofit.com / pro123');
@@ -1155,7 +1174,17 @@ async function main() {
 main()
   .catch((e) => {
     console.error(e);
-    process.exit(1);
+    const runtime = globalThis as typeof globalThis & {
+      process?: {
+        exit: (code: number) => never;
+      };
+    };
+
+    if (runtime.process) {
+      runtime.process.exit(1);
+    }
+
+    throw e;
   })
   .finally(async () => {
     await prisma.$disconnect();

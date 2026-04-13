@@ -6,6 +6,22 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
+  const superadminPassword = await bcrypt.hash('superadmin123', 12);
+  const superadmin = await prisma.user.upsert({
+    where: { email: 'superadmin@gofit.com' },
+    update: {},
+    create: {
+      email: 'superadmin@gofit.com',
+      passwordHash: superadminPassword,
+      firstName: 'Super',
+      lastName: 'Admin',
+      role: 'SUPERADMIN',
+      gymId: null,
+    },
+  } as any);
+
+  console.log('✅ Superadmin created:', superadmin.email);
+
   // Create default gym
   const gym = await prisma.gym.upsert({
     where: { slug: 'gofit-demo' },

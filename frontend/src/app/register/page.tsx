@@ -11,6 +11,7 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    documentNumber: '',
     email: '',
     phone: '',
     password: '',
@@ -51,6 +52,7 @@ export default function RegisterPage() {
         body: JSON.stringify({
           firstName: formData.firstName,
           lastName: formData.lastName,
+          documentNumber: formData.documentNumber,
           email: formData.email,
           phone: formData.phone || null,
           password: formData.password,
@@ -126,6 +128,20 @@ export default function RegisterPage() {
                   required
                 />
               </div>
+            </div>
+
+            <div className={styles.field}>
+              <label htmlFor="documentNumber" className={styles.label}>DNI</label>
+              <input
+                id="documentNumber"
+                name="documentNumber"
+                type="text"
+                value={formData.documentNumber}
+                onChange={handleChange}
+                className={styles.input}
+                placeholder="30111222"
+                required
+              />
             </div>
 
             <div className={styles.field}>

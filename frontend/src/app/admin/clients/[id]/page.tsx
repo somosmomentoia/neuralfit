@@ -52,7 +52,9 @@ interface Plan {
 
 const statusLabels: Record<string, string> = {
   ACTIVE: 'Activo',
-  INACTIVE: 'Inactivo',
+  PENDING: 'Pendiente',
+  SUSPENDED: 'Suspendido',
+  EXPIRED: 'Vencido',
   CANCELLED: 'Cancelado',
 };
 
@@ -65,7 +67,7 @@ export default function ClientDetailPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({
-    subscriptionStatus: 'ACTIVE',
+    status: 'ACTIVE',
     planId: '',
     assignedProfessionalId: '',
     specialConsiderations: '',
@@ -89,7 +91,7 @@ export default function ClientDetailPage() {
           setClient(clientData.client);
           const sub = clientData.client.subscription;
           setFormData({
-            subscriptionStatus: sub?.status || 'ACTIVE',
+            status: sub?.status || 'ACTIVE',
             planId: sub?.plan?.id || '',
             assignedProfessionalId: sub?.assignedProfessional?.id || '',
             specialConsiderations: sub?.specialConsiderations || '',
@@ -150,11 +152,11 @@ export default function ClientDetailPage() {
     if (!client) return;
     
     const newIsActive = !client.isActive;
-    const newSubscriptionStatus = newIsActive ? 'ACTIVE' : 'INACTIVE';
+    const newSubscriptionStatus = newIsActive ? 'ACTIVE' : 'SUSPENDED';
     
     const confirmMsg = newIsActive 
       ? '¿Activar este cliente?' 
-      : '¿Desactivar este cliente? Su suscripción pasará a estado Inactivo.';
+      : '¿Desactivar este cliente? Su suscripción pasará a estado Suspendido.';
     
     if (!confirm(confirmMsg)) return;
 
@@ -163,7 +165,7 @@ export default function ClientDetailPage() {
         method: 'PATCH',
         body: JSON.stringify({ 
           isActive: newIsActive,
-          subscriptionStatus: newSubscriptionStatus 
+          status: newSubscriptionStatus 
         }),
       });
 
@@ -244,7 +246,7 @@ export default function ClientDetailPage() {
               color: sub?.status === 'ACTIVE' ? '#22C55E' : '#EF4444'
             }}
           >
-            Suscripción: {statusLabels[sub?.status || 'INACTIVE']}
+            Suscripción: {statusLabels[sub?.status || 'SUSPENDED']}
           </div>
         </div>
       </div>
@@ -257,12 +259,14 @@ export default function ClientDetailPage() {
               <div className={styles.field}>
                 <label>Estado</label>
                 <select
-                  value={formData.subscriptionStatus}
-                  onChange={(e) => setFormData({ ...formData, subscriptionStatus: e.target.value })}
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                   className={styles.select}
                 >
                   <option value="ACTIVE">Activo</option>
-                  <option value="INACTIVE">Inactivo</option>
+                  <option value="PENDING">Pendiente</option>
+                  <option value="SUSPENDED">Suspendido</option>
+                  <option value="EXPIRED">Vencido</option>
                   <option value="CANCELLED">Cancelado</option>
                 </select>
               </div>

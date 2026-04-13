@@ -33,6 +33,16 @@ interface RecentSubscription {
   } | null;
 }
 
+interface AdminDashboardClient {
+  id: string;
+  subscription: {
+    status: string;
+    plan: {
+      price: number;
+    } | null;
+  } | null;
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     clients: 0,
@@ -69,8 +79,8 @@ export default function AdminDashboard() {
         const professionals = prosData.professionals || [];
         const leads = leadsData.leads || [];
         const recentSubs = recentData.subscriptions || [];
-        const activeClients = clients.filter((c: { clientProfile?: { subscriptionStatus: string } }) => 
-          c.clientProfile?.subscriptionStatus === 'ACTIVE'
+        const activeClients = clients.filter((client: AdminDashboardClient) => 
+          client.subscription?.status === 'ACTIVE'
         );
 
         setStats({
@@ -81,8 +91,8 @@ export default function AdminDashboard() {
           leads: leads.length,
           newLeads: leads.filter((l: { status: string }) => l.status === 'NEW').length,
           contactedLeads: leads.filter((l: { status: string }) => l.status === 'CONTACTED').length,
-          monthlyRevenue: activeClients.reduce((sum: number, c: { clientProfile?: { plan?: { price: number } } }) => 
-            sum + (c.clientProfile?.plan?.price || 0), 0),
+          monthlyRevenue: activeClients.reduce((sum: number, client: AdminDashboardClient) => 
+            sum + (client.subscription?.plan?.price || 0), 0),
           pendingSubscriptions: recentSubs.filter((s: { status: string }) => s.status === 'PENDING').length,
         });
         

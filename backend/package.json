@@ -15,6 +15,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "db:create-superadmin": "tsx prisma/create-superadmin.ts",
     "db:seed:prod": "npx prisma db seed",
     "db:studio": "prisma studio"
   },

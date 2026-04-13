@@ -28,7 +28,7 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
         firstName: true,
         lastName: true,
       },
-    });
+    } as any);
 
     if (!user) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
@@ -64,6 +64,7 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
         role: user.role,
         firstName: user.firstName,
         lastName: user.lastName,
+        documentNumber: (user as any).documentNumber ?? null,
       },
       token,
     });
@@ -76,11 +77,11 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
 // POST /api/auth/register - Self-registration for clients
 router.post('/register', async (req: AuthRequest, res: Response) => {
   try {
-    const { firstName, lastName, email, phone, password } = req.body;
+    const { firstName, lastName, email, phone, password, documentNumber } = req.body;
     const prisma: PrismaClient = req.app.get('prisma');
 
     // Validate required fields
-    if (!firstName || !lastName || !email || !password) {
+    if (!firstName || !lastName || !email || !password || !documentNumber) {
       return res.status(400).json({ error: 'Todos los campos son requeridos' });
     }
 
@@ -97,6 +98,15 @@ router.post('/register', async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'El email ya está registrado' });
     }
 
+    const existingDocumentUser = await prisma.user.findFirst({
+      where: { documentNumber },
+      select: { id: true },
+    } as any);
+
+    if (existingDocumentUser) {
+      return res.status(400).json({ error: 'El DNI ya está registrado' });
+    }
+
     // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -106,6 +116,7 @@ router.post('/register', async (req: AuthRequest, res: Response) => {
         firstName,
         lastName,
         email,
+        documentNumber,
         phone: phone || null,
         passwordHash,
         role: 'CLIENT',
@@ -116,7 +127,7 @@ router.post('/register', async (req: AuthRequest, res: Response) => {
           },
         },
       },
-    });
+    } as any);
 
     // Generate token
     const token = jwt.sign(
@@ -144,6 +155,7 @@ router.post('/register', async (req: AuthRequest, res: Response) => {
         role: user.role,
         firstName: user.firstName,
         lastName: user.lastName,
+        documentNumber: (user as any).documentNumber,
       },
       token,
     });
@@ -168,13 +180,28 @@ router.get('/me', authMiddleware, (req: AuthRequest, res: Response) => {
 router.put('/profile', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
-    const { firstName, lastName, phone, avatar } = req.body;
+    const { firstName, lastName, phone, avatar, documentNumber } = req.body;
+
+    if (documentNumber !== undefined && documentNumber !== req.user!.documentNumber) {
+      const existingDocumentUser = await prisma.user.findFirst({
+        where: {
+          documentNumber,
+          id: { not: req.user!.id },
+        },
+        select: { id: true },
+      } as any);
+
+      if (existingDocumentUser) {
+        return res.status(400).json({ error: 'El DNI ya está registrado' });
+      }
+    }
 
     const updatedUser = await prisma.user.update({
       where: { id: req.user!.id },
       data: {
         firstName: firstName || req.user!.firstName,
         lastName: lastName || req.user!.lastName,
+        documentNumber: documentNumber !== undefined ? documentNumber : req.user!.documentNumber,
         phone: phone !== undefined ? phone : req.user!.phone,
         avatar: avatar !== undefined ? avatar : req.user!.avatar,
       },
@@ -183,12 +210,13 @@ router.put('/profile', authMiddleware, async (req: AuthRequest, res: Response) =
         email: true,
         firstName: true,
         lastName: true,
+        documentNumber: true,
         phone: true,
         avatar: true,
         role: true,
         gymId: true,
       },
-    });
+    } as any);
 
     return res.json({ user: updatedUser });
   } catch (error) {

@@ -1,30 +1,92 @@
 import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, requireRole, AuthRequest } from '../middleware/auth';
+import { notifySubscriptionRenewed } from '../services/notificationService';
 import { resolveGymAttributionUserId } from '../utils/gymAttribution';
+import { addMonthsToDate, resolveRenewalStartDate, syncExpiredSubscriptions } from '../utils/subscriptions';
 
 const router = Router();
 
 router.use(authMiddleware);
 router.use(requireRole('CLIENT'));
 
-async function getPreferredRoutineGymId(prisma: PrismaClient, userId: string, fallbackGymId: string | null) {
-  const activeSubscription = await prisma.subscription.findFirst({
-    where: {
-      userId,
-      status: 'ACTIVE',
-    },
-    select: { gymId: true },
-    orderBy: { createdAt: 'desc' },
+const CLIENT_CURRENT_SUBSCRIPTION_STATUSES = ['ACTIVE', 'PENDING', 'SUSPENDED', 'EXPIRED', 'CANCELLED'] as const;
+const CLIENT_SUBSCRIPTION_STATUS_PRIORITY: Record<string, number> = {
+  ACTIVE: 0,
+  PENDING: 1,
+  SUSPENDED: 2,
+  EXPIRED: 3,
+  CANCELLED: 4,
+};
+
+const pickPreferredClientSubscription = (subscriptions: any[]) => {
+  const sortedSubscriptions = [...subscriptions].sort((a, b) => {
+    const priorityA = CLIENT_SUBSCRIPTION_STATUS_PRIORITY[a.status] ?? 99;
+    const priorityB = CLIENT_SUBSCRIPTION_STATUS_PRIORITY[b.status] ?? 99;
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB;
+    }
+
+    const dateA = new Date(a.startDate ?? a.createdAt).getTime();
+    const dateB = new Date(b.startDate ?? b.createdAt).getTime();
+    return dateB - dateA;
   });
 
-  return activeSubscription?.gymId ?? fallbackGymId ?? null;
+  return sortedSubscriptions[0] ?? null;
+};
+
+const formatMarketplacePriceOption = (priceOption: any) => ({
+  id: priceOption.id,
+  name: priceOption.name,
+  description: priceOption.description ?? null,
+  monthlyPrice: priceOption.monthlyPrice,
+  isFallbackPlan: false,
+  plan: priceOption.plan
+    ? {
+        id: priceOption.plan.id,
+        name: priceOption.plan.name,
+        description: priceOption.plan.description ?? null,
+        durationDays: priceOption.plan.durationDays,
+        features: priceOption.plan.features ?? [],
+      }
+    : null,
+});
+
+const formatMarketplaceFallbackPlan = (plan: any) => ({
+  id: plan.id,
+  name: plan.name,
+  description: plan.description ?? null,
+  monthlyPrice: plan.price,
+  isFallbackPlan: true,
+  plan: {
+    id: plan.id,
+    name: plan.name,
+    description: plan.description ?? null,
+    durationDays: plan.durationDays,
+    features: plan.features ?? [],
+  },
+});
+
+async function getPreferredRoutineGymId(prisma: PrismaClient, userId: string, fallbackGymId: string | null) {
+  const subscriptions = await prisma.subscription.findMany({
+    where: {
+      userId,
+      status: { in: [...CLIENT_CURRENT_SUBSCRIPTION_STATUSES] },
+    },
+    select: { gymId: true, status: true, startDate: true, createdAt: true },
+    orderBy: [{ startDate: 'desc' }, { createdAt: 'desc' }],
+  });
+
+  const preferredSubscription = pickPreferredClientSubscription(subscriptions);
+
+  return preferredSubscription?.gymId ?? fallbackGymId ?? null;
 }
 
 // GET /api/client/profile
 router.get('/profile', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
+    await syncExpiredSubscriptions(prisma, { userId: req.user!.id });
     
     const profile = await prisma.clientProfile.findFirst({
       where: { userId: req.user!.id },
@@ -57,10 +119,10 @@ router.get('/profile', async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Perfil no encontrado' });
     }
 
-    const latestActiveSubscription = await prisma.subscription.findFirst({
+    const currentSubscriptions = await prisma.subscription.findMany({
       where: {
         userId: req.user!.id,
-        status: 'ACTIVE',
+        status: { in: [...CLIENT_CURRENT_SUBSCRIPTION_STATUSES] },
       },
       include: {
         plan: {
@@ -74,12 +136,14 @@ router.get('/profile', async (req: AuthRequest, res: Response) => {
       orderBy: [{ startDate: 'desc' }, { createdAt: 'desc' }],
     });
 
+    const currentSubscription = pickPreferredClientSubscription(currentSubscriptions);
+
     return res.json({
       profile: {
         ...profile,
-        subscriptionStatus: latestActiveSubscription?.status || profile.subscriptionStatus,
-        plan: latestActiveSubscription?.plan || profile.plan,
-        currentSubscriptionId: latestActiveSubscription?.id || null,
+        subscriptionStatus: currentSubscription?.status || profile.subscriptionStatus,
+        plan: currentSubscription?.plan || profile.plan,
+        currentSubscriptionId: currentSubscription?.id || null,
       },
     });
   } catch (error) {
@@ -1321,8 +1385,9 @@ router.get('/exercises', async (req: AuthRequest, res: Response) => {
 router.get('/subscriptions', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
+    await syncExpiredSubscriptions(prisma, { userId: req.user!.id });
     
-    const subscriptions = await prisma.subscription.findMany({
+    const subscriptions = await (prisma.subscription.findMany as any)({
       where: { userId: req.user!.id },
       include: {
         gym: {
@@ -1337,6 +1402,7 @@ router.get('/subscriptions', async (req: AuthRequest, res: Response) => {
             },
           },
         },
+        priceOption: true,
         assignedProfessional: {
           include: {
             user: { select: { firstName: true, lastName: true } },
@@ -1357,8 +1423,9 @@ router.get('/subscriptions', async (req: AuthRequest, res: Response) => {
 router.get('/subscriptions/:id', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
+    await syncExpiredSubscriptions(prisma, { userId: req.user!.id, subscriptionId: req.params.id });
     
-    const subscription = await prisma.subscription.findFirst({
+    const subscription = await (prisma.subscription.findFirst as any)({
       where: { 
         id: req.params.id,
         userId: req.user!.id,
@@ -1377,6 +1444,7 @@ router.get('/subscriptions/:id', async (req: AuthRequest, res: Response) => {
             },
           },
         },
+        priceOption: true,
         assignedProfessional: {
           include: {
             user: { select: { firstName: true, lastName: true, email: true } },
@@ -1409,7 +1477,9 @@ router.get('/subscriptions/:id', async (req: AuthRequest, res: Response) => {
 router.post('/subscriptions', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
-    const { gymId, planId, type } = req.body;
+    const { gymId, planId, priceOptionId, type, monthsCount } = req.body;
+    const normalizedMonthsCount = Math.max(1, Number(monthsCount) || 1);
+    await syncExpiredSubscriptions(prisma, { userId: req.user!.id, gymId });
 
     // Verificar que el gym existe y es público
     const gym = await prisma.gym.findFirst({
@@ -1420,52 +1490,110 @@ router.post('/subscriptions', async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Gimnasio no encontrado' });
     }
 
-    // Verificar que no tenga ya una suscripción activa a este gym
     const existingSubscription = await prisma.subscription.findFirst({
-      where: { 
-        userId: req.user!.id, 
-        gymId,
-        status: { in: ['ACTIVE', 'PENDING'] },
-      },
-    });
-
-    if (existingSubscription) {
-      return res.status(400).json({ error: 'Ya tienes una suscripción a este gimnasio' });
-    }
-
-    // Obtener el plan si se especificó
-    let plan = null;
-    let endDate = null;
-    if (planId) {
-      plan = await prisma.plan.findFirst({
-        where: { id: planId, gymId, isActive: true },
-      });
-      if (plan) {
-        endDate = new Date();
-        endDate.setDate(endDate.getDate() + plan.durationDays);
-      }
-    }
-    const attributedToUserId = await resolveGymAttributionUserId(prisma, gymId);
-
-    // Crear suscripción con status ACTIVE (pago por MercadoPago)
-    const subscription = await prisma.subscription.create({
-      data: {
+      where: {
         userId: req.user!.id,
         gymId,
-        planId: plan?.id,
-        type: type || 'MONTHLY',
-        status: 'ACTIVE',
-        source: 'PLATFORM_PURCHASE',
-        startDate: new Date(),
-        endDate,
-        autoRenew: true,
-        attributedToUserId,
-      } as any,
+      },
       include: {
-        gym: true,
-        plan: true,
+        gym: {
+          select: { id: true, name: true },
+        },
       },
     });
+
+    let priceOption = null;
+    if (priceOptionId) {
+      priceOption = await (prisma as any).subscriptionPriceOption.findFirst({
+        where: {
+          id: priceOptionId,
+          gymId,
+          isActive: true,
+          isPublic: true,
+        },
+        include: {
+          plan: {
+            include: {
+              features: {
+                include: { feature: true },
+              },
+            },
+          },
+        },
+      } as any);
+    }
+
+    let plan = priceOption?.plan ?? null;
+    if (!plan && planId) {
+      plan = await prisma.plan.findFirst({
+        where: { id: planId, gymId, isActive: true },
+        include: {
+          features: {
+            include: { feature: true },
+          },
+        },
+      });
+    }
+
+    if (!plan) {
+      return res.status(404).json({ error: 'Plan no encontrado' });
+    }
+
+    const monthlyPriceSnapshot = priceOption?.monthlyPrice ?? plan.price;
+    const totalPriceSnapshot = monthlyPriceSnapshot * normalizedMonthsCount;
+    const renewalStartDate = resolveRenewalStartDate(existingSubscription?.endDate ?? null);
+    const endDate = addMonthsToDate(renewalStartDate, normalizedMonthsCount);
+    const attributedToUserId = await resolveGymAttributionUserId(prisma, gymId);
+
+    const subscription = existingSubscription
+      ? await (prisma.subscription.update as any)({
+          where: { id: existingSubscription.id },
+          data: {
+            planId: plan.id,
+            priceOptionId: priceOption?.id ?? null,
+            type: type || 'MONTHLY',
+            status: 'ACTIVE',
+            source: 'PLATFORM_PURCHASE',
+            startDate: renewalStartDate,
+            endDate,
+            monthsCount: normalizedMonthsCount,
+            monthlyPriceSnapshot,
+            totalPriceSnapshot,
+            priceOptionNameSnapshot: priceOption?.name ?? plan.name,
+            autoRenew: true,
+            cancelledAt: null,
+            attributedToUserId,
+          } as any,
+          include: {
+            gym: true,
+            plan: true,
+            priceOption: true,
+          },
+        })
+      : await (prisma.subscription.create as any)({
+          data: {
+            userId: req.user!.id,
+            gymId,
+            planId: plan.id,
+            priceOptionId: priceOption?.id ?? null,
+            type: type || 'MONTHLY',
+            status: 'ACTIVE',
+            source: 'PLATFORM_PURCHASE',
+            startDate: renewalStartDate,
+            endDate,
+            monthsCount: normalizedMonthsCount,
+            monthlyPriceSnapshot,
+            totalPriceSnapshot,
+            priceOptionNameSnapshot: priceOption?.name ?? plan.name,
+            autoRenew: true,
+            attributedToUserId,
+          } as any,
+          include: {
+            gym: true,
+            plan: true,
+            priceOption: true,
+          },
+        });
 
     if (!req.user!.gymId) {
       await prisma.user.update({
@@ -1478,17 +1606,19 @@ router.post('/subscriptions', async (req: AuthRequest, res: Response) => {
     await prisma.clientProfile.upsert({
       where: { userId: req.user!.id },
       update: {
-        planId: plan?.id,
+        planId: plan.id,
         subscriptionStatus: 'ACTIVE',
-        startDate: new Date(),
+        startDate: renewalStartDate,
       },
       create: {
         userId: req.user!.id,
-        planId: plan?.id,
+        planId: plan.id,
         subscriptionStatus: 'ACTIVE',
-        startDate: new Date(),
+        startDate: renewalStartDate,
       },
     });
+
+    await notifySubscriptionRenewed(req.user!.id, gym.name, endDate, gym.id);
 
     return res.status(201).json({ 
       subscription,
@@ -1569,15 +1699,40 @@ router.get('/gyms', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
     
-    const gyms = await prisma.gym.findMany({
+    const gyms: any[] = await (prisma.gym.findMany as any)({
       where: { isPublic: true },
       include: {
         branches: { 
           where: { isActive: true },
           take: 1,
         },
+        subscriptionPriceOptions: {
+          where: {
+            isActive: true,
+            isPublic: true,
+          },
+          include: {
+            plan: {
+              include: {
+                features: {
+                  include: { feature: true },
+                },
+              },
+            },
+          },
+          orderBy: [
+            { isDefault: 'desc' },
+            { monthlyPrice: 'asc' },
+            { createdAt: 'asc' },
+          ],
+        } as any,
         plans: {
           where: { isActive: true },
+          include: {
+            features: {
+              include: { feature: true },
+            },
+          },
           orderBy: { price: 'asc' },
         },
         _count: {
@@ -1587,7 +1742,14 @@ router.get('/gyms', async (req: AuthRequest, res: Response) => {
       orderBy: { name: 'asc' },
     });
 
-    return res.json({ gyms });
+    return res.json({
+      gyms: gyms.map((gym) => ({
+        ...gym,
+        priceOptions: gym.subscriptionPriceOptions.length > 0
+          ? gym.subscriptionPriceOptions.map(formatMarketplacePriceOption)
+          : gym.plans.map(formatMarketplaceFallbackPlan),
+      })),
+    });
   } catch (error) {
     console.error('Error fetching gyms:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -1599,10 +1761,29 @@ router.get('/gyms/:id', async (req: AuthRequest, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.get('prisma');
     
-    const gym = await prisma.gym.findFirst({
+    const gym: any = await (prisma.gym.findFirst as any)({
       where: { id: req.params.id, isPublic: true },
       include: {
         branches: { where: { isActive: true } },
+        subscriptionPriceOptions: {
+          where: {
+            isActive: true,
+            isPublic: true,
+          },
+          include: {
+            plan: {
+              include: {
+                features: {
+                  include: { feature: true },
+                },
+              },
+            },
+          },
+          orderBy: [
+            { isDefault: 'desc' },
+            { monthlyPrice: 'asc' },
+          ],
+        } as any,
         plans: {
           where: { isActive: true },
           include: {
@@ -1626,7 +1807,12 @@ router.get('/gyms/:id', async (req: AuthRequest, res: Response) => {
     });
 
     return res.json({ 
-      gym,
+      gym: {
+        ...gym,
+        priceOptions: gym.subscriptionPriceOptions.length > 0
+          ? gym.subscriptionPriceOptions.map(formatMarketplacePriceOption)
+          : gym.plans.map(formatMarketplaceFallbackPlan),
+      },
       hasSubscription: !!existingSubscription,
       subscription: existingSubscription,
     });

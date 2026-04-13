@@ -34,6 +34,22 @@ interface Professional {
   } | null;
 }
 
+const statusLabels: Record<string, string> = {
+  ACTIVE: 'Activo',
+  PENDING: 'Pendiente',
+  SUSPENDED: 'Suspendido',
+  EXPIRED: 'Vencido',
+  CANCELLED: 'Cancelado',
+};
+
+const statusColors: Record<string, string> = {
+  ACTIVE: '#22C55E',
+  PENDING: '#FFC107',
+  SUSPENDED: '#F59E0B',
+  EXPIRED: '#EF4444',
+  CANCELLED: '#EF4444',
+};
+
 export default function ProfessionalDetailPage() {
   const params = useParams();
   const [professional, setProfessional] = useState<Professional | null>(null);
@@ -159,10 +175,10 @@ export default function ProfessionalDetailPage() {
                     <span 
                       className={styles.clientStatus}
                       style={{
-                        color: client.subscriptionStatus === 'ACTIVE' ? '#22C55E' : '#EF4444'
+                        color: statusColors[client.subscriptionStatus] || '#9CA3AF'
                       }}
                     >
-                      {client.subscriptionStatus === 'ACTIVE' ? 'Activo' : 'Inactivo'}
+                      {statusLabels[client.subscriptionStatus] || client.subscriptionStatus}
                     </span>
                   </div>
                 </Link>

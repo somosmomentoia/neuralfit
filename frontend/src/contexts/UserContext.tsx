@@ -3,13 +3,15 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { getToken } from '@/lib/api';
 
+type UserRole = 'SUPERADMIN' | 'ADMIN' | 'PROFESSIONAL' | 'CLIENT';
+
 interface User {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   avatar: string | null;
-  role: string;
+  role: UserRole;
 }
 
 interface UserContextType {

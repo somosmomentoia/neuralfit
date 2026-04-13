@@ -6,6 +6,7 @@ import { PrismaClient } from '@prisma/client';
 import path from 'path';
 import authRoutes from './routes/auth';
 import adminRoutes from './routes/admin';
+import superadminRoutes from './routes/superadmin';
 import professionalRoutes from './routes/professional';
 import clientRoutes from './routes/client';
 import uploadRoutes from './routes/upload';
@@ -47,6 +48,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/superadmin', superadminRoutes);
 app.use('/api/professional', professionalRoutes);
 app.use('/api/client', clientRoutes);
 app.use('/api/upload', uploadRoutes);

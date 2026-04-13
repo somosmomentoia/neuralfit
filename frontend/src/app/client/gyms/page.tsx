@@ -14,9 +14,18 @@ interface Branch {
 interface Plan {
   id: string;
   name: string;
-  price: number;
+  price?: number;
   description: string | null;
   durationDays: number;
+}
+
+interface MarketplacePriceOption {
+  id: string;
+  name: string;
+  description: string | null;
+  monthlyPrice: number;
+  isFallbackPlan: boolean;
+  plan: Plan | null;
 }
 
 interface Gym {
@@ -26,7 +35,7 @@ interface Gym {
   logo: string | null;
   description: string | null;
   branches: Branch[];
-  plans: Plan[];
+  priceOptions: MarketplacePriceOption[];
   _count: { subscriptions: number };
 }
 
@@ -39,7 +48,7 @@ export default function GymsPage() {
   useEffect(() => {
     const fetchGyms = async () => {
       try {
-        const res = await apiFetch('/client/gyms/available');
+        const res = await apiFetch('/client/gyms');
         const data = await res.json();
         setGyms(data.gyms || []);
       } catch (error) {
@@ -57,7 +66,7 @@ export default function GymsPage() {
   };
 
   const handleSubscribe = (gymId: string) => {
-    router.push(`/client/plan?gym=${gymId}`);
+    router.push(`/client/plan?tab=explore&gym=${gymId}`);
   };
 
   if (loading) {
@@ -67,7 +76,7 @@ export default function GymsPage() {
   return (
     <div className={styles.container}>
       <p className={styles.subtitle}>
-        Explora los gimnasios disponibles y sus planes
+        Explora los gimnasios disponibles y sus membresías publicadas
       </p>
 
       {/* Lista de gimnasios */}
@@ -162,21 +171,32 @@ export default function GymsPage() {
                     </div>
                   </div>
 
-                  {/* Planes */}
+                  {/* Membresías */}
                   <div className={styles.section}>
-                    <h4 className={styles.sectionTitle}>Planes disponibles</h4>
+                    <h4 className={styles.sectionTitle}>Membresías disponibles</h4>
                     <div className={styles.plansList}>
-                      {gym.plans.map((plan) => (
-                        <div key={plan.id} className={styles.planItem}>
-                          <div className={styles.planInfo}>
-                            <span className={styles.planName}>{plan.name}</span>
-                            <span className={styles.planPrice}>{formatPrice(plan.price)}/mes</span>
+                      {gym.priceOptions.length > 0 ? (
+                        gym.priceOptions.map((option) => (
+                          <div key={option.id} className={styles.planItem}>
+                            <div className={styles.planInfo}>
+                              <span className={styles.planName}>{option.name}</span>
+                              <span className={styles.planPrice}>{formatPrice(option.monthlyPrice)}/mes</span>
+                            </div>
+                            <p className={styles.planDescription}>
+                              {option.description || option.plan?.description || (option.plan ? `Plan base: ${option.plan.name}` : 'Membresía disponible')}
+                            </p>
                           </div>
-                          {plan.description && (
-                            <p className={styles.planDescription}>{plan.description}</p>
-                          )}
+                        ))
+                      ) : (
+                        <div className={styles.planItem}>
+                          <div className={styles.planInfo}>
+                            <span className={styles.planName}>Sin membresías publicadas</span>
+                          </div>
+                          <p className={styles.planDescription}>
+                            Este gimnasio todavía no configuró precios visibles en marketplace.
+                          </p>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
 

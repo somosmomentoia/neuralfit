@@ -13,8 +13,15 @@ export interface Client {
   avatar: string | null;
   isActive: boolean;
   createdAt: string;
+  subscription?: {
+    status: 'PENDING' | 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'SUSPENDED';
+    plan: {
+      id: string;
+      name: string;
+    } | null;
+  } | null;
   clientProfile: {
-    subscriptionStatus: 'ACTIVE' | 'INACTIVE' | 'CANCELLED';
+    subscriptionStatus: 'PENDING' | 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'SUSPENDED' | 'INACTIVE';
     plan: {
       id: string;
       name: string;
@@ -30,15 +37,21 @@ interface ClientListProps {
 }
 
 const statusLabels: Record<string, string> = {
+  PENDING: 'Pendiente',
   ACTIVE: 'Activo',
-  INACTIVE: 'Inactivo',
+  SUSPENDED: 'Suspendido',
+  EXPIRED: 'Vencido',
   CANCELLED: 'Cancelado',
+  INACTIVE: 'Inactivo',
 };
 
 const statusColors: Record<string, string> = {
+  PENDING: '#FFC107',
   ACTIVE: '#22C55E',
-  INACTIVE: '#F59E0B',
+  SUSPENDED: '#F59E0B',
+  EXPIRED: '#EF4444',
   CANCELLED: '#EF4444',
+  INACTIVE: '#F59E0B',
 };
 
 export function ClientList({
@@ -71,7 +84,8 @@ export function ClientList({
     <div className={styles.clientsList}>
       {clients.map((client) => {
         const isExpanded = expandedClient === client.id;
-        const status = client.clientProfile?.subscriptionStatus || 'INACTIVE';
+        const status = client.subscription?.status || client.clientProfile?.subscriptionStatus || 'INACTIVE';
+        const plan = client.subscription?.plan || client.clientProfile?.plan;
         
         return (
           <div 
@@ -91,10 +105,10 @@ export function ClientList({
                   <h3 className={styles.clientName}>{client.firstName} {client.lastName}</h3>
                   <span className={styles.separator}>·</span>
                   <span className={styles.email}>{client.email}</span>
-                  {client.clientProfile?.plan && (
+                  {plan && (
                     <>
                       <span className={styles.separator}>·</span>
-                      <span className={styles.planBadge}>{client.clientProfile.plan.name}</span>
+                      <span className={styles.planBadge}>{plan.name}</span>
                     </>
                   )}
                 </div>

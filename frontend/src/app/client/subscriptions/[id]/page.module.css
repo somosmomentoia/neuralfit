@@ -122,9 +122,16 @@
   gap: var(--spacing-4);
 }
 
-.gymLogo {
+.gymLogoWrapper {
+  position: relative;
   width: 72px;
   height: 72px;
+  flex-shrink: 0;
+}
+
+.gymLogo {
+  width: 100%;
+  height: 100%;
   border-radius: 18px;
   object-fit: cover;
   border: 2px solid rgba(188, 255, 49, 0.3);

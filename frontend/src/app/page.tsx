@@ -25,6 +25,7 @@ export default function Home() {
         if (res.ok) {
           const data = await res.json();
           const redirectPath = 
+            data.user.role === 'SUPERADMIN' ? '/superadmin' :
             data.user.role === 'ADMIN' ? '/admin' :
             data.user.role === 'PROFESSIONAL' ? '/professional' : '/client';
           router.replace(redirectPath);

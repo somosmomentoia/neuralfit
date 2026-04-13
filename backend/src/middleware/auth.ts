@@ -16,6 +16,7 @@ export interface AuthRequest extends Request {
     gymId: string | null;
     firstName: string;
     lastName: string;
+    documentNumber: string | null;
     phone: string | null;
     avatar: string | null;
   };
@@ -46,16 +47,17 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
         gymId: true,
         firstName: true,
         lastName: true,
+        documentNumber: true,
         phone: true,
         avatar: true,
       },
-    });
+    } as any);
 
     if (!user) {
       return res.status(401).json({ error: 'Usuario no encontrado' });
     }
 
-    req.user = user;
+    req.user = user as any;
     next();
   } catch (error) {
     return res.status(401).json({ error: 'Token inválido' });

@@ -13,6 +13,7 @@ datasource db {
 // ==================== ENUMS ====================
 
 enum Role {
+  SUPERADMIN
   ADMIN
   PROFESSIONAL
   CLIENT
@@ -93,6 +94,7 @@ model Gym {
   routines      Routine[]
   sports        Sport[]
   plans         Plan[]
+  subscriptionPriceOptions SubscriptionPriceOption[]
   expenses      Expense[]
   expenseCategories ExpenseCategory[]
   branches      Branch[]
@@ -111,6 +113,7 @@ model User {
   passwordHash String
   firstName    String
   lastName     String
+  documentNumber String?  @unique
   phone        String?
   avatar       String?
   role         Role
@@ -203,6 +206,8 @@ model Subscription {
   // Plan contratado
   planId                String?
   plan                  Plan?    @relation(fields: [planId], references: [id])
+  priceOptionId         String?
+  priceOption           SubscriptionPriceOption? @relation(fields: [priceOptionId], references: [id], onDelete: SetNull)
   
   // Estado, tipo y origen de suscripción
   status                SubscriptionStatus @default(PENDING)
@@ -212,6 +217,10 @@ model Subscription {
   // Fechas
   startDate             DateTime?
   endDate               DateTime?
+  monthsCount           Int      @default(1)
+  monthlyPriceSnapshot  Float?
+  totalPriceSnapshot    Float?
+  priceOptionNameSnapshot String?
   
   // MercadoPago - datos de la suscripción
   mpSubscriptionId      String?  // ID de suscripción en MP
@@ -219,6 +228,7 @@ model Subscription {
   mpPreapprovalId       String?  // ID de preapproval para suscripciones recurrentes
   autoRenew             Boolean   @default(true)
   cancelledAt           DateTime? // Fecha en que se solicitó cancelación (sigue activa hasta endDate)
+  expiredNotifiedAt     DateTime?
   createdByUserId       String?
   createdByUser         User?     @relation("SubscriptionCreatedBy", fields: [createdByUserId], references: [id])
   attributedToUserId    String?
@@ -517,6 +527,7 @@ model Plan {
 
   clients  ClientProfile[]
   subscriptions Subscription[]
+  priceOptions SubscriptionPriceOption[]
   invoices Invoice[]
   features PlanFeatureAssignment[]
   
@@ -524,6 +535,30 @@ model Plan {
   updatedAt DateTime @updatedAt
 
   @@index([gymId])
+}
+
+model SubscriptionPriceOption {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  monthlyPrice Float
+  isActive    Boolean @default(true)
+  isPublic    Boolean @default(false)
+  isDefault   Boolean @default(false)
+
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  planId String
+  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+  @@index([planId])
 }
 
 // Features/beneficios disponibles para planes (configurables por gym)

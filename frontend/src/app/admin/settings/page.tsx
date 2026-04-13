@@ -33,6 +33,21 @@ interface Plan {
   _count: { clients: number };
 }
 
+interface SubscriptionPriceOption {
+  id: string;
+  name: string;
+  description: string | null;
+  monthlyPrice: number;
+  isActive: boolean;
+  isPublic: boolean;
+  isDefault: boolean;
+  plan: {
+    id: string;
+    name: string;
+  } | null;
+  subscriptionsCount: number;
+}
+
 interface Benefit {
   id: string;
   name: string;
@@ -52,7 +67,7 @@ interface AttributionCandidate {
   role: 'ADMIN' | 'PROFESSIONAL';
 }
 
-type ActiveTab = 'general' | 'branches' | 'plans' | 'features' | 'benefits';
+type ActiveTab = 'general' | 'branches' | 'plans' | 'pricing' | 'features' | 'benefits';
 
 interface GymConfig {
   id: string;
@@ -72,6 +87,7 @@ export default function SettingsPage() {
   const [gymConfig, setGymConfig] = useState<GymConfig | null>(null);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [priceOptions, setPriceOptions] = useState<SubscriptionPriceOption[]>([]);
   const [features, setFeatures] = useState<PlanFeature[]>([]);
   const [benefits, setBenefits] = useState<Benefit[]>([]);
   const [attributionCandidates, setAttributionCandidates] = useState<AttributionCandidate[]>([]);
@@ -84,10 +100,12 @@ export default function SettingsPage() {
   const [showFeatureModal, setShowFeatureModal] = useState(false);
   const [showBenefitModal, setShowBenefitModal] = useState(false);
   const [showMpModal, setShowMpModal] = useState(false);
+  const [showPriceOptionModal, setShowPriceOptionModal] = useState(false);
   const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [editingFeature, setEditingFeature] = useState<PlanFeature | null>(null);
   const [editingBenefit, setEditingBenefit] = useState<Benefit | null>(null);
+  const [editingPriceOption, setEditingPriceOption] = useState<SubscriptionPriceOption | null>(null);
 
   // Form states
   const [gymForm, setGymForm] = useState({
@@ -119,6 +137,16 @@ export default function SettingsPage() {
     featureIds: [] as string[],
   });
 
+  const [priceOptionForm, setPriceOptionForm] = useState({
+    name: '',
+    description: '',
+    monthlyPrice: '',
+    planId: '',
+    isActive: true,
+    isPublic: true,
+    isDefault: false,
+  });
+
   const [featureForm, setFeatureForm] = useState({
     name: '',
     description: '',
@@ -140,10 +168,11 @@ export default function SettingsPage() {
 
   const fetchData = async () => {
     try {
-      const [gymRes, branchesRes, plansRes, featuresRes, benefitsRes] = await Promise.all([
+      const [gymRes, branchesRes, plansRes, priceOptionsRes, featuresRes, benefitsRes] = await Promise.all([
         apiFetch('/admin/gym'),
         apiFetch('/admin/branches'),
         apiFetch('/admin/plans'),
+        apiFetch('/admin/subscription-price-options'),
         apiFetch('/admin/plan-features'),
         apiFetch('/admin/benefits'),
       ]);
@@ -151,6 +180,7 @@ export default function SettingsPage() {
       const gymData = await gymRes.json();
       const branchesData = await branchesRes.json();
       const plansData = await plansRes.json();
+      const priceOptionsData = await priceOptionsRes.json();
       const featuresData = await featuresRes.json();
       const benefitsData = await benefitsRes.json();
 
@@ -167,12 +197,88 @@ export default function SettingsPage() {
       }
       setBranches(branchesData.branches || []);
       setPlans(plansData.plans || []);
+      setPriceOptions(priceOptionsData.priceOptions || []);
       setFeatures(featuresData.features || []);
       setBenefits(benefitsData.benefits || []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openPriceOptionModal = (priceOption?: SubscriptionPriceOption) => {
+    if (priceOption) {
+      setEditingPriceOption(priceOption);
+      setPriceOptionForm({
+        name: priceOption.name,
+        description: priceOption.description || '',
+        monthlyPrice: priceOption.monthlyPrice.toString(),
+        planId: priceOption.plan?.id || '',
+        isActive: priceOption.isActive,
+        isPublic: priceOption.isPublic,
+        isDefault: priceOption.isDefault,
+      });
+    } else {
+      setEditingPriceOption(null);
+      setPriceOptionForm({
+        name: '',
+        description: '',
+        monthlyPrice: '',
+        planId: plans[0]?.id || '',
+        isActive: true,
+        isPublic: true,
+        isDefault: priceOptions.length === 0,
+      });
+    }
+    setShowPriceOptionModal(true);
+  };
+
+  const savePriceOption = async () => {
+    if (!priceOptionForm.name || !priceOptionForm.planId || !priceOptionForm.monthlyPrice) {
+      alert('Completa nombre, plan y precio mensual');
+      return;
+    }
+
+    try {
+      const method = editingPriceOption ? 'PUT' : 'POST';
+      const url = editingPriceOption
+        ? `/admin/subscription-price-options/${editingPriceOption.id}`
+        : '/admin/subscription-price-options';
+
+      const res = await apiFetch(url, {
+        method,
+        body: JSON.stringify({
+          ...priceOptionForm,
+          monthlyPrice: parseFloat(priceOptionForm.monthlyPrice),
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || 'No se pudo guardar el precio/promoción');
+        return;
+      }
+
+      setShowPriceOptionModal(false);
+      fetchData();
+    } catch (error) {
+      console.error('Error saving subscription price option:', error);
+    }
+  };
+
+  const deletePriceOption = async (id: string) => {
+    if (!confirm('¿Estás seguro de eliminar este precio/promoción?')) return;
+    try {
+      const res = await apiFetch(`/admin/subscription-price-options/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || 'No se pudo eliminar el precio/promoción');
+        return;
+      }
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting subscription price option:', error);
     }
   };
 
@@ -475,6 +581,12 @@ export default function SettingsPage() {
             Planes
           </button>
           <button
+            className={`${styles.tab} ${activeTab === 'pricing' ? styles.active : ''}`}
+            onClick={() => setActiveTab('pricing')}
+          >
+            Precios
+          </button>
+          <button
             className={`${styles.tab} ${activeTab === 'features' ? styles.active : ''}`}
             onClick={() => setActiveTab('features')}
           >
@@ -673,6 +785,75 @@ export default function SettingsPage() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {activeTab === 'pricing' && (
+            <div className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <h2 className={styles.sectionTitle}>Precios y promociones ({priceOptions.length})</h2>
+                  <p className={styles.sectionText}>
+                    Estos valores son los que podrán elegirse en marketplace, altas y renovaciones.
+                  </p>
+                </div>
+                <button className={styles.addButton} onClick={() => openPriceOptionModal()} disabled={plans.length === 0}>
+                  + Agregar Precio
+                </button>
+              </div>
+
+              {plans.length === 0 ? (
+                <div className={styles.emptyBlock}>
+                  Primero crea al menos un plan para poder definir precios/promociones por gimnasio.
+                </div>
+              ) : priceOptions.length === 0 ? (
+                <div className={styles.emptyBlock}>
+                  Aún no configuraste precios públicos. Puedes crear un precio estándar y luego sumar promos como alumno nuevo o convenio.
+                </div>
+              ) : (
+                <div className={styles.grid}>
+                  {priceOptions.map((priceOption) => (
+                    <div key={priceOption.id} className={styles.card}>
+                      <div className={styles.cardHeader}>
+                        <div>
+                          <h3 className={styles.cardTitle}>{priceOption.name}</h3>
+                          {priceOption.plan && (
+                            <p className={styles.cardMeta}>Plan base: {priceOption.plan.name}</p>
+                          )}
+                        </div>
+                        <div className={styles.priceOptionHeaderRight}>
+                          {priceOption.isDefault && <span className={styles.defaultBadge}>Default</span>}
+                          <span className={styles.price}>{formatPrice(priceOption.monthlyPrice)}</span>
+                        </div>
+                      </div>
+
+                      {priceOption.description && (
+                        <p className={styles.cardDescription}>{priceOption.description}</p>
+                      )}
+
+                      <div className={styles.priceOptionMetaRow}>
+                        <span className={`${styles.badge} ${priceOption.isActive ? styles.active : styles.inactive}`}>
+                          {priceOption.isActive ? 'Activo' : 'Inactivo'}
+                        </span>
+                        <span className={`${styles.badge} ${priceOption.isPublic ? styles.active : styles.inactive}`}>
+                          {priceOption.isPublic ? 'Visible marketplace' : 'Solo interno'}
+                        </span>
+                      </div>
+
+                      <p className={styles.clientCount}>{priceOption.subscriptionsCount} suscripciones</p>
+
+                      <div className={styles.cardActions}>
+                        <button className={styles.editBtn} onClick={() => openPriceOptionModal(priceOption)}>
+                          Editar
+                        </button>
+                        <button className={styles.deleteBtn} onClick={() => deletePriceOption(priceOption.id)}>
+                          Eliminar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -1056,6 +1237,95 @@ export default function SettingsPage() {
               </button>
               <button className={styles.saveBtn} onClick={handleSaveMpConfig} disabled={saving}>
                 {saving ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPriceOptionModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowPriceOptionModal(false)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <h2 className={styles.modalTitle}>
+              {editingPriceOption ? 'Editar Precio / Promoción' : 'Nuevo Precio / Promoción'}
+            </h2>
+            <div className={styles.form}>
+              <div className={styles.field}>
+                <label>Nombre comercial</label>
+                <input
+                  type="text"
+                  value={priceOptionForm.name}
+                  onChange={e => setPriceOptionForm({ ...priceOptionForm, name: e.target.value })}
+                  placeholder="Precio estándar"
+                />
+              </div>
+              <div className={styles.field}>
+                <label>Descripción</label>
+                <textarea
+                  value={priceOptionForm.description}
+                  onChange={e => setPriceOptionForm({ ...priceOptionForm, description: e.target.value })}
+                  placeholder="Promo alumno nuevo, club convenio, etc."
+                />
+              </div>
+              <div className={styles.fieldRow}>
+                <div className={styles.field}>
+                  <label>Plan asociado</label>
+                  <select
+                    value={priceOptionForm.planId}
+                    onChange={e => setPriceOptionForm({ ...priceOptionForm, planId: e.target.value })}
+                  >
+                    <option value="">Selecciona un plan</option>
+                    {plans.map(plan => (
+                      <option key={plan.id} value={plan.id}>{plan.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className={styles.field}>
+                  <label>Precio mensual (ARS)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={priceOptionForm.monthlyPrice}
+                    onChange={e => setPriceOptionForm({ ...priceOptionForm, monthlyPrice: e.target.value })}
+                    placeholder="15000"
+                  />
+                </div>
+              </div>
+
+              <div className={styles.checkboxGroup}>
+                <label className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={priceOptionForm.isActive}
+                    onChange={e => setPriceOptionForm({ ...priceOptionForm, isActive: e.target.checked })}
+                  />
+                  <span>Activo para altas y renovaciones</span>
+                </label>
+                <label className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={priceOptionForm.isPublic}
+                    onChange={e => setPriceOptionForm({ ...priceOptionForm, isPublic: e.target.checked })}
+                  />
+                  <span>Visible en el marketplace del cliente</span>
+                </label>
+                <label className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={priceOptionForm.isDefault}
+                    onChange={e => setPriceOptionForm({ ...priceOptionForm, isDefault: e.target.checked })}
+                  />
+                  <span>Usar como precio por defecto</span>
+                </label>
+              </div>
+            </div>
+            <div className={styles.modalActions}>
+              <button className={styles.cancelBtn} onClick={() => setShowPriceOptionModal(false)}>
+                Cancelar
+              </button>
+              <button className={styles.saveBtn} onClick={savePriceOption}>
+                Guardar
               </button>
             </div>
           </div>

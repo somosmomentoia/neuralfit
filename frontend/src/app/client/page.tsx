@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
@@ -17,6 +18,8 @@ interface Subscription {
   type: string;
   startDate: string | null;
   endDate: string | null;
+  monthsCount?: number | null;
+  priceOptionNameSnapshot?: string | null;
   gym: {
     id: string;
     name: string;
@@ -25,8 +28,13 @@ interface Subscription {
   };
   plan: {
     name: string;
-    price: number;
+    price?: number;
     durationDays: number;
+  } | null;
+  priceOption?: {
+    id: string;
+    name: string;
+    monthlyPrice: number;
   } | null;
 }
 
@@ -150,6 +158,10 @@ export default function ClientHomePage() {
     return new Date(dateStr).toLocaleDateString('es-AR');
   };
 
+  const getSubscriptionDisplayName = (subscription: Subscription) => {
+    return subscription.priceOptionNameSnapshot || subscription.priceOption?.name || subscription.plan?.name || 'Sin plan';
+  };
+
   return (
     <div className={styles.container}>
       {/* Membership Cards Carousel */}
@@ -187,7 +199,7 @@ export default function ClientHomePage() {
               <div className={styles.cardDetails}>
                 <div className={styles.cardPlan}>
                   <span className={styles.cardLabel}>PLAN</span>
-                  <span className={styles.cardValue}>{sub.plan?.name || 'Sin plan'}</span>
+                  <span className={styles.cardValue}>{getSubscriptionDisplayName(sub)}</span>
                 </div>
                 <div className={styles.cardExpiry}>
                   <span className={styles.cardLabel}>VENCE</span>
@@ -239,7 +251,7 @@ export default function ClientHomePage() {
               >
                 <div className={styles.benefitImageContainer}>
                   {benefit.imageUrl ? (
-                    <img src={benefit.imageUrl} alt={benefit.name} className={styles.benefitImg} />
+                    <Image src={benefit.imageUrl} alt={benefit.name} fill sizes="(max-width: 768px) 50vw, 240px" className={styles.benefitImg} />
                   ) : (
                     <div className={styles.benefitPlaceholder}>
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

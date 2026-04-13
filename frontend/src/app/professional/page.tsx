@@ -20,6 +20,22 @@ interface Client {
   subscriptionStatus: string;
 }
 
+const statusLabels: Record<string, string> = {
+  ACTIVE: 'Activo',
+  PENDING: 'Pendiente',
+  SUSPENDED: 'Suspendido',
+  EXPIRED: 'Vencido',
+  CANCELLED: 'Cancelado',
+};
+
+const statusColors: Record<string, string> = {
+  ACTIVE: styles.active,
+  PENDING: styles.pending,
+  SUSPENDED: styles.suspended,
+  EXPIRED: styles.expired,
+  CANCELLED: styles.cancelled,
+};
+
 export default function ProfessionalDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [clients, setClients] = useState<Client[]>([]);
@@ -155,7 +171,7 @@ export default function ProfessionalDashboard() {
                     {client.user.firstName} {client.user.lastName}
                   </span>
                   <span className={`${styles.clientStatus} ${client.subscriptionStatus === 'ACTIVE' ? styles.active : ''}`}>
-                    {client.subscriptionStatus === 'ACTIVE' ? 'Activo' : 'Inactivo'}
+                    {statusLabels[client.subscriptionStatus] || client.subscriptionStatus}
                   </span>
                 </div>
                 <div className={styles.clientArrow}>

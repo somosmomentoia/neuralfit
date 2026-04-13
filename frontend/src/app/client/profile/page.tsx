@@ -9,6 +9,7 @@ import { useUser } from '@/contexts/UserContext';
 interface UserProfile {
   firstName: string;
   lastName: string;
+  documentNumber: string | null;
   email: string;
   phone: string | null;
   avatar: string | null;
@@ -33,6 +34,7 @@ export default function ClientProfilePage() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    documentNumber: '',
     phone: '',
   });
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -46,6 +48,7 @@ export default function ClientProfilePage() {
         const profileData = {
           firstName: userData.user?.firstName || '',
           lastName: userData.user?.lastName || '',
+          documentNumber: userData.user?.documentNumber || '',
           email: userData.user?.email || '',
           phone: userData.user?.phone || '',
           avatar: userData.user?.avatar || null,
@@ -56,6 +59,7 @@ export default function ClientProfilePage() {
         setFormData({
           firstName: profileData.firstName,
           lastName: profileData.lastName,
+          documentNumber: profileData.documentNumber || '',
           phone: profileData.phone || '',
         });
 
@@ -85,6 +89,7 @@ export default function ClientProfilePage() {
         body: JSON.stringify({
           firstName: formData.firstName,
           lastName: formData.lastName,
+          documentNumber: formData.documentNumber,
           phone: formData.phone || null,
         }),
       });
@@ -95,6 +100,7 @@ export default function ClientProfilePage() {
           ...prev,
           firstName: data.user.firstName,
           lastName: data.user.lastName,
+          documentNumber: data.user.documentNumber,
           phone: data.user.phone,
         } : null);
         setEditing(false);
@@ -225,6 +231,20 @@ export default function ClientProfilePage() {
               />
             ) : (
               <span className={styles.value}>{profile?.lastName}</span>
+            )}
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>DNI</label>
+            {editing ? (
+              <input
+                type="text"
+                className={styles.input}
+                value={formData.documentNumber}
+                onChange={(e) => setFormData({ ...formData, documentNumber: e.target.value })}
+              />
+            ) : (
+              <span className={styles.value}>{profile?.documentNumber || 'No especificado'}</span>
             )}
           </div>
 

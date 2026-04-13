@@ -7,13 +7,17 @@ import { ClientList, Client } from '@/components/clients';
 
 const statusLabels: Record<string, string> = {
   ACTIVE: 'Activo',
-  INACTIVE: 'Inactivo',
+  PENDING: 'Pendiente',
+  SUSPENDED: 'Suspendido',
+  EXPIRED: 'Vencido',
   CANCELLED: 'Cancelado',
 };
 
 const statusColors: Record<string, string> = {
   ACTIVE: '#22C55E',
-  INACTIVE: '#F59E0B',
+  PENDING: '#FFC107',
+  SUSPENDED: '#F59E0B',
+  EXPIRED: '#EF4444',
   CANCELLED: '#EF4444',
 };
 
@@ -47,7 +51,8 @@ export default function ClientsPage() {
   }, []);
 
   const filteredClients = clients.filter(c => {
-    const matchesFilter = filter === 'ALL' || c.clientProfile?.subscriptionStatus === filter;
+    const status = c.subscription?.status || c.clientProfile?.subscriptionStatus || 'INACTIVE';
+    const matchesFilter = filter === 'ALL' || status === filter;
     const matchesSearch = search === '' || 
       `${c.firstName} ${c.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
       c.email.toLowerCase().includes(search.toLowerCase());
@@ -56,8 +61,8 @@ export default function ClientsPage() {
 
   const stats = {
     total: clients.length,
-    active: clients.filter(c => c.clientProfile?.subscriptionStatus === 'ACTIVE').length,
-    inactive: clients.filter(c => c.clientProfile?.subscriptionStatus === 'INACTIVE').length,
+    active: clients.filter(c => (c.subscription?.status || c.clientProfile?.subscriptionStatus) === 'ACTIVE').length,
+    inactive: clients.filter(c => (c.subscription?.status || c.clientProfile?.subscriptionStatus || 'INACTIVE') !== 'ACTIVE').length,
   };
 
   return (
@@ -126,7 +131,7 @@ export default function ClientsPage() {
           />
         </div>
         <div className={styles.filters}>
-          {['ALL', 'ACTIVE', 'INACTIVE', 'CANCELLED'].map((status) => (
+          {['ALL', 'ACTIVE', 'PENDING', 'SUSPENDED', 'EXPIRED', 'CANCELLED'].map((status) => (
             <button
               key={status}
               className={`${styles.filterBtn} ${filter === status ? styles.active : ''}`}
