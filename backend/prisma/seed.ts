@@ -3,6 +3,12 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+const addDays = (days: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date;
+};
+
 async function main() {
   console.log('🌱 Seeding database...');
 
@@ -625,6 +631,76 @@ async function main() {
 
   console.log('✅ New user created:', pendingUser.email);
 
+  const adminCreatedClientPassword = await bcrypt.hash('manual123', 12);
+  const adminCreatedClient = await prisma.user.upsert({
+    where: { email: 'manual@gofit.com' },
+    update: {},
+    create: {
+      email: 'manual@gofit.com',
+      passwordHash: adminCreatedClientPassword,
+      firstName: 'Lucía',
+      lastName: 'Manual',
+      documentNumber: '30111222',
+      role: 'CLIENT',
+      gymId: gym.id,
+    },
+  } as any);
+
+  await prisma.clientProfile.upsert({
+    where: { userId: adminCreatedClient.id },
+    update: {
+      createdByUserId: admin.id,
+      createdByGymId: gym.id,
+      assignedProfessionalId: proProfile?.id,
+      subscriptionStatus: 'ACTIVE',
+      specialConsiderations: 'Requiere seguimiento de rodilla izquierda.',
+    },
+    create: {
+      userId: adminCreatedClient.id,
+      createdByUserId: admin.id,
+      createdByGymId: gym.id,
+      assignedProfessionalId: proProfile?.id,
+      subscriptionStatus: 'ACTIVE',
+      specialConsiderations: 'Requiere seguimiento de rodilla izquierda.',
+    },
+  });
+
+  const professionalCreatedClientPassword = await bcrypt.hash('manualpro123', 12);
+  const professionalCreatedClient = await prisma.user.upsert({
+    where: { email: 'alumno.pro@gofit.com' },
+    update: {},
+    create: {
+      email: 'alumno.pro@gofit.com',
+      passwordHash: professionalCreatedClientPassword,
+      firstName: 'Mateo',
+      lastName: 'Asignado',
+      documentNumber: '33444555',
+      role: 'CLIENT',
+      gymId: gym.id,
+    },
+  } as any);
+
+  await prisma.clientProfile.upsert({
+    where: { userId: professionalCreatedClient.id },
+    update: {
+      createdByUserId: professional.id,
+      createdByGymId: gym.id,
+      assignedProfessionalId: proProfile?.id,
+      subscriptionStatus: 'ACTIVE',
+      specialConsiderations: 'Objetivo principal: recomposición corporal.',
+    },
+    create: {
+      userId: professionalCreatedClient.id,
+      createdByUserId: professional.id,
+      createdByGymId: gym.id,
+      assignedProfessionalId: proProfile?.id,
+      subscriptionStatus: 'ACTIVE',
+      specialConsiderations: 'Objetivo principal: recomposición corporal.',
+    },
+  });
+
+  console.log('✅ Gym-created clients seeded: 2');
+
   // Create some sports
   const sports = [
     'Fútbol', 'Pádel', 'Básquet', 'Boxeo', 'Rugby', 
@@ -759,142 +835,283 @@ async function main() {
 
   console.log('✅ Plans created with features');
 
+  const gymAdminEmails = [
+    'admin@gofit.com',
+    'admin@ironfitness.com',
+    'admin@powergym.com',
+    'admin@flexfitness.com',
+    'admin@megagym.com',
+    'admin@crossfitbox.com',
+  ];
+
+  const gymAdmins = await prisma.user.findMany({
+    where: { email: { in: gymAdminEmails } },
+    select: { id: true, email: true, gymId: true },
+  });
+
+  const adminByEmail = new Map(gymAdmins.map((user) => [user.email, user]));
+
+  const attributionConfigs = [
+    { gymId: gym.id, adminEmail: 'admin@gofit.com' },
+    { gymId: gym2.id, adminEmail: 'admin@ironfitness.com' },
+    { gymId: gym3.id, adminEmail: 'admin@powergym.com' },
+    { gymId: gym4.id, adminEmail: 'admin@flexfitness.com' },
+    { gymId: gym5.id, adminEmail: 'admin@megagym.com' },
+    { gymId: gym6.id, adminEmail: 'admin@crossfitbox.com' },
+  ];
+
+  for (const { gymId, adminEmail } of attributionConfigs) {
+    const attributionAdmin = adminByEmail.get(adminEmail);
+    if (!attributionAdmin) {
+      continue;
+    }
+
+    await prisma.gym.update({
+      where: { id: gymId },
+      data: { defaultClientAttributionUserId: attributionAdmin.id },
+    });
+  }
+
+  const priceOptions = [
+    { id: 'gofit-standard', name: 'Mensual estándar', description: 'Precio público base para acceso completo al gimnasio.', monthlyPrice: 15000, isActive: true, isPublic: true, isDefault: true, gymId: gym.id, planId: planMensual.id },
+    { id: 'gofit-student', name: 'Promo estudiante', description: 'Precio promocional para alumnos con acreditación.', monthlyPrice: 12900, isActive: true, isPublic: true, isDefault: false, gymId: gym.id, planId: planMensual.id },
+    { id: 'gofit-trimestral-online', name: 'Pack trimestral online', description: 'Precio mensual bonificado para compras de 3 meses.', monthlyPrice: 13350, isActive: true, isPublic: true, isDefault: false, gymId: gym.id, planId: planTrimestral.id },
+    { id: 'gofit-corporate-private', name: 'Convenio corporativo', description: 'Opción interna no publicada para cuentas empresa.', monthlyPrice: 11800, isActive: true, isPublic: false, isDefault: false, gymId: gym.id, planId: planMensual.id },
+    { id: 'iron-basic-public', name: 'Básico Iron', description: 'Acceso general a sala de musculación.', monthlyPrice: 12000, isActive: true, isPublic: true, isDefault: true, gymId: gym2.id, planId: 'iron-mensual' },
+    { id: 'iron-first-month', name: 'Primer mes promo', description: 'Precio de adquisición para nuevos alumnos.', monthlyPrice: 9900, isActive: true, isPublic: true, isDefault: false, gymId: gym2.id, planId: 'iron-mensual' },
+    { id: 'iron-premium-plus', name: 'Premium Plus', description: 'Incluye crossfit y acceso completo.', monthlyPrice: 23000, isActive: true, isPublic: true, isDefault: false, gymId: gym2.id, planId: 'iron-premium' },
+    { id: 'power-libre-base', name: 'Pase libre', description: 'Precio público para acceso ilimitado.', monthlyPrice: 10000, isActive: true, isPublic: true, isDefault: true, gymId: gym3.id, planId: 'power-libre' },
+    { id: 'power-neighbors', name: 'Promo barrio', description: 'Bonificación para residentes de la zona.', monthlyPrice: 8500, isActive: true, isPublic: true, isDefault: false, gymId: gym3.id, planId: 'power-libre' },
+    { id: 'power-duo-promo', name: 'Plan dúo promo', description: 'Precio mensual por persona para venir acompañado.', monthlyPrice: 16000, isActive: true, isPublic: true, isDefault: false, gymId: gym3.id, planId: 'power-duo' },
+    { id: 'flex-basico-public', name: 'Flex básico', description: 'Acceso base al estudio boutique.', monthlyPrice: 15000, isActive: true, isPublic: true, isDefault: true, gymId: gym4.id, planId: 'flex-basico' },
+    { id: 'flex-full-studio', name: 'Full Studio', description: 'Musculación más clases grupales premium.', monthlyPrice: 21000, isActive: true, isPublic: true, isDefault: false, gymId: gym4.id, planId: 'flex-full' },
+    { id: 'flex-vip-presale', name: 'VIP preventa', description: 'Opción interna pausada para campañas VIP.', monthlyPrice: 39900, isActive: false, isPublic: false, isDefault: false, gymId: gym4.id, planId: 'flex-vip' },
+    { id: 'mega-standard-public', name: 'Standard', description: 'Acceso a una sede con precio base.', monthlyPrice: 8000, isActive: true, isPublic: true, isDefault: true, gymId: gym5.id, planId: 'mega-standard' },
+    { id: 'mega-corporate', name: 'Corporate', description: 'Precio bonificado para convenios empresa.', monthlyPrice: 6900, isActive: true, isPublic: true, isDefault: false, gymId: gym5.id, planId: 'mega-standard' },
+    { id: 'mega-multi-pass', name: 'Multi sede', description: 'Acceso a todas las sucursales de Mega Gym.', monthlyPrice: 13000, isActive: true, isPublic: true, isDefault: false, gymId: gym5.id, planId: 'mega-multi' },
+    { id: 'cf-3x-public', name: '3x por semana', description: 'Acceso a 12 clases mensuales.', monthlyPrice: 20000, isActive: true, isPublic: true, isDefault: true, gymId: gym6.id, planId: 'cf-3x' },
+    { id: 'cf-foundations', name: 'Foundations', description: 'Plan inicial con onboarding para nuevos atletas.', monthlyPrice: 17900, isActive: true, isPublic: true, isDefault: false, gymId: gym6.id, planId: 'cf-3x' },
+    { id: 'cf-unlimited-public', name: 'Unlimited', description: 'Clases ilimitadas y open gym.', monthlyPrice: 32000, isActive: true, isPublic: true, isDefault: false, gymId: gym6.id, planId: 'cf-unlimited' },
+  ];
+
+  for (const option of priceOptions) {
+    await (prisma as any).subscriptionPriceOption.upsert({
+      where: { id: option.id },
+      update: {
+        name: option.name,
+        description: option.description,
+        monthlyPrice: option.monthlyPrice,
+        isActive: option.isActive,
+        isPublic: option.isPublic,
+        isDefault: option.isDefault,
+        gymId: option.gymId,
+        planId: option.planId,
+      },
+      create: option,
+    });
+  }
+
+  console.log('✅ Subscription price options created:', priceOptions.length);
+
   // ==================== CREATE SUBSCRIPTION FOR CLIENT ====================
-  // Now that plans exist, we can create the subscription
-  const endDate = new Date();
-  endDate.setDate(endDate.getDate() + 30); // 30 days from now
-  
-  await prisma.subscription.upsert({
-    where: { userId_gymId: { userId: client.id, gymId: gym.id } },
-    update: {},
-    create: {
+  const subscriptionFixtures = [
+    {
       userId: client.id,
       gymId: gym.id,
-      planId: planMensual.id,
-      status: 'ACTIVE',
-      type: 'MONTHLY',
+      planId: planTrimestral.id,
+      priceOptionId: 'gofit-trimestral-online',
+      status: 'ACTIVE' as const,
+      type: 'QUARTERLY' as const,
+      source: 'PLATFORM_PURCHASE' as const,
+      monthsCount: 3,
+      monthlyPriceSnapshot: 13350,
+      totalPriceSnapshot: 40050,
+      priceOptionNameSnapshot: 'Pack trimestral online',
       startDate: new Date(),
-      endDate: endDate,
+      endDate: addDays(90),
       autoRenew: true,
       mpSubscriptionId: 'mp_sub_demo_001',
       mpPayerId: 'mp_payer_demo_001',
+      createdByUserId: null,
+      attributedToUserId: admin.id,
+      assignedProfessionalId: proProfile?.id,
+      notes: 'Compra online de 3 meses usando promo pública.',
     },
-  });
-
-  console.log('✅ Subscription created for client (GoFit)');
-
-  // Crear suscripciones adicionales para cliente@gofit.com en otros gyms
-  // Esto simula un usuario con múltiples membresías
-  const endDate2 = new Date();
-  endDate2.setDate(endDate2.getDate() + 25);
-  
-  await prisma.subscription.upsert({
-    where: { userId_gymId: { userId: client.id, gymId: gym2.id } },
-    update: {},
-    create: {
+    {
       userId: client.id,
       gymId: gym2.id,
       planId: 'iron-premium',
-      status: 'ACTIVE',
-      type: 'MONTHLY',
+      priceOptionId: 'iron-premium-plus',
+      status: 'ACTIVE' as const,
+      type: 'MONTHLY' as const,
+      source: 'PLATFORM_PURCHASE' as const,
+      monthsCount: 1,
+      monthlyPriceSnapshot: 23000,
+      totalPriceSnapshot: 23000,
+      priceOptionNameSnapshot: 'Premium Plus',
       startDate: new Date(),
-      endDate: endDate2,
+      endDate: addDays(25),
       autoRenew: true,
       mpSubscriptionId: 'mp_sub_demo_002',
       mpPayerId: 'mp_payer_demo_001',
+      createdByUserId: null,
+      attributedToUserId: adminByEmail.get('admin@ironfitness.com')?.id ?? null,
+      assignedProfessionalId: null,
+      notes: 'Membresía premium comprada desde marketplace.',
     },
-  });
-
-  console.log('✅ Subscription created for client (Iron Fitness)');
-
-  // Suscripción a Power Gym (gym3)
-  const endDatePower = new Date();
-  endDatePower.setDate(endDatePower.getDate() + 18);
-  
-  await prisma.subscription.upsert({
-    where: { userId_gymId: { userId: client.id, gymId: gym3.id } },
-    update: {},
-    create: {
+    {
       userId: client.id,
       gymId: gym3.id,
-      planId: 'power-full',
-      status: 'ACTIVE',
-      type: 'MONTHLY',
+      planId: 'power-libre',
+      priceOptionId: 'power-neighbors',
+      status: 'ACTIVE' as const,
+      type: 'MONTHLY' as const,
+      source: 'PLATFORM_PURCHASE' as const,
+      monthsCount: 2,
+      monthlyPriceSnapshot: 8500,
+      totalPriceSnapshot: 17000,
+      priceOptionNameSnapshot: 'Promo barrio',
       startDate: new Date(),
-      endDate: endDatePower,
-      autoRenew: true,
+      endDate: addDays(60),
+      autoRenew: false,
       mpSubscriptionId: 'mp_sub_demo_006',
       mpPayerId: 'mp_payer_demo_001',
+      createdByUserId: null,
+      attributedToUserId: adminByEmail.get('admin@powergym.com')?.id ?? null,
+      assignedProfessionalId: null,
+      notes: 'Cliente aprovechó una promo pública por 2 meses.',
     },
-  });
-
-  console.log('✅ Subscription created for client (Power Gym)');
-
-  const endDate3 = new Date();
-  endDate3.setDate(endDate3.getDate() + 15);
-  
-  await prisma.subscription.upsert({
-    where: { userId_gymId: { userId: client.id, gymId: gym4.id } },
-    update: {},
-    create: {
+    {
       userId: client.id,
       gymId: gym4.id,
       planId: 'flex-full',
-      status: 'ACTIVE',
-      type: 'MONTHLY',
+      priceOptionId: 'flex-full-studio',
+      status: 'ACTIVE' as const,
+      type: 'MONTHLY' as const,
+      source: 'PLATFORM_PURCHASE' as const,
+      monthsCount: 1,
+      monthlyPriceSnapshot: 21000,
+      totalPriceSnapshot: 21000,
+      priceOptionNameSnapshot: 'Full Studio',
       startDate: new Date(),
-      endDate: endDate3,
+      endDate: addDays(15),
       autoRenew: true,
       mpSubscriptionId: 'mp_sub_demo_003',
       mpPayerId: 'mp_payer_demo_001',
+      createdByUserId: null,
+      attributedToUserId: adminByEmail.get('admin@flexfitness.com')?.id ?? null,
+      assignedProfessionalId: null,
+      notes: 'Suscripción activa en gym boutique.',
     },
-  });
-
-  console.log('✅ Subscription created for client (Flex Fitness)');
-
-  const endDate4 = new Date();
-  endDate4.setDate(endDate4.getDate() + 20);
-  
-  await prisma.subscription.upsert({
-    where: { userId_gymId: { userId: client.id, gymId: gym5.id } },
-    update: {},
-    create: {
+    {
       userId: client.id,
       gymId: gym5.id,
       planId: 'mega-multi',
-      status: 'ACTIVE',
-      type: 'MONTHLY',
+      priceOptionId: 'mega-multi-pass',
+      status: 'ACTIVE' as const,
+      type: 'MONTHLY' as const,
+      source: 'PLATFORM_PURCHASE' as const,
+      monthsCount: 1,
+      monthlyPriceSnapshot: 13000,
+      totalPriceSnapshot: 13000,
+      priceOptionNameSnapshot: 'Multi sede',
       startDate: new Date(),
-      endDate: endDate4,
+      endDate: addDays(20),
       autoRenew: true,
       mpSubscriptionId: 'mp_sub_demo_004',
       mpPayerId: 'mp_payer_demo_001',
+      createdByUserId: null,
+      attributedToUserId: adminByEmail.get('admin@megagym.com')?.id ?? null,
+      assignedProfessionalId: null,
+      notes: 'Acceso a toda la cadena Mega Gym.',
     },
-  });
-
-  console.log('✅ Subscription created for client (Mega Gym)');
-
-  const endDate5 = new Date();
-  endDate5.setDate(endDate5.getDate() + 10);
-  
-  await prisma.subscription.upsert({
-    where: { userId_gymId: { userId: client.id, gymId: gym6.id } },
-    update: {},
-    create: {
+    {
       userId: client.id,
       gymId: gym6.id,
       planId: 'cf-unlimited',
-      status: 'ACTIVE',
-      type: 'MONTHLY',
+      priceOptionId: 'cf-unlimited-public',
+      status: 'ACTIVE' as const,
+      type: 'MONTHLY' as const,
+      source: 'PLATFORM_PURCHASE' as const,
+      monthsCount: 1,
+      monthlyPriceSnapshot: 32000,
+      totalPriceSnapshot: 32000,
+      priceOptionNameSnapshot: 'Unlimited',
       startDate: new Date(),
-      endDate: endDate5,
-      autoRenew: true,
+      endDate: addDays(10),
+      autoRenew: false,
       mpSubscriptionId: 'mp_sub_demo_005',
       mpPayerId: 'mp_payer_demo_001',
+      createdByUserId: null,
+      attributedToUserId: adminByEmail.get('admin@crossfitbox.com')?.id ?? null,
+      assignedProfessionalId: null,
+      notes: 'CrossFit ilimitado listo para probar renovaciones.',
     },
-  });
+  ];
 
-  console.log('✅ Subscription created for client (CrossFit Box)');
+  for (const subscription of subscriptionFixtures) {
+    await prisma.subscription.upsert({
+      where: { userId_gymId: { userId: subscription.userId, gymId: subscription.gymId } },
+      update: subscription,
+      create: subscription,
+    } as any);
+  }
+
+  const manualSubscriptionFixtures = [
+    {
+      userId: adminCreatedClient.id,
+      gymId: gym.id,
+      planId: planMensual.id,
+      priceOptionId: 'gofit-student',
+      status: 'ACTIVE' as const,
+      type: 'MONTHLY' as const,
+      source: 'ADMIN_GRANTED' as const,
+      monthsCount: 2,
+      monthlyPriceSnapshot: 12900,
+      totalPriceSnapshot: 25800,
+      priceOptionNameSnapshot: 'Promo estudiante',
+      startDate: new Date(),
+      endDate: addDays(60),
+      autoRenew: false,
+      createdByUserId: admin.id,
+      attributedToUserId: admin.id,
+      assignedProfessionalId: proProfile?.id,
+      notes: 'Alta manual creada por admin con promo estudiante.',
+      specialConsiderations: 'Rehabilitación progresiva de rodilla.',
+    },
+    {
+      userId: professionalCreatedClient.id,
+      gymId: gym.id,
+      planId: planMensual.id,
+      priceOptionId: 'gofit-corporate-private',
+      status: 'ACTIVE' as const,
+      type: 'MONTHLY' as const,
+      source: 'ADMIN_GRANTED' as const,
+      monthsCount: 1,
+      monthlyPriceSnapshot: 11800,
+      totalPriceSnapshot: 11800,
+      priceOptionNameSnapshot: 'Convenio corporativo',
+      startDate: new Date(),
+      endDate: addDays(30),
+      autoRenew: false,
+      createdByUserId: professional.id,
+      attributedToUserId: professional.id,
+      assignedProfessionalId: proProfile?.id,
+      notes: 'Alta manual creada por profesional desde el gym.',
+      specialConsiderations: 'Seguimiento enfocado en recomposición corporal.',
+    },
+  ];
+
+  for (const subscription of manualSubscriptionFixtures) {
+    await prisma.subscription.upsert({
+      where: { userId_gymId: { userId: subscription.userId, gymId: subscription.gymId } },
+      update: subscription,
+      create: subscription,
+    } as any);
+  }
+
+  console.log('✅ Subscription snapshots created for seeded client:', subscriptionFixtures.length);
+  console.log('✅ Manual gym subscriptions created:', manualSubscriptionFixtures.length);
   console.log('✅ cliente@gofit.com now has 5 active subscriptions');
 
   // Nota: nuevo@gofit.com no tiene suscripción - puede usarse para probar el flujo de compra
@@ -935,6 +1152,13 @@ async function main() {
       hasWifi: false,
     },
   ];
+
+  await prisma.branch.deleteMany({
+    where: {
+      gymId: gym.id,
+      name: { in: branches.map((branch) => branch.name) },
+    },
+  });
 
   for (const branch of branches) {
     await prisma.branch.create({

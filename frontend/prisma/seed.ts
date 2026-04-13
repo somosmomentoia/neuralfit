@@ -3,6 +3,12 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+const addDays = (days: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date;
+};
+
 async function main() {
   console.log('🌱 Seeding database...');
 
@@ -99,6 +105,11 @@ async function main() {
     where: { userId: professional.id },
   });
 
+  await (prisma as any).gym.update({
+    where: { id: gym.id },
+    data: { defaultClientAttributionUserId: admin.id },
+  });
+
   // Create client profile
   await prisma.clientProfile.upsert({
     where: { userId: client.id },
@@ -111,6 +122,116 @@ async function main() {
   });
 
   console.log('✅ Client created:', client.email);
+
+  const freeUserPassword = await bcrypt.hash('libre123', 12);
+  const freeUser = await prisma.user.upsert({
+    where: { email: 'libre@gofit.com' },
+    update: {},
+    create: {
+      email: 'libre@gofit.com',
+      passwordHash: freeUserPassword,
+      firstName: 'María',
+      lastName: 'Libre',
+      role: 'CLIENT',
+      gymId: null,
+    },
+  } as any);
+
+  await (prisma as any).clientProfile.upsert({
+    where: { userId: freeUser.id },
+    update: {},
+    create: {
+      userId: freeUser.id,
+      subscriptionStatus: 'EXPIRED',
+    },
+  });
+
+  const pendingUserPassword = await bcrypt.hash('nuevo123', 12);
+  const pendingUser = await prisma.user.upsert({
+    where: { email: 'nuevo@gofit.com' },
+    update: {},
+    create: {
+      email: 'nuevo@gofit.com',
+      passwordHash: pendingUserPassword,
+      firstName: 'Carlos',
+      lastName: 'Nuevo',
+      role: 'CLIENT',
+      gymId: null,
+    },
+  } as any);
+
+  await (prisma as any).clientProfile.upsert({
+    where: { userId: pendingUser.id },
+    update: {},
+    create: {
+      userId: pendingUser.id,
+      subscriptionStatus: 'EXPIRED',
+    },
+  });
+
+  const adminCreatedClientPassword = await bcrypt.hash('manual123', 12);
+  const adminCreatedClient = await prisma.user.upsert({
+    where: { email: 'manual@gofit.com' },
+    update: {},
+    create: {
+      email: 'manual@gofit.com',
+      passwordHash: adminCreatedClientPassword,
+      firstName: 'Lucía',
+      lastName: 'Manual',
+      documentNumber: '30111222',
+      role: 'CLIENT',
+      gymId: gym.id,
+    },
+  } as any);
+
+  await (prisma as any).clientProfile.upsert({
+    where: { userId: adminCreatedClient.id },
+    update: {
+      createdByUserId: admin.id,
+      createdByGymId: gym.id,
+      assignedProfessionalId: proProfile?.id,
+      subscriptionStatus: 'ACTIVE',
+    },
+    create: {
+      userId: adminCreatedClient.id,
+      createdByUserId: admin.id,
+      createdByGymId: gym.id,
+      assignedProfessionalId: proProfile?.id,
+      subscriptionStatus: 'ACTIVE',
+    },
+  });
+
+  const professionalCreatedClientPassword = await bcrypt.hash('manualpro123', 12);
+  const professionalCreatedClient = await prisma.user.upsert({
+    where: { email: 'alumno.pro@gofit.com' },
+    update: {},
+    create: {
+      email: 'alumno.pro@gofit.com',
+      passwordHash: professionalCreatedClientPassword,
+      firstName: 'Mateo',
+      lastName: 'Asignado',
+      documentNumber: '33444555',
+      role: 'CLIENT',
+      gymId: gym.id,
+    },
+  } as any);
+
+  await (prisma as any).clientProfile.upsert({
+    where: { userId: professionalCreatedClient.id },
+    update: {
+      createdByUserId: professional.id,
+      createdByGymId: gym.id,
+      assignedProfessionalId: proProfile?.id,
+      subscriptionStatus: 'ACTIVE',
+    },
+    create: {
+      userId: professionalCreatedClient.id,
+      createdByUserId: professional.id,
+      createdByGymId: gym.id,
+      assignedProfessionalId: proProfile?.id,
+      subscriptionStatus: 'ACTIVE',
+    },
+  });
 
   // Create some sports
   const sports = [
@@ -134,7 +255,7 @@ async function main() {
   console.log('✅ Sports created:', sports.length);
 
   // Create a plan
-  await prisma.plan.upsert({
+  const planMensual = await prisma.plan.upsert({
     where: { id: 'plan-mensual' },
     update: {},
     create: {
@@ -148,6 +269,123 @@ async function main() {
   });
 
   console.log('✅ Plan created');
+
+  await (prisma as any).subscriptionPriceOption.upsert({
+    where: { id: 'gofit-standard' },
+    update: {
+      name: 'Mensual estándar',
+      description: 'Precio base publicado para el gym demo.',
+      monthlyPrice: 15000,
+      isActive: true,
+      isPublic: true,
+      isDefault: true,
+      gymId: gym.id,
+      planId: planMensual.id,
+    },
+    create: {
+      id: 'gofit-standard',
+      name: 'Mensual estándar',
+      description: 'Precio base publicado para el gym demo.',
+      monthlyPrice: 15000,
+      isActive: true,
+      isPublic: true,
+      isDefault: true,
+      gymId: gym.id,
+      planId: planMensual.id,
+    },
+  });
+
+  await (prisma as any).subscriptionPriceOption.upsert({
+    where: { id: 'gofit-student' },
+    update: {
+      name: 'Promo estudiante',
+      description: 'Precio promocional para altas manuales de prueba.',
+      monthlyPrice: 12900,
+      isActive: true,
+      isPublic: true,
+      isDefault: false,
+      gymId: gym.id,
+      planId: planMensual.id,
+    },
+    create: {
+      id: 'gofit-student',
+      name: 'Promo estudiante',
+      description: 'Precio promocional para altas manuales de prueba.',
+      monthlyPrice: 12900,
+      isActive: true,
+      isPublic: true,
+      isDefault: false,
+      gymId: gym.id,
+      planId: planMensual.id,
+    },
+  });
+
+  const subscriptions = [
+    {
+      userId: client.id,
+      gymId: gym.id,
+      planId: planMensual.id,
+      priceOptionId: 'gofit-standard',
+      status: 'ACTIVE' as const,
+      type: 'MONTHLY' as const,
+      source: 'PLATFORM_PURCHASE' as const,
+      monthsCount: 1,
+      monthlyPriceSnapshot: 15000,
+      totalPriceSnapshot: 15000,
+      priceOptionNameSnapshot: 'Mensual estándar',
+      startDate: new Date(),
+      endDate: addDays(30),
+      autoRenew: true,
+      attributedToUserId: admin.id,
+      assignedProfessionalId: proProfile?.id,
+    },
+    {
+      userId: adminCreatedClient.id,
+      gymId: gym.id,
+      planId: planMensual.id,
+      priceOptionId: 'gofit-student',
+      status: 'ACTIVE' as const,
+      type: 'MONTHLY' as const,
+      source: 'ADMIN_GRANTED' as const,
+      monthsCount: 2,
+      monthlyPriceSnapshot: 12900,
+      totalPriceSnapshot: 25800,
+      priceOptionNameSnapshot: 'Promo estudiante',
+      startDate: new Date(),
+      endDate: addDays(60),
+      autoRenew: false,
+      createdByUserId: admin.id,
+      attributedToUserId: admin.id,
+      assignedProfessionalId: proProfile?.id,
+    },
+    {
+      userId: professionalCreatedClient.id,
+      gymId: gym.id,
+      planId: planMensual.id,
+      priceOptionId: 'gofit-student',
+      status: 'ACTIVE' as const,
+      type: 'MONTHLY' as const,
+      source: 'ADMIN_GRANTED' as const,
+      monthsCount: 1,
+      monthlyPriceSnapshot: 12900,
+      totalPriceSnapshot: 12900,
+      priceOptionNameSnapshot: 'Promo estudiante',
+      startDate: new Date(),
+      endDate: addDays(30),
+      autoRenew: false,
+      createdByUserId: professional.id,
+      attributedToUserId: professional.id,
+      assignedProfessionalId: proProfile?.id,
+    },
+  ];
+
+  for (const subscription of subscriptions) {
+    await (prisma as any).subscription.upsert({
+      where: { userId_gymId: { userId: subscription.userId, gymId: subscription.gymId } },
+      update: subscription,
+      create: subscription,
+    });
+  }
 
   // Create expense categories
   const categories = ['Alquiler', 'Servicios', 'Equipamiento', 'Sueldos', 'Marketing', 'Otros'];
@@ -169,9 +407,14 @@ async function main() {
   console.log('🎉 Seed completed!');
   console.log('');
   console.log('📧 Usuarios de prueba:');
+  console.log('   Superadmin: superadmin@gofit.com / superadmin123');
   console.log('   Admin: admin@gofit.com / admin123');
   console.log('   Profesional: entrenador@gofit.com / pro123');
   console.log('   Cliente: cliente@gofit.com / cliente123');
+  console.log('   Cliente manual admin: manual@gofit.com / manual123');
+  console.log('   Cliente manual profesional: alumno.pro@gofit.com / manualpro123');
+  console.log('   Usuario libre: libre@gofit.com / libre123');
+  console.log('   Usuario nuevo: nuevo@gofit.com / nuevo123');
 }
 
 main()
